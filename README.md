@@ -19,9 +19,9 @@ The goal is to control execution directly: from CPU state to memory layout.
 
 ## Current State
 
-- [x] Kernel entry point
-- [x] Stack initialization
-- [x] VGA text output
+- [ ] Kernel entry point
+- [ ] Stack initialization
+- [ ] VGA text output
 - [ ] GDT setup
 - [ ] IDT / interrupt handling
 - [ ] Paging (virtual memory)
