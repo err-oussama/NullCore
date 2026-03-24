@@ -31,7 +31,10 @@ void	print(char *str, int fg, int bg)
 			g_col = 0;
 			g_row++;
 			if (*str == '\n')
+			{
+				str++;
 				continue ;
+			}
 		}
 		put_char(*str++, fg, bg, g_row, g_col);
 		g_col++;
