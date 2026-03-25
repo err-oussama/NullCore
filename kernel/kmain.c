@@ -6,6 +6,7 @@ void	kmain(void)
 	print_warn("this is warnning\n");
 	print_info("this is info\n");
 	put_nbr(99);
+	put_nbr(-99);
 	while (1)
 		;
 }
