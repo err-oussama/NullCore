@@ -10,9 +10,8 @@ In modern 64-bit OS, the GDT's role in address translation is obsolete since all
 
 ## GDT Entry format
 
-+-------------------------------------------------------------------------------+
-|                               GDT/LDT entry                                   |
 |*Bytes*|*Bits* |       *Name*          |               *Role*                  |
+|-------|-------|-----------------------|---------------------------------------|
 |0-1    | 0-15  | Segment Limit-low     | Lowset part of Segment Limit 0-15     |
 |2-3    |16-31  | Base Address-low      | Lowset part of Base Address 0-15      |
 |4      |32-39  | Base Address-Middle   | Middle part of Base Address 16-31     |
@@ -20,7 +19,6 @@ In modern 64-bit OS, the GDT's role in address translation is obsolete since all
 |6      |48-51  | Segment Limit-high    | Highest part of Segment Limit 16-19   |
 |6      |52-55  | Flags                 | Info about Segment                    |
 |7      |56-63  | Base Address-high     | Highest part of Base Address 24-31    |
-+-------------------------------------------------------------------------------+
 
 
 
