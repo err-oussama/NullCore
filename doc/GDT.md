@@ -2,10 +2,10 @@
 
 ## Definition
 
-A system-wide array of 8-bytes entries called ***Segment Descriptors***, each describing a memory segment by defining its *base address* (where it start), *limit* (how large it is), privilege level (ring 0-3), and type (code, data, or system). It is shared across all processes, set up once by the OS at boot, and located by the CPY via `Global Descriptor Table Register (GDTR)`.
-The first entry is entry is always a NULL descriptor (all zeros) acting as a sefety quard. The GDT typically holds desciprtors for the kernel code segment, kernel data segment, user code segment, user dat segment, and TSS.
-Programs access these segments descriptor via a selector --  a 16-bit value containing an index into the GDT, a privilege level and a table indicator bit .
-In modern 64-bit OS, the GDT's role in address translation is obsolete since all segment base are forced to be 0 and paging handles memory management, however the GDT remains required because the CPU still depends on it for privilege level enforcement and the TSS.
+- A system-wide array of 8-bytes entries called ***Segment Descriptors***, each describing a memory segment by defining its *base address* (where it start), *limit* (how large it is), privilege level (ring 0-3), and type (code, data, or system). It is shared across all processes, set up once by the OS at boot, and located by the CPY via `Global Descriptor Table Register (GDTR)`.
+- The first entry is entry is always a NULL descriptor (all zeros) acting as a sefety quard. The GDT typically holds desciprtors for the kernel code segment, kernel data segment, user code segment, user dat segment, and TSS.
+- Programs access these segments descriptor via a selector --  a 16-bit value containing an index into the GDT, a privilege level and a table indicator bit .
+- In modern 64-bit OS, the GDT's role in address translation is obsolete since all segment base are forced to be 0 and paging handles memory management, however the GDT remains required because the CPU still depends on it for privilege level enforcement and the TSS.
 
 
 ## GDT Entry format
