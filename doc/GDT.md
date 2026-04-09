@@ -32,7 +32,17 @@
 
 
 
+### Access Byte 
 
+|*Bits* |       *Name*          |                           *Role*                                      |                                   *Value*                                     |
+|-------|-----------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------|
+|   0   |Accessed               |Determine if the CPU accessed the Segment                              |0=Never Accessed \ 1=Accessed                                                  |
+|   1   |Writeable/Readable     |For Code segments: readbale or not\For Data segment: writebale or not  |0=code:Execute-only,data:read-only \ 1=code:Read/Execute,data:Read/Write       |
+|   2   |Conforming/Direction   |Code:privilege behavior \ Data: growth direction                       |0=code:Non-Conforming,data:Grows upward \ 1=code:Conforming,data:Grows downward|
+|   3   |Executable             |Defines whether this is a code or a data segment                       |0=Data Segment \ 1=Code Segment                                                |
+|   4   |Description type       |Distinguishes between system and code/data descriptors                 |0=Kernel Data \ 1=Code & Data Segment                                          |
+|  5-6  |DPL                    |Minimum Privilege level required to access this segment                |Ring 0-3                                                                       |
+|   7   |Present                |Marks whether the segment is present in memory                         |0=Absent, Raise General Protextion Fault \ 1=Present                           |
 
 
 ## Instruction 
