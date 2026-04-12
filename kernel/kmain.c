@@ -1,8 +1,10 @@
+#include "kernel.h"
 #include "kprint.h"
-
 void kmain(void) {
-  char *a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ       ";
-  kmemory_dump_hex(a, 27);
+  gdt_entry null_entry;
+  gdt_set_entry(&null_entry, 0, 0b11111111111111111111, 0, 0b1111);
+  kmemory_dump_bin(&null_entry, sizeof(null_entry));
+
   while (1)
     ;
 }
