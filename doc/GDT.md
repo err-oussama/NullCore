@@ -70,17 +70,6 @@ it reads the current GDTR and dumps its content into a 6-byte memory operand in 
 sgdt [gdtr_copy]            ; dump current GDTR into gdtr_copy
 
 
-
-
-# LDT 
-
-A pre-process private version of the GDT, using the exact same 8-byte descriptor format. Unlike the GDT which is shared system-wide, each process can have its own LDT for private segment desciptors. The CPU locates it via the LDTR (Local Descriptor Table Register) register, which holds a selector pointing to the LDT's own descriptor inside the GDT. Almost no modern OS uses it as a paging has completely replaced its purpose.
-
-
-## why we need to setup gdt 
-
-
-
-
+## GDT entry 
 
 
