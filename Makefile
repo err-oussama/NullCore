@@ -27,7 +27,7 @@ all: $(TARGET)
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^
-
+	rm -f $(ASM_OBJ) $(C_OBJ)
 
 # Compile C sources
 kernel/%.o: kernel/%.c

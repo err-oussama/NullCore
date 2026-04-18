@@ -1,14 +1,10 @@
-#include "gdt.h"
 #include "kernel.h"
-#include "kprint.h"
 
 void kmain(void) {
-  gdt_entry null_entry;
+  gdt_entry gdt_entry[8];
 
-  gdt_set_entry(&null_entry, 0, 0, 0,
-                GDT_FLAG_64BIT | GDT_FLAG_OP_SIZE_32 | GDT_FLAG_SEG_UNIT_1KB);
-
-  kmemory_dump_bin(&null_entry, sizeof(null_entry));
+  setup_gdt_entrys(gdt_entry);
+  kmemory_dump_hex(&gdt_entry[0], sizeof(gdt_entry[0]) * 8);
 
   while (1)
     ;

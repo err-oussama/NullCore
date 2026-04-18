@@ -96,6 +96,7 @@ void vga_memory_dump_bin(void *ptr, unsigned int size) {
 void vga_memory_dump_hex(void *ptr, unsigned long size) {
   unsigned long i = -1;
   char *p = (char *)ptr;
+
   while (++i < size) {
     if (!(i % 16)) {
       if (i)
@@ -105,8 +106,5 @@ void vga_memory_dump_hex(void *ptr, unsigned long size) {
     }
     vga_print(" ");
     vga_print_hex((unsigned long)p[i++]);
-    if (i >= size)
-      break;
-    vga_print_hex((unsigned long)p[i]);
   }
 }

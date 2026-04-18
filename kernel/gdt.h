@@ -12,7 +12,7 @@
 #define GDT_FLAG_OP_SIZE_32 0b0100
 
 #define GDT_FLAG_SEG_UNIT_1B 0b0000
-#define GDT_FLAG_SEG_UNIT_1KB 0b1000
+#define GDT_FLAG_SEG_UNIT_4KB 0b1000
 
 // ACCESS BYTE
 
@@ -44,5 +44,27 @@
 
 #define GDT_ACC_PRESENT 0b10000000
 #define GDT_ACC_ABSENT 0b00000000
+
+typedef struct __attribute__((packed)) {
+  unsigned short limit_low;
+  unsigned short base_low;
+  unsigned char base_middle;
+  unsigned char access_byte;
+  unsigned char granularity; // limit high and flags
+  unsigned char base_high;
+} gdt_entry;
+
+typedef struct __attribute__((packed)) {
+  unsigned short limit; // size of the gdt_entry vector by bytes
+  unsigned int base;    // pointer to whre the gdt_entry vector start;
+} gdt_register;
+
+void lgdtr(gdt_register *gdt_ptr);
+void sgdtr(gdt_register *gdt_ptr);
+
+void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
+                   unsigned char access_byte, unsigned char flags);
+
+void setup_gdt_entrys(gdt_entry *entrys);
 
 #endif
