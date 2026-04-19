@@ -11,6 +11,15 @@ void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
   entry->granularity = (flags << 4) | ((limit >> 16) & 0b1111);
 }
 
+void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base,
+                            unsigned int limit, unsigned char access_byte,
+                            unsigned char flags) {
+
+  gdt_set_entry(entry, base & 0x00000000ffffffff, limit, access_byte, flags);
+  unsigned long *extension = (unsigned long *)&entry[1];
+  *extension = base >> 32;
+}
+
 void setup_gdt_entrys(gdt_entry *entrys) {
   /*
         [
@@ -63,4 +72,9 @@ void setup_gdt_entrys(gdt_entry *entrys) {
                 GDT_FLAG_AVL_0 | GDT_FLAG_64BIT | GDT_FLAG_OP_SIZE_16 |
                     GDT_FLAG_SEG_UNIT_4KB);
   // setup TSS descriptor
+  gdt_set_entry(&entrys[6], 0, 0x67,
+                GDT_ACC_ACCESSED | GDT_ACC_CONFORMING | GDT_ACC_READ_ONLY |
+                    GDT_ACC_TYPE_DATA_SEG | GDT_ACC_TYPE_KERN_DATA |
+                    GDT_ACC_DPL0 | GDT_ACC_PRESENT,
+                0x0);
 }

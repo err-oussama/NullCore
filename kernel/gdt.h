@@ -65,6 +65,10 @@ void sgdtr(gdt_register *gdt_ptr);
 void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
                    unsigned char access_byte, unsigned char flags);
 
+void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base,
+                            unsigned int limit, unsigned char access_byte,
+                            unsigned char flags);
+
 void setup_gdt_entrys(gdt_entry *entrys);
 
 #endif
