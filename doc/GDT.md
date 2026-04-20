@@ -45,6 +45,42 @@
 |   7   |Present                |Marks whether the segment is present in memory                         |0=Absent, Raise General Protextion Fault \ 1=Present                           |
 
 
+## Bit Explantion
+### Grows-up vs Grows-down bit 
+
+To master the "Grows Down" vs "Grows Up" logic, you have to stop thinking about where the memory is and start thinking  about where the **Forbidden Zone** is
+
+In both case the CPU calculates the final address the same way: ***Base + Offset***, The direction bit simplly tells the CPU which offsets are *legal*.
+
+|   Mode        | Direction Bit |   The Hardware Rule    |   Valid Range  |
+|---------------|---------------|------------------------|----------------|
+|**Expand-Up**  |       0       |Offset must be <= Limit |0 -> Limit      |
+|**Expand-Down**|       1       |Offset must be > Limit  |Limit + 1 -> Max|
+
+### Conforming vs Non-Conforming
+
+- **Non-Conforming**(0): This is "Strict Mode" where your current Privilege Level must exactly match the segment's Ring 
+- If a Ring 3 program tries to jump into a Ring 0 Non-Conforming segment, the CPU triggers a fault to protect the kernel 
+
+- **Conforming**(1): This is "Flexible Mode" that allows lower-privilege programs to execute higher privilge code.
+
+- A Ring 3 program can jump into a Ring 0 Conforming segment without crashing, and run the code, but it cannot execute instruction that require Ring 0.
+- However, the CPU "conforms" to the caller: you stay in Ring 3 and don't gain any special kernel powers or hardware access.
+
+
+
+### Descriptor Type Bit (S)
+
+- **0 = System Descriptor**: The segment is a special hardware structure (like TSS or LDT) 
+
+- **1 = Code/Data Segment**: The segment contains actual program code or variables(Kernel Dode, Kernel Data, User Code, User Data)
+
+- When **Bit 4 (S)** is 1 the CPU looks at the bottom bits as **individual switches** (is it readable? is it Conforming?)
+
+- When **Bit 4 (S)** is 0, the CPU flips its internal logic, it stops seeieng 4 separater switches and starts seeing **one single-4 number** (the *type* field)
+
+
+
 ## Global Descriptor Table Register (GDTR)
     
 The GDTR is a special hidden CPU register that holds two fields:
