@@ -17,7 +17,7 @@ Video Graphics Array (VGA) -- Text Mode Memory layout
 */
 int g_row = 0;
 int g_col = 0;
-volatile unsigned short *vga = (unsigned short *)0xB8000;
+volatile uint16 *vga = (uint16 *)0xB8000;
 void vg_put_char(char c, int fg, int bg, int row, int col) {
   vga[row * 80 + col] = ((bg << 4 | fg) << 8) | c;
 }
@@ -52,11 +52,9 @@ void vga_print_dec(long n) {
   vga_print_base(n, "0123456789", 10);
 }
 
-void vga_print_hex(unsigned long n) {
-  vga_print_base(n, "0123456789ABCDEF", 16);
-}
-void vga_print_base(unsigned long n, char *base, int base_len) {
-  char buff[40];
+void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16); }
+void vga_print_base(uint32 n, char *base, int base_len) {
+  char buff[40] = {0};
   int i = 39;
 
   buff[i] = 0;
@@ -69,42 +67,44 @@ void vga_print_base(unsigned long n, char *base, int base_len) {
   vga_print_str(&buff[i], VGA_WHITE, VGA_BLACK);
 }
 
-void vga_print_bin(unsigned long n) { vga_print_base(n, "01", 2); }
+void vga_print_bin(uint32 n) { vga_print_base(n, "01", 2); }
 
-void vga_print_byte(unsigned char byte) {
-  unsigned int i = 8;
+void vga_print_byte(uint8 byte) {
+  uint32 i = 8;
   while (i--)
     vga_print((byte >> i) & 1 ? "1" : "0");
 }
 
-void vga_memory_dump_bin(void *ptr, unsigned int size) {
-  unsigned long i = -1;
-  char *p = (char *)ptr;
+void vga_memory_dump_bin(void *ptr, uint32 size) {
+  uint32 i = -1;
+  uint8 *p = (uint8 *)ptr;
 
   while (++i < size) {
     if (!(i % 4)) {
       if (i)
         vga_print("\n");
       vga_print("0x");
-      vga_print_hex((unsigned long)p + i);
+      vga_print_hex((uint32)(p + i));
     }
     vga_print(" ");
     vga_print_byte(p[i]);
   }
 }
 
-void vga_memory_dump_hex(void *ptr, unsigned long size) {
-  unsigned long i = -1;
-  char *p = (char *)ptr;
+void vga_memory_dump_hex(void *ptr, uint32 size) {
+  uint32 i = -1;
+  uint8 *p = (uint8 *)ptr;
 
   while (++i < size) {
     if (!(i % 16)) {
       if (i)
         vga_print("\n");
       vga_print("0x");
-      vga_print_hex((unsigned long)p + i);
+      vga_print_hex((uint32)p + i);
+      vga_print(": ");
     }
     vga_print(" ");
-    vga_print_hex((unsigned long)p[i++]);
+    vga_print_hex((uint32)(p[i] >> 0x4));
+    vga_print_hex((uint32)(p[i] & 0x0f));
   }
 }

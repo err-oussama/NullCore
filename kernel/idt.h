@@ -1,6 +1,6 @@
 #ifndef IDT_H
 #define IDT_H
-#include "kernel.h"
+#include "type.h"
 
 // SELECTOR
 
@@ -43,11 +43,11 @@
 // STRUCT
 
 typedef struct __attribute__((packed)) {
-  unsigned short offset_low; // first 16 bit
-  unsigned short selector;
-  unsigned char reserved;
-  unsigned char type_attribute;
-  unsigned short offset_high;
+  uint16 offset_low; // first 16 bit
+  uint16 selector;
+  uint8 reserved;
+  uint8 type_attribute;
+  uint16 offset_high;
 } gate_descriptor;
 
 // FUNCTION

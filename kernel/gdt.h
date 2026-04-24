@@ -1,5 +1,6 @@
 #ifndef GDT_H
 #define GDT_H
+#include "type.h"
 
 // FLAG BYTE
 #define GDT_FLAG_AVL_1 0b1
@@ -46,29 +47,26 @@
 #define GDT_ACC_ABSENT 0b00000000
 
 typedef struct __attribute__((packed)) {
-  unsigned short limit_low;
-  unsigned short base_low;
-  unsigned char base_middle;
-  unsigned char access_byte;
-  unsigned char granularity; // limit high and flags
-  unsigned char base_high;
+  uint16 limit_low;
+  uint16 base_low;
+  uint8 base_middle;
+  uint8 access_byte;
+  uint8 granularity; // limit high and flags
+  uint8 base_high;
 } gdt_entry;
 
 typedef struct __attribute__((packed)) {
-  unsigned short limit; // size of the gdt_entry vector by bytes
-  unsigned int base;    // pointer to whre the gdt_entry vector start;
+  uint16 limit; // size of the gdt_entry vector by bytes
+  uint32 base;  // pointer to whre the gdt_entry vector start;
 } gdt_register;
 
 void lgdtr(gdt_register *gdt_ptr);
 void sgdtr(gdt_register *gdt_ptr);
 
-void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
-                   unsigned char access_byte, unsigned char flags);
-
-void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base,
-                            unsigned int limit, unsigned char access_byte,
-                            unsigned char flags);
+void gdt_set_entry(gdt_entry *entry, uint32 base, uint32 limit,
+                   uint8 access_byte, uint8 flags);
+void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base, uint32 limit,
+                            uint8 access_byte, uint8 flags);
 
 void setup_gdt_entrys(gdt_entry *entrys);
-
 #endif

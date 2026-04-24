@@ -1,7 +1,7 @@
 #include "gdt.h"
 
-void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
-                   unsigned char access_byte, unsigned char flags) {
+void gdt_set_entry(gdt_entry *entry, uint32 base, uint32 limit,
+                   uint8 access_byte, uint8 flags) {
 
   entry->access_byte = access_byte;
   entry->base_high = base >> 24;
@@ -11,9 +11,8 @@ void gdt_set_entry(gdt_entry *entry, unsigned int base, unsigned int limit,
   entry->granularity = (flags << 4) | ((limit >> 16) & 0b1111);
 }
 
-void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base,
-                            unsigned int limit, unsigned char access_byte,
-                            unsigned char flags) {
+void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base, uint32 limit,
+                            uint8 access_byte, uint8 flags) {
 
   gdt_set_entry(entry, base & 0x00000000ffffffff, limit, access_byte, flags);
   unsigned long *extension = (unsigned long *)&entry[1];
