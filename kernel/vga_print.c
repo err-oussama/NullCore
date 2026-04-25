@@ -53,11 +53,11 @@ void vga_print_dec(long n) {
 }
 
 void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16); }
-void vga_print_base(uint32 n, char *base, int base_len) {
-  char buff[40] = {0};
+void vga_print_base(uint32 n, char *base, uint32 base_len) {
+  char buff[40];
   int i = 39;
 
-  buff[i] = 0;
+  buff[i] = '\0';
   if (n == 0)
     return (vga_print_str("0", VGA_WHITE, VGA_BLACK));
   while (n > 0) {

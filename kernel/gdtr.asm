@@ -5,7 +5,7 @@ global sgdtr;
 lgdtr:
 	mov eax, [esp + 4];
 	lgdt [eax];
-	re
+	ret
 sgdtr:
 	mov eax, [esp + 4]
 	sgdt [eax];

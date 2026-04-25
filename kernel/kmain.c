@@ -8,23 +8,14 @@ void kmain(void) {
 
   setup_gdt_entrys(gdt_entrys);
 
-  int cs = get_cs() >> 3;
-  gdt_register gdtr = {0};
+  gdt_register gdtr;
+  gdtr.base = (uint32)&gdt_entrys;
+  gdtr.limit = sizeof(gdt_entry) * 8;
 
-  kprint_bin(IDT_DPL1 | IDT_PRESENT);
-  kprint("\n");
-  sgdtr(&gdtr);
-  kprint_dec(gdtr.base);
-  kprint("\n");
-  kprint_dec(sizeof(void *));
-  kprint("\n");
-  kprint("\n");
-  kprint_dec(gdtr.limit);
-  kprint("\n");
+  lgdtr(&gdtr);
   gdt_entry *entrys = (gdt_entry *)gdtr.base;
-  vga_memory_dump_hex(&entrys[1], sizeof(gdt_entry));
+  kmemory_dump_hex(&gdt_entrys, sizeof(gdt_entry) * 8);
 
-  kprint_dec(cs);
   while (1)
     ;
 }

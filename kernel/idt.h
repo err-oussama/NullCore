@@ -50,9 +50,17 @@ typedef struct __attribute__((packed)) {
   uint16 offset_high;
 } gate_descriptor;
 
+typedef struct __attribute__((packed)) {
+  uint16 limit;
+  uint32 base;
+} idtr;
+
 // FUNCTION
 
 void set_idt_entry(gate_descriptor *gate, uint32 ISR_address, uint16 selector,
                    uint8 type_attribute);
+
+void lidtr(idtr *idt_r);
+void sidtr(idtr *idt_r);
 
 #endif
