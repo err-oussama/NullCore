@@ -125,3 +125,50 @@ The **Interrupt Description Table (IDT)** -- also called the *Interrupt Vector T
 |4      |System Bit (S)               |Identifies system structures                                   |0=System Descriptor/1=(code,data) segment              |
 |5-6    |Description Privilege Level  |Define the minimum privilege level required to access this gate|Rin 0-3                                                |
 |7      |Present                      |Marks whether this descriptor is valid and active              |1=Active/0=Inactive, raise General Protection Fault(GP)|
+
+
+
+## Interrupt Descriptor Type 
+
+### Interrupt Gate 
+**Interrupt Gate** is the gate type used for **hardware IRQs and CPU exceptions** that must not be interrupted while being handled.
+
+**What makes it special -- one thing**:
+
+When the CPU enters an interrupt gate handler, it **automatically clears the IF (Interrupt Flage) flag in EFLAGS** -- meaning all maskable hardware interrupts are disabled for the duration of your handler. When you `iret`, the CPU restores EFLAGS and IF goes back to what it was.
+
+In one line: Interrupt gate = jump to ISR + *automatically disable interrupts* for the duration, so your handler runs atomically without being interrupted by another IRQ.
+
+
+### Trap Gate 
+**Trap Gate** is identical to interrupt gate in almost every way -- **one single difference**: it does **not clear the IF flag** -- interrupts remain eneabled while your handler runs.
+
+**When do you use it**:
+The classic case is **system call `int 0x80`** -- you want user space to trigger the handler, but you also want to timer IRQ to still fire during a long syscall so the scheduler can still preempt. If you used an interrupt gate for syscalls, the entire system would freeze during every syscall.
+
+**In one line**: Trap gate = exactly like interrupt gate but **Interrupt stay enabled** -- used it when your handler is safe to be interrupted
+
+
+### Call Gate 
+
+**Call Gate** is fundamentally different from interrupt and trap gates -- it is **not itriggered by an interrupt at all**. It is triggered by an explicit `call` or `jmp` instruction from code.
+
+**What it is for**:
+It exists purely for **controlled privilege transitions** -- user space (ring 3) calling into kernel space(ring 0) in a deliberate, explicit way, Think of it as a **defined entry point** the kernel exposes to user space.
+
+**In one line**: Call gate = a **GDT-defined entry point** that lets lower privilege code explicitly `call` into higher privilege code -- correct but obsolete, replaced by `sysenter`/`syscall`
+
+
+
+### Task Gate 
+**Task Gate** is the heaviest gate type -- instead of just jumping to a handler, it triggers a **complete hardware task swith**.
+
+
+**What it is for**:
+When the CPU hits a task gate it does not just save a few registers and jump -- it saves the **entire CPU state** into the current **TSS (Task State Segment)** and loads a complete new one. Every register, segment, stack pointer -- everything.
+
+**In one line**: Task gate = trigger a **full CPU state swap** via TSS -- correct and safe but extremly heavy, only practically useful today for the double fault handler where you need a guaranteed clean stack.
+
+
+
+
