@@ -170,5 +170,49 @@ When the CPU hits a task gate it does not just save a few registers and jump -- 
 **In one line**: Task gate = trigger a **full CPU state swap** via TSS -- correct and safe but extremly heavy, only practically useful today for the double fault handler where you need a guaranteed clean stack.
 
 
+## Interrupt Vectors
+
+The 256 interrupt vectors are splite into two regions:
+
+***0x00-0x1F (0-31)***: hardwired by  Intel. The CPU decides what triggers these, you cannot reassign them. You can only write the handler, not control  what fires it. 
+
+***0x20-0xFF (32-255)***: completely yours. You decide what triggers them and what the handler does.
+
+### 0x00 - 0x1F
+
+|*Vector*|*Name*|           *Description*               |
+|--------|------|---------------------------------------|
+|0x00    |#DE   |Divide Error                           |
+|0x01    |#DB   |Debug                                  |
+|0x02    |  -   |Non-Maskable Interrupt (NMI)           |
+|0x03    |#BP   |Break Point                            |
+|0x04    |#OF   |Overflow                               |
+|0x05    |#BP   |Bound Range Exceeded                   |
+|0x06    |#UP   |Invalid Opcode                         |
+|0x07    |#NM   |Device Not Available (FPU)             |
+|0x08    |#DF   |Double Fault                           |
+|0x09    |  -   |Coprocessor Segment Overrun (Obsolete) |
+|0x0A    |#TS   |Invalid TSS                            |
+|0x0B    |#NP   |Segment Not Present                    |
+|0x0C    |#SS   |Stack Segment Fault                    |
+|0x0D    |#GP   |General Protection Fault               |
+|0x0E    |#PF   |Page Fault                             |
+|0x0F    |  -   |Reserved                               |
+|0x10    |#MF   |x87 Floating Point Exception           |
+|0x11    |#AC   |Alignment check                        |
+|0x12    |#MC   |Machine Check                          |
+|0x13    |#XM   |SIMD Floating Point Exception          |
+|0x14    |#VE   |Virtualization Exception               |
+|0x15    |#CP   |Control Protection Exception           |
+|0x16    |  -   |Reserved                               |
+|0x17    |  -   |Reserved                               |
+|0x18    |  -   |Reserved                               |
+|0x19    |  -   |Reserved                               |
+|0x1A    |  -   |Reserved                               |
+|0x1B    |  -   |Reserved                               |
+|0x1C    |#HV   |Hypervisor Injection Exception         |
+|0x1D    |#VC   |VMM Communication Exception            |
+|0x1E    |#SX   |Security Exception                     |
+|0x1F    |  -   |Reserved                               |
 
 
