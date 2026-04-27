@@ -180,39 +180,81 @@ The 256 interrupt vectors are splite into two regions:
 
 ### 0x00 - 0x1F
 
-|*Vector*|*Name*|           *Description*               |
-|--------|------|---------------------------------------|
-|0x00    |#DE   |Divide Error                           |
-|0x01    |#DB   |Debug                                  |
-|0x02    |  -   |Non-Maskable Interrupt (NMI)           |
-|0x03    |#BP   |Break Point                            |
-|0x04    |#OF   |Overflow                               |
-|0x05    |#BP   |Bound Range Exceeded                   |
-|0x06    |#UP   |Invalid Opcode                         |
-|0x07    |#NM   |Device Not Available (FPU)             |
-|0x08    |#DF   |Double Fault                           |
-|0x09    |  -   |Coprocessor Segment Overrun (Obsolete) |
-|0x0A    |#TS   |Invalid TSS                            |
-|0x0B    |#NP   |Segment Not Present                    |
-|0x0C    |#SS   |Stack Segment Fault                    |
-|0x0D    |#GP   |General Protection Fault               |
-|0x0E    |#PF   |Page Fault                             |
-|0x0F    |  -   |Reserved                               |
-|0x10    |#MF   |x87 Floating Point Exception           |
-|0x11    |#AC   |Alignment check                        |
-|0x12    |#MC   |Machine Check                          |
-|0x13    |#XM   |SIMD Floating Point Exception          |
-|0x14    |#VE   |Virtualization Exception               |
-|0x15    |#CP   |Control Protection Exception           |
-|0x16    |  -   |Reserved                               |
-|0x17    |  -   |Reserved                               |
-|0x18    |  -   |Reserved                               |
-|0x19    |  -   |Reserved                               |
-|0x1A    |  -   |Reserved                               |
-|0x1B    |  -   |Reserved                               |
-|0x1C    |#HV   |Hypervisor Injection Exception         |
-|0x1D    |#VC   |VMM Communication Exception            |
-|0x1E    |#SX   |Security Exception                     |
-|0x1F    |  -   |Reserved                               |
+|*Vector*|*Name*|*Type*|           *Description*               |
+|--------|------|------|---------------------------------------|
+|0x00    |#DE   |Fault |Divide Error                           |
+|0x01    |#DB   |F/T   |Debug                                  |
+|0x02    |  -   |INT   |Non-Maskable Interrupt (NMI)           |
+|0x03    |#BP   |Trap  |Break Point                            |
+|0x04    |#OF   |Trap  |Overflow                               |
+|0x05    |#BP   |Fault |Bound Range Exceeded                   |
+|0x06    |#UP   |Fault |Invalid Opcode                         |
+|0x07    |#NM   |Fault |Device Not Available (FPU)             |
+|0x08    |#DF   |Abort |Double Fault                           |
+|0x09    |  -   |Fault |Coprocessor Segment Overrun (Obsolete) |
+|0x0A    |#TS   |Fault |Invalid TSS                            |
+|0x0B    |#NP   |Fault |Segment Not Present                    |
+|0x0C    |#SS   |Fault |Stack Segment Fault                    |
+|0x0D    |#GP   |Fault |General Protection Fault               |
+|0x0E    |#PF   |Fault |Page Fault                             |
+|0x0F    |  -   |  -   |Reserved                               |
+|0x10    |#MF   |Fault |x87 Floating Point Exception           |
+|0x11    |#AC   |Fault |Alignment check                        |
+|0x12    |#MC   |Abort |Machine Check                          |
+|0x13    |#XM   |Fault |SIMD Floating Point Exception          |
+|0x14    |#VE   |Fault |Virtualization Exception               |
+|0x15    |#CP   |Fault |Control Protection Exception           |
+|0x16    |  -   |  -   |Reserved                               |
+|0x17    |  -   |  -   |Reserved                               |
+|0x18    |  -   |  -   |Reserved                               |
+|0x19    |  -   |  -   |Reserved                               |
+|0x1A    |  -   |  -   |Reserved                               |
+|0x1B    |  -   |  -   |Reserved                               |
+|0x1C    |#HV   |INT   |Hypervisor Injection Exception         |
+|0x1D    |#VC   |Fault |VMM Communication Exception            |
+|0x1E    |#SX   |Fault |Security Exception                     |
+|0x1F    |  -   |  -   |Reserved                               |
+
+
+**Fault**:
+-   Reported **before** the instruction that caused it 
+-   EIP points to the **faulting instruction** -- `iret` re-executes it 
+-   Recoverable -- the handler can fix the cause and retry 
+
+
+
+**Trap**:
+-   Reported **after** the instruction that caused it 
+-   EIP points to the **next instrution**
+-   Recoverable -- execution continues normally after handler 
+
+
+**INT**:
+-   Not caused by an instruction fault at all -- comes from **outside** the normal execution flow 
+-   NMI comes from hardware completely bypassing the IF flag 
+-   Hypervisor injection comes from the VMM injecting an event into the guest
+-   No faulting instruction to point to -- EIP just points to whatever was executing
+
+
+
+**Abort**:
+
+-   Server unrecoverable error 
+-   EIP is **unreliable** -- you cannot trust saved state 
+-   Not recoverable -- system is considered dead, no meaningful `iret`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
