@@ -38,8 +38,8 @@ void kmain(void) {
                     IDT_TYPE_32BIT_INTERRUPT_GATE);
   lidtr(&idt_reg);
   activate_interrupt();
-  volatile int a = 0;
-  volatile int b = 10 / a;
+  int a = 0;
+  int b = 10 / a;
   while (1)
     ;
 }
