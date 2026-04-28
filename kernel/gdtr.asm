@@ -1,12 +1,14 @@
 
-global lgdtr;
-global sgdtr;
+global lgdtr
+global sgdtr
+
+section .text 
 
 lgdtr:
-	mov eax, [esp + 4];
-	lgdt [eax];
+	mov eax, [esp + 4]
+	lgdt [eax]
 	ret
 sgdtr:
 	mov eax, [esp + 4]
-	sgdt [eax];
-	ret;
+	sgdt [eax]
+	ret

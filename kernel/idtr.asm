@@ -1,25 +1,21 @@
 global lidtr
 global sidtr
-global call_int
+global activate_interrupt 
 
 
 section .text
 
 lidtr:
-	mov eax, [ebp + 4]
+	mov eax, [esp + 4]
 	lidt [eax]
 	ret
 
 
 sidtr:
-	mov eax, [ebp + 4]
+	mov eax, [esp + 4]
 	sidt [eax]
 	ret
 
-
-
-call_isr:
-	pusha
-	call [exp - 4]
-	popa
-	iret
+activate_interrupt:
+	sti 
+	ret 

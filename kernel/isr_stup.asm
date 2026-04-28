@@ -1,4 +1,6 @@
 extern dived_error_handler
+global isr_dummy
+
 
 section .text 
 
@@ -14,5 +16,13 @@ isr_%1:
 
 %endmacro
 
-
 ISR_STUB dived_error_handler
+
+
+isr_dummy:
+	pusha
+	popa
+	iret
+
+
+
