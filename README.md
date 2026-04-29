@@ -45,38 +45,38 @@ on x86.
 ## Roadmap
 
 ### Bootstrapping
-
 * [x] Kernel entry point
 * [x] Stack initialization
 * [x] Direct VGA text output
 * [x] Basic printing utilities
 
 ### CPU Control
-
 * [x] Global Descriptor Table (GDT)
-* [ ] Interrupt Descriptor Table (IDT)
+* [x] Interrupt Descriptor Table (IDT)
+* [x] ISR stubs (all 32 CPU exceptions)
 
 ### Interrupt System
-
 * [ ] PIC remapping
-* [ ] Interrupt Service Routines (ISR)
 * [ ] Hardware IRQ handling
-
-### Hardware Interaction
-
-* [ ] Timer (PIT)
 * [ ] Keyboard input
 
 ### Memory Management
-
+* [ ] Physical memory map (parse multiboot)
+* [ ] Physical frame allocator
 * [ ] Paging (virtual memory)
+* [ ] Kernel heap (kmalloc/kfree)
 * [ ] Address space control
 
 ### Execution Model
-
+* [ ] Timer (PIT)
 * [ ] Task switching primitives
 * [ ] Basic scheduler
 * [ ] System call interface
+
+### User Space
+* [ ] User space segments (already in GDT)
+* [ ] First user process
+* [ ] ELF loader
 
 ---
 
