@@ -245,16 +245,20 @@ The 256 interrupt vectors are splite into two regions:
 
 
 
+## Interrupt Request (IRQ)
+
+**Interrupt Request (IRQ)** is a signal sent by an external hardware device to the CPU to notify it that something happend and needs attention. The device cannot wait -- it interrupts whatever the CPU is currently doing to get serviced.
 
 
+The signal goes through the **PIC (Programmable Interrupt Controller)** which prioritizes and forwards it to the CPU as an interrupt vector number. The CPU then pauses execution, jumps to the registered handler, services the device, and resumes where it left off.
 
-
-
-
-
-
-
-
-
+```
+Examples:
+    keyboard    ->  you pressed a key       ->      IRQ1
+    timer       ->  another tick elapsed    ->      IRQ0
+    hard disk   ->  data finished loading   ->      IRQ14 
+    mouse       ->  cursor  moved           ->      IRQ12
+```
+The key property that defines an IRQ -- it is **Asynchronous**. It has nothing to do with what code is currently running. It can fire at any point, in the middle of any instruction, completely independent of your program's logic.
 
 
