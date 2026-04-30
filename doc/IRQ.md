@@ -56,3 +56,67 @@ Every hardware device would be wired directly to the CPU -- the CPU would have n
 ```
 
 **In one line**: The PIC is the traffic controller between hardware devices and the CPU -- it collects interrupt signals, prioritizes them, and delivers them one at a time so the CPU never gets overwhelmed.
+
+## The 8259 PIC
+The 8259 PIC was originally designed as a **single chip** that could handle 8 IRQ lines. When the IBM PC AT cames out it needed more than 8 IRQs to handle all the devices it supported -- so instead of redesigning the chip, they simply **chained two of them together**:
+
+
+### Master 8259 (ports 0x20/0x21):
+- Directly connected to the CPU 
+- Handler IRQ0-IRQ7
+- The CPU only talks to this chip 
+- IRQ2 is sacrificed as the **cascade line** -- it is the physical wire connecting the slave output into the master input
+
+
+
+```
+master offset = 0x20 
+
+    IRQ0    →   0x20 
+    IRQ1    →   0x21  
+    IRQ2    →   0x22
+    IRQ3    →   0x23
+    IRQ4    →   0x24 
+    IRQ5    →   0x25 
+    IRQ6    →   0x26
+    IRQ7    →   0x27 
+```
+
+### Slave 8259 (ports 0xA0/0xA1):
+- Not connected to the CPU Directly 
+- Handles IRQ8-IRQ15 
+- Its output feeds into **IRQ2 of the master**
+- When a slave IRQ fires it signals the master via IRQ2, then the master tells the CPU 
+
+```
+Slave offset = 0x28 
+
+    IRQ8    →   0x28
+    IRQ9    →   0x29  
+    IRQ10   →   0x2A
+    IRQ11   →   0x2B
+    IRQ12   →   0x2C 
+    IRQ13   →   0x2D 
+    IRQ14   →   0x2E
+    IRQ15   →   0x2F 
+```
+
+
+**The chain**:
+```
+    device fires IRQ12 (mouse)
+                ↓
+        Slave receives it  
+                ↓
+Slave signals master through IRQ2 
+                ↓
+      Master forwards to CPU 
+                ↓
+       CPU jumps to handler 
+```
+
+Both chips are **Indentical hardware** -- same chip, same design. The only different is one is configured as master and one as slave during the initialization sequence you send via `outb`
+
+
+
+
