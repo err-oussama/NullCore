@@ -119,4 +119,14 @@ Both chips are **Indentical hardware** -- same chip, same design. The only diffe
 
 
 
+```
+init time:
 
+1.  send ICW1   →   start initialization 
+2.  send ICW2   →   set offset (0x20 master, 0x28 slave)
+3.  send ICW3   →   tell chips about cascade wiring 
+4.  send ICW4   →   tell it 8086 mode (0x01)
+
+runtime:
+5.  send EOI    →   after every IRQ handler (0x20 to command port)
+```
