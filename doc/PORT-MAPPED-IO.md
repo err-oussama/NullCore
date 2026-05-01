@@ -59,6 +59,9 @@ out ox20, al;   immediate port — only works if port fits in 1 byte
 
 
 ### Strict rules 
+
 — **Port**    →   ONLY ***DX*** or ***immediate byte*** no ther register works
+
 — **Data**    →   ONLY ***AL / AX / EAX*** - no  ther register works 
+
 — **Result**  →   ONLY ***AL / AX / EAX*** - no other register works
