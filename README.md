@@ -56,7 +56,7 @@ on x86.
 * [x] ISR stubs (all 32 CPU exceptions)
 
 ### Interrupt System
-* [ ] PIC remapping
+* [x] PIC remapping
 * [ ] Hardware IRQ handling
 * [ ] Keyboard input
 
@@ -104,13 +104,13 @@ Makefile     # Build system
 
 ### Build
 
-```bash
+```
 make
 ```
 
 ### Run
 
-```bash
+```
 make run
 ```
 
