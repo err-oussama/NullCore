@@ -2,6 +2,7 @@
 #include "idt.h"
 #include "isr.h"
 #include "kprint.h"
+#include "pic.h"
 #include "type.h"
 static gdt_entry gdt_entrys[8];
 
@@ -17,7 +18,6 @@ void setup_GDT() {
   lgdtr(&gdtr);
   kmemory_dump_hex(&gdt_entrys, sizeof(gdt_entry) * 8);
 }
-
 void setup_dummy_isr() {
 
   for (int i = 0; i < 256; i++)
@@ -26,9 +26,7 @@ void setup_dummy_isr() {
                       IDT_TYPE_32BIT_INTERRUPT_GATE);
 }
 
-void kmain(void) {
-  setup_GDT();
-
+void setup_IDT() {
   setup_dummy_isr();
   idtr idt_reg;
   idt_reg.base = (uint32)gate_descriptors;
@@ -37,6 +35,12 @@ void kmain(void) {
                 IDT_PRESENT | IDT_DPL0 | IDT_S_BIT0 |
                     IDT_TYPE_32BIT_INTERRUPT_GATE);
   lidtr(&idt_reg);
+}
+
+void kmain(void) {
+  setup_GDT();
+  setup_IDT();
+  pic_init();
   activate_interrupt();
   int a = 0;
   int b = 10 / a;

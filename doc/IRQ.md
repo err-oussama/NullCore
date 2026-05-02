@@ -130,3 +130,55 @@ init time:
 runtime:
 5.  send EOI    →   after every IRQ handler (0x20 to command port)
 ```
+## Initialization Command Word 
+**ICW (Initialization Command Word)** is a sequence of 4 commands you send to the PIC to configure it before it can be used. It tells the PIC everything it needs to know to operate correctly -- where to map its IRQs in the IDT, how the master and slave are connected, and what CPU it is talking to. Untill all 4 are send in order the PIC stays in initialization mode and forwards nothing to the CPU 
+
+
+The PIC initialization is a **4 step sequence** you must complete in exact order. The PIC has an internal state machine that advances one step per ICW -- it will not accept normal operation commands until all 4 are sent.
+
+
+
+### ICW1 — sent to command port 
+
+Triggers initialization mode on the PIC. The chip stops forwarding IRQs and enters a state where it expects ICW2, ICW3, ICW4 to follow.
+```
+outb(0x20, 0x11)    →   master enters init mode 
+outb(0xA0, 0x11)    →   slave enters init mode 
+```
+### ICW2 — sent to data port 
+
+sets the vector offset — the base IDT vector number this chip's IRQs will map to:
+
+```
+outb(0x21, 0x20)    →   master IRQs start at vector 0x20 
+outb(0xA1, 0x28)    →   slave IRQs start at vector 0x28  
+```
+
+### ICW3 — sent to data port 
+Configures the cascade wiring between master and slave 
+```
+outb(0x21, 0x04)    →   master: slave connected at IRQ2 
+outb(0xA1, 0x02)    →   slave: identity number is 2 
+```
+
+### ICW — sent do data port 
+Stes the CPU mode the PIC is operating with 
+```i
+outb(0x21, 0x01)    →   master: 8086 mode 
+outb(0xA1, 0x01)    →   slave: 8086 mode      
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
