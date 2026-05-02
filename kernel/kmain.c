@@ -16,7 +16,6 @@ void setup_GDT() {
   gdtr.base = (uint32)&gdt_entrys;
   gdtr.limit = (sizeof(gdt_entry) * 8) - 1;
   lgdtr(&gdtr);
-  kmemory_dump_hex(&gdt_entrys, sizeof(gdt_entry) * 8);
 }
 void setup_dummy_isr() {
 
@@ -31,7 +30,15 @@ void setup_IDT() {
   idtr idt_reg;
   idt_reg.base = (uint32)gate_descriptors;
   idt_reg.limit = sizeof(gate_descriptor) * 256 - 1;
-  set_idt_entry(&gate_descriptors[0], (uint32)isr_divide_error_handler, 1 << 3,
+  set_idt_entry(&gate_descriptors[0], (uint32)isr_divide_error_handler, 0x08,
+                IDT_PRESENT | IDT_DPL0 | IDT_S_BIT0 |
+                    IDT_TYPE_32BIT_INTERRUPT_GATE);
+
+  set_idt_entry(&gate_descriptors[0x20], (uint32)isr_timer_handler, 0x08,
+                IDT_PRESENT | IDT_DPL0 | IDT_S_BIT0 |
+                    IDT_TYPE_32BIT_INTERRUPT_GATE);
+
+  set_idt_entry(&gate_descriptors[0x21], (uint32)isr_keyboard_handler, 0x08,
                 IDT_PRESENT | IDT_DPL0 | IDT_S_BIT0 |
                     IDT_TYPE_32BIT_INTERRUPT_GATE);
   lidtr(&idt_reg);
@@ -42,8 +49,6 @@ void kmain(void) {
   setup_IDT();
   pic_init();
   activate_interrupt();
-  int a = 0;
-  int b = 10 / a;
   while (1)
     ;
 }

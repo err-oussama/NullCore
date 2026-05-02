@@ -23,7 +23,9 @@ extern hypervisor_injection_exception_handler
 extern VMM_communication_exception_handler
 extern security_exception_handler
 
-
+;
+extern timer_handler
+extern keyboard_handler
 
 global isr_dummy
 
@@ -66,10 +68,11 @@ ISR_STUB hypervisor_injection_exception_handler
 ISR_STUB VMM_communication_exception_handler
 ISR_STUB security_exception_handler
 
+;
+ISR_STUB timer_handler
+ISR_STUB keyboard_handler
 
 isr_dummy:
-	pusha
-	popa
 	iret
 
 

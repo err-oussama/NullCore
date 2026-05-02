@@ -28,8 +28,12 @@ void isr_hypervisor_injection_exception_handler();
 void isr_VMM_communication_exception_handler();
 void isr_security_exception_handler();
 
-//
+// pic
 
+void isr_timer_handler();
+void isr_keyboard_handler();
+
+//
 void divide_error_handler();
 void debug_handler();
 void non_maskable_interrupt_handler();
@@ -54,6 +58,9 @@ void control_protection_exception_handler();
 void hypervisor_injection_exception_handler();
 void VMM_communication_exception_handler();
 void security_exception_handler();
+// pic
+void timer_handler();
+void keyboard_handler();
 
 void isr_dummy();
 #endif

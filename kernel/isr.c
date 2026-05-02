@@ -1,6 +1,6 @@
 #include "isr.h"
 #include "kprint.h"
-
+#include "pic.h"
 void divide_error_handler() {
   kprint_err("Interrupt: Division Error ");
   while (1)
@@ -122,4 +122,14 @@ void security_exception_handler() {
   kprint_err("Interrupt: Security Exception");
   while (1)
     ;
+}
+
+void timer_handler() {
+  // kprint("tick");
+  pic_send_eoi(0);
+}
+
+void keyboard_handler() {
+  kprint_hex(inb(0x60));
+  pic_send_eoi(0x1);
 }
