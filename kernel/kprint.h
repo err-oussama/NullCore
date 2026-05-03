@@ -1,9 +1,11 @@
 #ifndef PRINT_H
 #define PRINT_H
 
+#include "type.h"
 #include "vga_print.h"
 
 void kprint(char *str);
+void kprint_cha(uint8 c);
 void kprint_wrn(char *str);
 void kprint_err(char *str);
 void kprint_dec(long n);

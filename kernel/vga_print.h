@@ -23,6 +23,7 @@
 void vga_print_base(uint32 n, char *base, uint32 base_len);
 void vga_print_str(char *str, int fg, int bg);
 
+void vga_print_cha(uint8 c);
 void vga_print_dec(long n);
 void vga_print_hex(uint32 n);
 void vga_print(char *str);
