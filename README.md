@@ -57,8 +57,8 @@ on x86.
 
 ### Interrupt System
 * [x] PIC remapping
-* [ ] Hardware IRQ handling
-* [ ] Keyboard input
+* [x] Hardware IRQ handling
+* [x] Keyboard input
 
 ### Memory Management
 * [ ] Physical memory map (parse multiboot)
