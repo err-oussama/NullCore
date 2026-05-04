@@ -38,9 +38,12 @@ typedef struct __attribute__((packed)) {
   // bootloader name -- valid if bit 9 set
   uint32 boot_loader_name; // address of bootloader name string;
 
+  // (Advanced Power Management)
   // APM table -- valid if bit 10 set
   uint32 apm_table;
 
+  // Video Electronics Standards Associations, Basic Input Ouput System
+  // (VESA BIOS Extensions)
   // VBE info -- valid if bit 11 set
   uint32 vbe_control_info;
   uint32 vbe_mode_info;
