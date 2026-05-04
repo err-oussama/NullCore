@@ -11,6 +11,7 @@ extern kmain
 _start:
 	cli
 	mov esp, stack_top
+	push ebx
 	call kmain
 
 .hang:

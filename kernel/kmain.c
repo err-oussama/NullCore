@@ -1,9 +1,11 @@
 #include "gdt.h"
 #include "idt.h"
 #include "isr.h"
+#include "kernel.h"
 #include "kprint.h"
 #include "pic.h"
 #include "type.h"
+
 static gdt_entry gdt_entrys[8];
 
 static gate_descriptor gate_descriptors[256];
@@ -44,11 +46,10 @@ void setup_IDT() {
   lidtr(&idt_reg);
 }
 
-void kmain(void) {
+void kmain(multiboot_info *boot_info) {
+  kmemory_dump_bin(boot_info, sizeof(multiboot_info));
   setup_GDT();
   setup_IDT();
   pic_init();
   activate_interrupt();
-  while (1)
-    ;
 }
