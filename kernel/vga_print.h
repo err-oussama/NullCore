@@ -20,6 +20,7 @@
 #define VGA_YELLOW 0xE
 #define VGA_WHITE 0xF
 
+void vga_clear_screen();
 void vga_print_base(uint32 n, char *base, uint32 base_len);
 void vga_print_str(char *str, int fg, int bg);
 

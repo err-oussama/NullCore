@@ -54,6 +54,15 @@ typedef struct __attribute__((packed)) {
 
 } multiboot_info;
 
+typedef struct __attribute__((packed)) {
+  uint32 size;      // size of this entry Not including this field itself
+  uint32 addr_low;  // physical address low 32 bits
+  uint32 addr_high; // physical address high 32 bits (always 0 in 32-bit)
+  uint32 len_low;   // length of region low 32 bits
+  uint32 len_high;  // length of region high 32 bits (always 0 in 32-bit)
+  uint32 type;      // what kind of memory this region is
+} mmap_entry;
+
 int get_cs();
 int is64bit();
 #endif

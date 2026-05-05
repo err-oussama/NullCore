@@ -1,5 +1,6 @@
 #ifndef IDT_H
 #define IDT_H
+#include "isr.h"
 #include "type.h"
 
 // SELECTOR
@@ -52,13 +53,15 @@ typedef struct __attribute__((packed)) {
   uint32 base;
 } idtr;
 
+static gate_descriptor gate_descriptors[256];
+
 // FUNCTION
 
 void set_idt_entry(gate_descriptor *gate, uint32 ISR_address, uint16 selector,
-                   uint8 type_attribute);
+                   uint8 type_attr);
 
 void lidtr(idtr *idt_r);
 void sidtr(idtr *idt_r);
-
 void activate_interrupt();
+void setup_IDT();
 #endif

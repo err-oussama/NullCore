@@ -74,3 +74,13 @@ void setup_gdt_entrys(gdt_entry *entrys) {
   // setup TSS descriptor
   gdt_set_entry(&entrys[6], 0, 0x67, 0x89, 0x0);
 }
+
+void setup_GDT() {
+
+  setup_gdt_entrys(gdt_entrys);
+
+  gdt_register gdtr;
+  gdtr.base = (uint32)&gdt_entrys;
+  gdtr.limit = (sizeof(gdt_entry) * 8) - 1;
+  lgdtr(&gdtr);
+}

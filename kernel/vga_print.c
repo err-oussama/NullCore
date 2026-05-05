@@ -18,6 +18,11 @@ Video Graphics Array (VGA) -- Text Mode Memory layout
 int g_row = 0;
 int g_col = 0;
 volatile uint16 *vga = (uint16 *)0xB8000;
+
+void vga_clear_screen() {
+  for (uint32 i = 0; i < 25 * (80); i++)
+    vga[i] = ((VGA_BLACK << 4 | VGA_BLACK) << 8) | ' ';
+}
 void vg_put_char(char c, int fg, int bg, int row, int col) {
   vga[row * 80 + col] = ((bg << 4 | fg) << 8) | c;
 }

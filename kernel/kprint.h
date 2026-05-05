@@ -4,6 +4,7 @@
 #include "type.h"
 #include "vga_print.h"
 
+void kclear_screen();
 void kprint(char *str);
 void kprint_cha(uint8 c);
 void kprint_wrn(char *str);

@@ -1,5 +1,6 @@
 #include "vga_print.h"
 
+void kclear_screen() { vga_clear_screen(); }
 void kprint(char *str) { vga_print(str); }
 void kprint_warn(char *str) { vga_print_warn(str); }
 void kprint_err(char *str) { vga_print_err(str); }
