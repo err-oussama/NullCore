@@ -61,7 +61,7 @@ on x86.
 * [x] Keyboard input
 
 ### Memory Management
-* [ ] Physical memory map (parse multiboot)
+* [x] Physical memory map (parse multiboot)
 * [ ] Physical frame allocator
 * [ ] Paging (virtual memory)
 * [ ] Kernel heap (kmalloc/kfree)
