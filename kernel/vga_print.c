@@ -51,8 +51,19 @@ void vga_print_cha(uint8 c) {
   }
   if (g_row >= 25)
     g_row = 0;
-  vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | c;
-  g_col++;
+  if (c == '\b') {
+    if (g_col == 0 && g_row != 0) {
+      g_col = 79;
+      if (g_row > 0)
+        g_row--;
+    }
+    if (g_col || g_row)
+      g_col--;
+    vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_BLACK) << 8) | ' ';
+  } else {
+    vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | c;
+    g_col++;
+  }
 }
 void vga_print_err(char *str) { vga_print_str(str, VGA_BLACK, VGA_RED); }
 void vga_print_warn(char *str) { vga_print_str(str, VGA_YELLOW, VGA_BLACK); }
