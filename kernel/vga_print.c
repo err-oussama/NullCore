@@ -111,6 +111,7 @@ void vga_memory_dump_bin(void *ptr, uint32 size) {
         vga_print("\n");
       vga_print("0x");
       vga_print_hex((uint32)(p + i));
+      vga_print(": ");
     }
     vga_print(" ");
     vga_print_byte(p[i]);

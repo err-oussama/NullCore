@@ -16,8 +16,8 @@ void gdt_set_TSS_64bit_descriptor(gdt_entry *entry, unsigned long base,
                                   uint8 flags) {
 
   gdt_set_entry(entry, base & 0x00000000ffffffff, limit, access_byte, flags);
-  unsigned long *extension = (unsigned long *)&entry[1];
-  *extension = base >> 32;
+  // unsigned long *extension = (unsigned long *)&entry[1];
+  // *extension = base >> 32; // uncomment this in 64-bit
 }
 
 void setup_gdt_entrys(gdt_entry *entrys) {
