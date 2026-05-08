@@ -1,5 +1,7 @@
 #ifndef PMM_H
 #define PMM_H
+#include "kprint.h"
+#include "memory.h"
 #include "type.h"
 
 /*
@@ -33,5 +35,12 @@ uint32 pmm_get_pool_size();
 uint32 pmm_addre_to_frame(uint32 addre);
 uint32 pmm_frame_to_addre(uint32 frame);
 uint8 pmm_is_frame_free(uint32 frame);
+uint8 pmm_is_addre_free(uint32 addre);
 
+void pmm_use_frame(uint32 frame);
+void pmm_free_frame(uint32 frame);
+
+uint32 pmm_alloc();
+
+void pmm_free(uint32 addre);
 #endif
