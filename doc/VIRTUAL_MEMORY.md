@@ -52,6 +52,65 @@ A **PDE** is a single 32-bit value inside the page directory that **points to a 
 |12-31  |FA     |Physical Frame Address                                         |
 
 
+## Bits explenation 
+
+### P — Present 
+
+Tells the MMU whether this page exists in physical RAM.
+If 0 and the CPU tries to access it #PF fires immediately 
+
+### R/W — Read / Write 
+
+Controls whether the page can be written to. 
+If 0 the page is read-only and write attempt fires #PF 
+if 1 both reads and write are allowed 
+
+### U/S — User / Supervisor 
+
+Controls which privilege level can access this page 
+If 0 only ring 0-2 (kernel) can access it -- any user space (ring-3) access fires #PF
+If 1 both kernel and user space can access it. 
+
+
+### PWT — Page Write Through 
+
+Controls the cache write policy for this page. 
+If 0 write go to cache first and RAM is updated later.
+If 1 every write goes to both cache and RAM simultaneously.
+
+### PCD — Page Cache Disable 
+
+Controls whether this page is cached at all. 
+If 0 the pages goes through the CPU cache normally.
+If 1 every access bypass the cache and hits RAM directly - used for memory mapped hardware like VGA.
+
+
+
+### A — Accessed 
+
+The CPU sets this bit automatically the first time the page is readed from, written to or executed from.
+The kernel uses it to track which pages are being used -- useful for page replacement algorithms.
+
+
+
+### D — Dirty 
+
+The CPU sets this bit automatically the first time the page is written to. 
+The kernel uses it to know if a page was modified -- if dirty the page must be written to disk before being freed.
+
+
+
+### PAT — Page Attribute Table 
+Extends PWT and PCD to select from a table of 8 possible cache modes. Combined with PWT and PCD it gives 3 bits total selecting one of 8 cache behavior configurations defined in the PAT MSR register.
+
+
+### G — Global 
+
+If 1 the page translation stays in the TLB even when CR3 is reloaded during a context switch. 
+Used for kernel pages that are shared across all processes - avoids flushing and refilling TLB entries that never change.
+
+
+
 ## Virtual Address 
 
 ```
@@ -90,7 +149,8 @@ covers          →   every byte within the 4KB frame
 ```
 
 
+## TLB — Translation Lookaside Buffer
 
-
+The **TLB** is a small hardware cache inside the CPU that stores recent virtual to physical address translations. Its entries purpose is to avoid repeating the full page table walk every single time the CPU access memory.
 
 
