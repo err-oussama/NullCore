@@ -2,9 +2,10 @@
 #define MULTIBOOT_INFO_H
 
 #include "kernel.h"
-#include "kprint.h"
 #include "pmm.h"
 #include "type.h"
+
+extern uint32 kernel_end;
 
 typedef struct __attribute__((packed)) {
   uint32 flags; // bit N se = field N is valid
@@ -70,6 +71,7 @@ typedef struct __attribute__((packed)) {
 #							FUNCTIONS
 ###########################################
 */
+
 void show_multiboot_data(multiboot_info *boot_info);
 
 void init_pmp(multiboot_info *boot_info);

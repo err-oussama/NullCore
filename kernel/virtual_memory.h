@@ -1,6 +1,7 @@
 #ifndef VIRTUAL_MEMORY_H
 #define VIRTUAL_MEMORY_H
 
+#include "pmm.h"
 #include "type.h"
 
 #define MMU_PTE_P 0x001      // present  			0x0 absent
@@ -27,5 +28,7 @@ typedef uint32 PTE;
 typedef uint32 PDE;
 
 uint32 mmu_make_entry(uint32 frame_address, uint16 flags);
+
+void mmu_kernel_memory_map_pages();
 
 #endif
