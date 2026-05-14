@@ -21,12 +21,12 @@ void non_maskable_interrupt_handler() {
     ;
 }
 void break_point_handler() {
-  kprint_err("Break Point");
+  kprint_err("Interrupt: Break Point");
   while (1)
     ;
 }
 void overflow_handler() {
-  kprint_err("Interrupt: ");
+  kprint_err("Interrupt: overflow");
   while (1)
     ;
 }

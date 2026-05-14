@@ -7,6 +7,7 @@
 #include "pic.h"
 #include "pmm.h"
 #include "vga_print.h"
+#include "virtual_memory.h"
 
 extern uint32 kernel_end;
 
