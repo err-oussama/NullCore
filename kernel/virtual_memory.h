@@ -29,7 +29,7 @@ typedef uint32 PDE;
 
 uint32 mmu_make_entry(uint32 frame_address, uint16 flags);
 
-void mmu_kernel_memory_map_pages();
+void mmu_kernel_setup();
 
 void mmu_map_pt(uint32 *pd, uint16 flags);
 #endif

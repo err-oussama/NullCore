@@ -7,7 +7,7 @@ uint32 mmu_make_entry(uint32 frame_address, uint16 flags) {
   return (frame_address & 0xfffff000) | flags;
 }
 
-void mmu_kernel_memory_map_pages() {
+void mmu_kernel_setup() {
   uint32 *pd = (uint32 *)pmm_alloc();
   memset((void *)pd, 0, 0x1000);
 
