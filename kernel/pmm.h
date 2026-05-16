@@ -44,4 +44,7 @@ void pmm_free_frame(uint32 frame);
 uint32 pmm_alloc();
 
 void pmm_free(uint32 addre);
+
+void pmm_info();
+
 #endif

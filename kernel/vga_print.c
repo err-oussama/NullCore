@@ -15,6 +15,7 @@ Video Graphics Array (VGA) -- Text Mode Memory layout
 
 
 */
+
 int g_row = 0;
 int g_col = 0;
 volatile uint16 *vga = (uint16 *)0xB8000;
