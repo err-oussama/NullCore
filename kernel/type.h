@@ -9,4 +9,6 @@
 #define int16 short
 #define int32 int
 
+#define NULL (void *)0x0
+
 #endif

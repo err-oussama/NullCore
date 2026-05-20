@@ -1,7 +1,9 @@
-
 #include "memory.h"
 #include "kernel.h"
 #include "multiboot_metadata.h"
+
+//	void *kmalloc(uint32 size)
+//  void kfree(ptr p);
 
 void memset(void *addr, uint32 c, uint32 size) {
   uint8 *p = (uint8 *)addr;
