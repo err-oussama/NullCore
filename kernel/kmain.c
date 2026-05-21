@@ -1,7 +1,8 @@
 #include "kernel.h"
 #include "kprint.h"
+#include "memory.h"
 #include "multiboot_metadata.h"
-#include "pmm.h"
+#include "type.h"
 
 void kmain(multiboot_info *boot_info) {
   kclear_screen();
@@ -11,6 +12,9 @@ void kmain(multiboot_info *boot_info) {
   // show_multiboot_data(boot_info);
   // show_physical_memory();
   // pmm_info();
-  uint32 *p = NULL;
-  kprint_dec(*p);
+
+  init_heap();
+  void *addr = kmalloc(0xF0);
+  kprint("\n");
+  kprint_hex((uint32)addr);
 }
