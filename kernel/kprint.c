@@ -1,7 +1,9 @@
+#include "kprint.h"
+#include "type.h"
 #include "vga_print.h"
 
 void kclear_screen() { vga_clear_screen(); }
-void kprint(char *str) { vga_print(str); }
+void kprint_str(char *str) { vga_print(str); }
 void kprint_warn(char *str) { vga_print_warn(str); }
 void kprint_err(char *str) { vga_print_err(str); }
 
@@ -15,4 +17,38 @@ void kmemory_dump_bin(void *ptr, unsigned long size) {
 }
 void kmemory_dump_hex(void *ptr, unsigned long size) {
   vga_memory_dump_hex(ptr, size);
+}
+void kprintf(char *format, ...) {
+  char *ptr;
+
+  ptr = (char *)&format;
+  ptr += sizeof(char *);
+
+  while (*format) {
+    if (*format == '%') {
+      format++;
+      if (*format == 'd') {
+        kprint_dec(*(uint32 *)(ptr));
+        ptr += sizeof(uint32);
+      } else if (*format == 'c') {
+        kprint_cha(*(uint8 *)(ptr));
+        ptr += sizeof(uint32);
+      } else if (*format == 's') {
+        kprint_str(*(char **)ptr);
+        ptr += sizeof(char *);
+      } else if (*format == 'x') {
+        kprint_hex(*(uint32 *)(ptr));
+        ptr += sizeof(uint32);
+      } else if (*format == 'p') {
+        kprint_str("0x");
+        kprint_hex(*(uint32 *)(ptr));
+        ptr += sizeof(void *);
+      } else
+        break;
+      format++;
+      continue;
+    }
+    kprint_cha(*format);
+    format++;
+  }
 }

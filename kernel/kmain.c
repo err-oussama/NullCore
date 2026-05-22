@@ -14,7 +14,9 @@ void kmain(multiboot_info *boot_info) {
   // pmm_info();
 
   init_heap();
+
   void *addr = kmalloc(0xF0);
-  kprint("\n");
-  kprint_hex((uint32)addr);
+  addr = kmalloc(0xF0);
+  kprintf("this %p, %s, %d, [%c] [%d]", 0xBBBBBBBB, "this is god", 100, 'h',
+          200);
 }

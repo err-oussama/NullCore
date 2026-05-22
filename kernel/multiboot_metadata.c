@@ -3,7 +3,7 @@
 #include "vga_print.h"
 
 void show_multiboot_data(multiboot_info *boot_info) {
-  kprint("\n------------MULTIBOOT METADATA------------\n");
+  kprint_str("\n------------MULTIBOOT METADATA------------\n");
   uint8 *ptr = (uint8 *)boot_info->mmap_addr;
   uint8 *end = ptr + boot_info->mmap_length;
 
@@ -11,17 +11,17 @@ void show_multiboot_data(multiboot_info *boot_info) {
   while (ptr < end) {
 
     entry = (mmap_entry *)ptr;
-    kprint("type: ");
+    kprint_str("type: ");
     kprint_hex(entry->type);
-    kprint(", address: 0x");
+    kprint_str(", address: 0x");
     kprint_hex(entry->addr_low);
-    kprint(", size: 0x");
+    kprint_str(", size: 0x");
     kprint_hex(entry->len_low);
 
-    kprint("\n");
+    kprint_str("\n");
     ptr += entry->size + 4;
   }
-  kprint("------------------------------------------\n");
+  kprint_str("------------------------------------------\n");
 }
 
 void init_pmp(multiboot_info *boot_info) {

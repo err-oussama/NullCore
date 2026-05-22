@@ -38,6 +38,7 @@ struct heap_page {
 void *kmalloc(uint32 size);
 void kfree(void *p);
 
+void memory_print_page(uint32 id, uint32 part);
 void init_heap();
 uint32 block_size(heap_block block);
 uint8 is_block_free(heap_block block);

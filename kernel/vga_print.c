@@ -52,7 +52,7 @@ void vga_print_cha(uint8 c) {
   }
   if (g_row >= 25)
     g_row = 0;
-  if (c == '\b') {
+  if (c == '\n') {
     if (g_col == 0 && g_row != 0) {
       g_col = 79;
       if (g_row > 0)
@@ -131,7 +131,13 @@ void vga_memory_dump_hex(void *ptr, uint32 size) {
       vga_print_hex((uint32)p + i);
       vga_print(": ");
     }
-    vga_print(" ");
+    if (!(i % 8) && i != 0 && i != 0 && (i % 16))
+      vga_print("        ");
+    else if (!(i % 4) && i != 0 && (i % 16))
+      vga_print("    ");
+    else if (!(i % 2) && i != 0 && i != 0 && (i % 16))
+      vga_print(" ");
+
     vga_print_hex((uint32)(p[i] >> 0x4));
     vga_print_hex((uint32)(p[i] & 0x0f));
   }

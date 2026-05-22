@@ -14,19 +14,19 @@ void pmm_init(uint32 pmp_start, uint32 pmp_size) {
 }
 
 void pmm_info() {
-  kprint("-----------Physical Memory Pool-----------\n");
-  kprint("  start: 0x");
+  kprint_str("-----------Physical Memory Pool-----------\n");
+  kprint_str("  start: 0x");
   kprint_hex(pmp.start);
-  kprint("\n  end:   0x");
+  kprint_str("\n  end:   0x");
   kprint_hex(pmp.start + pmp.size);
-  kprint("\n  size:  0x");
+  kprint_str("\n  size:  0x");
   kprint_hex(pmp.size);
-  kprint(" Byte, 0x");
+  kprint_str(" Byte, 0x");
   kprint_hex(pmp.size / 0x1000);
-  kprint(" Frame, 0x");
+  kprint_str(" Frame, 0x");
   kprint_hex(pmp.size / 1024 / 1024);
-  kprint(" MB");
-  kprint("\n------------------------------------------\n");
+  kprint_str(" MB");
+  kprint_str("\n------------------------------------------\n");
 }
 
 uint32 pmm_get_pool_start() { return pmp.start; }
