@@ -1,13 +1,15 @@
 #ifndef TYPE_H
 #define TYPE_H
 
-#define uint8 unsigned char
-#define uint16 unsigned short
-#define uint32 unsigned int
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+typedef unsigned int uint32;
 
-#define int8 char
-#define int16 short
-#define int32 int
+typedef char int8;
+typedef short int16;
+typedef int int32;
+
+#define PAGE_SIZE 0x1000
 
 #define NULL (void *)0x0
 

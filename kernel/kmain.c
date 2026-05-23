@@ -15,8 +15,13 @@ void kmain(multiboot_info *boot_info) {
 
   init_heap();
 
-  void *addr = kmalloc(0xF0);
-  addr = kmalloc(0xF0);
-  kprintf("this %p, %s, %d, [%c] [%d]", 0xBBBBBBBB, "this is god", 100, 'h',
-          200);
+  void *addr = kmalloc(0x10);
+  kprintf("Address 1: %p\n", addr);
+  addr = kmalloc(0x4);
+  kprintf("Address 2: %p\n", addr);
+  addr = kmalloc(0x4);
+  kprintf("Address 2: %p\n", addr);
+
+  kprintf("--------------------\n");
+  kmemory_dump_hex(get_heap_start(), 64);
 }

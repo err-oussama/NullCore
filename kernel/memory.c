@@ -7,45 +7,79 @@
 
 static heap_page *heap_memory = NULL; // the first page of the heap
 
-void memory_print_page(uint32 id, uint32 part) {
+void *get_heap_start() { return heap_memory; }
 
-  heap_page *page = heap_memory;
-  for (uint32 i = 0; i < id; i++)
-    page = page->next;
-
-  kmemory_dump_hex(page + (part * 16), 16);
-}
 void init_heap() {
   heap_memory = (void *)pmm_alloc();
   if (heap_memory) {
     memset(heap_memory, 0, 0x1000);
     heap_memory->free_space = 0x1000 - sizeof(heap_page);
     heap_memory->next = NULL;
-    heap_memory->last_block = (heap_block *)&heap_memory[1];
+    heap_memory->last_block = NULL;
   }
 }
 
-void *kmalloc(uint32 size) {
-  if (!heap_memory)
-    return NULL;
-  heap_page *page = heap_memory;
-  heap_block *block = (heap_block *)&page[1];
+int add_page() {
+  heap_page *current = heap_memory->next;
+
+  while (current->next)
+    current = current->next;
+
+  heap_page *new_page = (heap_page *)pmm_alloc();
+  if (new_page) {
+    current->next = new_page;
+    new_page->free_space = PAGE_SIZE - sizeof(heap_page) - sizeof(heap_block);
+    new_page->next = NULL;
+    new_page->last_block = NULL;
+    return 0;
+  }
+  return 1;
+}
+
+void *get_block_from_page(heap_page *page, uint32 size) {
+  heap_block *block = page->last_block;
   size = (size + 3) & ~3;
-  if (size < page->free_space) {
-    while (block < page->last_block) {
-      if (is_block_free(*block))
-        return &block[1];
-      block += sizeof(heap_block) + block_size(*block);
-    }
-    if (block + sizeof(heap_block) + size < page + 0x1000) {
-      *block = size | 1;
-      page->free_space -= size | 1;
-      page->last_block = block;
-      return block + sizeof(heap_block);
-    }
+  if (!block) {
+    block = (heap_block *)&page[1];
+    *block = size | 1;
+    page->free_space -= size + sizeof(heap_block);
+    page->last_block = block;
+    return block + sizeof(heap_block);
   }
 
-  return NULL;
+  while (block <= page->last_block) {
+    if (is_block_free(*block) && block_size(*block) >= size)
+      return &block[1];
+    block += block_size(*block);
+  }
+  if (block + sizeof(heap_block) + size > page + PAGE_SIZE)
+    return NULL;
+
+  *block = size | 1;
+  page->free_space -= size;
+  page->last_block = block;
+  return block + sizeof(heap_block);
+}
+void *kmalloc(uint32 size) {
+
+  if (!heap_memory || !size)
+    return NULL;
+
+  heap_page *page = heap_memory;
+
+  /* if (size > PAGE_SIZE)
+                   return pages
+   */
+
+  while (page->next && page->free_space < size)
+    page = page->next;
+  if (!page) {
+    add_page();
+    page = page->next;
+    if (!page)
+      return NULL;
+  }
+  return get_block_from_page(page, size);
 }
 
 //  void kfree(ptr p);
