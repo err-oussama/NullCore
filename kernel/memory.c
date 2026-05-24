@@ -20,7 +20,7 @@ void init_heap() {
 }
 
 int add_page() {
-  heap_page *current = heap_memory->next;
+  heap_page *current = heap_memory;
 
   while (current->next)
     current = current->next;
@@ -38,7 +38,6 @@ int add_page() {
 
 void *get_block_from_page(heap_page *page, uint32 size) {
   heap_block *block = page->last_block;
-  size = (size + 3) & ~3;
   if (!block) {
     block = (heap_block *)&page[1];
     *block = size | 1;
@@ -69,6 +68,7 @@ void *kmalloc(uint32 size) {
     return NULL;
 
   heap_page *page = heap_memory;
+  size = (size + 3) & ~3;
 
   /* if (size > PAGE_SIZE)
                    return pages
@@ -76,7 +76,7 @@ void *kmalloc(uint32 size) {
 
   while (page->next && page->free_space < size)
     page = page->next;
-  if (!page) {
+  if (!page->next && page->free_space < size) {
     add_page();
     page = page->next;
     if (!page)
