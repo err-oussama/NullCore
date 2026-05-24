@@ -44,21 +44,24 @@ void *get_block_from_page(heap_page *page, uint32 size) {
     *block = size | 1;
     page->free_space -= size + sizeof(heap_block);
     page->last_block = block;
-    return block + sizeof(heap_block);
+    return &block[1];
   }
-
+  uint8 *ptr = NULL;
   while (block <= page->last_block) {
     if (is_block_free(*block) && block_size(*block) >= size)
       return &block[1];
-    block += block_size(*block);
+    ptr = (uint8 *)block;
+    ptr += block_size(*block) + sizeof(heap_block);
+    block = (heap_block *)ptr;
   }
-  if (block + sizeof(heap_block) + size > page + PAGE_SIZE)
+  ptr = (uint8 *)block;
+  if (ptr + sizeof(heap_block) + size > page + PAGE_SIZE)
     return NULL;
 
   *block = size | 1;
-  page->free_space -= size;
+  page->free_space -= size + sizeof(heap_block);
   page->last_block = block;
-  return block + sizeof(heap_block);
+  return &block[1];
 }
 void *kmalloc(uint32 size) {
 
@@ -84,7 +87,7 @@ void *kmalloc(uint32 size) {
 
 //  void kfree(ptr p);
 
-uint32 block_size(heap_block block) { return block >> 1; }
+uint32 block_size(heap_block block) { return block & ~1; }
 uint8 is_block_free(heap_block block) { return !(block & 1); }
 
 void memset(void *addr, uint32 c, uint32 size) {
@@ -96,33 +99,22 @@ void memset(void *addr, uint32 c, uint32 size) {
 
 void show_physical_memory() {
 
-  kprint_str("\n------------------KERNEL------------------");
-  kprint_str("\nmultiboot header: 0x");
-  kprint_hex((uint32)&multiboot_header);
-  kprint_str(", size 0x");
-  kprint_hex((uint32)&kernel_text - (uint32)&multiboot_header);
+  kprint_str("\n------------------KERNEL------------------\n");
+  kprintf("multiboot header: %p, size 0x%x", &multiboot_header,
+          (uint32)&kernel_text - (uint32)&multiboot_header);
 
-  kprint_str("\n   .text        : 0x");
-  kprint_hex((uint32)&kernel_text);
-  kprint_str(", size 0x");
-  kprint_hex((uint32)&kernel_rodata - (uint32)&kernel_text);
+  kprintf("   .text        : %p, size: 0x\n", &kernel_text,
+          (uint32)&kernel_rodata - (uint32)&kernel_text);
 
-  kprint_str("\n   .rodata      : 0x");
-  kprint_hex((uint32)&kernel_rodata);
-  kprint_str(", size 0x");
-  kprint_hex((uint32)&kernel_data - (uint32)&kernel_rodata);
+  kprintf("   .rodata      : %p, size: 0x\n", &kernel_rodata,
+          (uint32)&kernel_data - (uint32)&kernel_rodata);
 
-  kprint_str("\n   .data        : 0x");
-  kprint_hex((uint32)&kernel_data);
-  kprint_str(", size 0x");
-  kprint_hex((uint32)&kernel_bss - (uint32)&kernel_data);
+  kprintf("   .data        : %p, size: %x\n", &kernel_data,
+          (uint32)&kernel_bss - (uint32)&kernel_data);
 
-  kprint_str("\n   .bss         : 0x");
-  kprint_hex((uint32)&kernel_bss);
-  kprint_str(", size 0x");
-  kprint_hex((uint32)&kernel_end - (uint32)&kernel_bss);
+  kprintf("   .bss         : %p, size: %h\n", &kernel_bss,
+          (uint32)&kernel_end - (uint32)&kernel_bss);
 
-  kprint_str("\n   end of kernel: 0x");
-  kprint_hex((uint32)&kernel_end);
-  kprint_str("\n------------------------------------------\n");
+  kprintf("   end of kernel: %p\n", &kernel_end);
+  kprint_str("------------------------------------------\n");
 }

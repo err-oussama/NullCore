@@ -8,20 +8,15 @@ void kmain(multiboot_info *boot_info) {
   kclear_screen();
   init_pmp(boot_info);
   setup_hardware();
-  // kprint("Memmory Management Unit: basic setup done.\n");
-  // show_multiboot_data(boot_info);
-  // show_physical_memory();
-  // pmm_info();
-
   init_heap();
 
-  void *addr = kmalloc(0x10);
-  kprintf("Address 1: %p\n", addr);
-  addr = kmalloc(0x4);
-  kprintf("Address 2: %p\n", addr);
-  addr = kmalloc(0x4);
-  kprintf("Address 2: %p\n", addr);
+  void *addr = NULL;
+  uint32 sizes[] = {0x10, 0x8, 0x5, 0x1, 0x3, 0xF};
+  uint32 values[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
+  for (uint32 i = 0; i < 6; i++) {
+    addr = kmalloc(sizes[i]);
+    memset(addr, values[i], sizes[i]);
+  }
 
-  kprintf("--------------------\n");
-  kmemory_dump_hex(get_heap_start(), 64);
+  kmemory_dump_hex(get_heap_start(), 128);
 }
