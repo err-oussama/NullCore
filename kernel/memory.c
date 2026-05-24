@@ -100,7 +100,7 @@ void memset(void *addr, uint32 c, uint32 size) {
 void show_physical_memory() {
 
   kprint_str("\n------------------KERNEL------------------\n");
-  kprintf("multiboot header: %p, size 0x%x", &multiboot_header,
+  kprintf("multiboot header: %p, size: 0x%x\n", &multiboot_header,
           (uint32)&kernel_text - (uint32)&multiboot_header);
 
   kprintf("   .text        : %p, size: 0x\n", &kernel_text,
@@ -112,7 +112,7 @@ void show_physical_memory() {
   kprintf("   .data        : %p, size: %x\n", &kernel_data,
           (uint32)&kernel_bss - (uint32)&kernel_data);
 
-  kprintf("   .bss         : %p, size: %h\n", &kernel_bss,
+  kprintf("   .bss         : %p, size: 0x%x\n", &kernel_bss,
           (uint32)&kernel_end - (uint32)&kernel_bss);
 
   kprintf("   end of kernel: %p\n", &kernel_end);

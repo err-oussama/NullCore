@@ -52,7 +52,20 @@ void vga_print_cha(uint8 c) {
   }
   if (g_row >= 25)
     g_row = 0;
-  if (c == '\n') {
+
+  if (c == '\b') {
+    if (!g_col && !g_row)
+      return;
+    if (!g_col) {
+      g_row--;
+      g_col = 79;
+    } else
+      g_col--;
+
+    vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | ' ';
+  }
+
+  else if (c == '\n') {
     g_col = 0;
     g_row++;
     if (g_row >= 25)

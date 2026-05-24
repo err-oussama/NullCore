@@ -9,17 +9,5 @@ void kmain(multiboot_info *boot_info) {
   init_pmp(boot_info);
   setup_hardware();
   init_heap();
-
-  void *addr = NULL;
-  uint32 sizes[] = {0xFF0, 0x8, 0x5, 0x1, 0x3, 0xF};
-  uint32 values[] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};
-  for (uint32 i = 0; i < 6; i++) {
-    addr = kmalloc(sizes[i]);
-    memset(addr, values[i], sizes[i]);
-  }
-
-  kmemory_dump_hex(get_heap_start(), 64);
-  kprint_str("\n------------------------\n");
-  heap_page *page = (heap_page *)get_heap_start();
-  kmemory_dump_hex(page->next, 128);
+  show_physical_memory();
 }
