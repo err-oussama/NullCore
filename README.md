@@ -65,7 +65,6 @@ on x86.
 * [x] Physical frame allocator
 * [x] Paging (virtual memory)
 * [x] Kernel heap (kmalloc/kfree)
-* [ ] Address space control
 
 ### Execution Model
 * [ ] Timer (PIT)
@@ -74,7 +73,8 @@ on x86.
 * [ ] System call interface
 
 ### User Space
-* [ ] User space segments (already in GDT)
+* [ ] Address space control
+* [x] User space segments (already in GDT)
 * [ ] First user process
 * [ ] ELF loader
 
