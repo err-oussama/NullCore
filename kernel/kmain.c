@@ -9,4 +9,9 @@ void kmain(multiboot_info *boot_info) {
   init_pmp(boot_info);
   setup_hardware();
   init_heap();
+  uint64 a = 0xFFFFFFFFFFF;
+  uint64 b = 0xFFFFFFFEFFF;
+
+  uint64 c = a - b;
+  kmemory_dump_bin(&c, sizeof(uint64));
 }
