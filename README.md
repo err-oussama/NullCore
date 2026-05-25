@@ -64,7 +64,7 @@ on x86.
 * [x] Physical memory map (parse multiboot)
 * [x] Physical frame allocator
 * [x] Paging (virtual memory)
-* [ ] Kernel heap (kmalloc/kfree)
+* [x] Kernel heap (kmalloc/kfree)
 * [ ] Address space control
 
 ### Execution Model
