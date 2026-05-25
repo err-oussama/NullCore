@@ -7,7 +7,7 @@
 
 static heap_page *heap_memory = NULL; // the first page of the heap
 
-void *get_heap_start() { return heap_memory; }
+heap_page *get_heap_start() { return heap_memory; }
 
 void init_heap() {
   heap_memory = (void *)pmm_alloc();
@@ -70,7 +70,7 @@ void *kmalloc(uint32 size) {
   heap_page *page = heap_memory;
   size = (size + 3) & ~3;
 
-  /* if (size > PAGE_SIZE)
+  /* if (size > PAGE_SIZE) will be supported when needed
                    return pages
    */
 
@@ -85,7 +85,17 @@ void *kmalloc(uint32 size) {
   return get_block_from_page(page, size);
 }
 
-//  void kfree(ptr p);
+void kfree(void *ptr) {
+  uint8 *p = ptr;
+  heap_page *page;
+  uint32 page_start = (uint32)ptr;
+  heap_block *block = (heap_block *)(p - sizeof(heap_block));
+  *block &= ~0x3;
+  page_start &= ~0xFFF;
+  kprintf("page address is : %p\n", page_start);
+  page = (heap_page *)page_start;
+  page->free_space += block_size(*block);
+}
 
 uint32 block_size(heap_block block) { return block & ~1; }
 uint8 is_block_free(heap_block block) { return !(block & 1); }

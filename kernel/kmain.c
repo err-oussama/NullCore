@@ -9,5 +9,4 @@ void kmain(multiboot_info *boot_info) {
   init_pmp(boot_info);
   setup_hardware();
   init_heap();
-  show_physical_memory();
 }

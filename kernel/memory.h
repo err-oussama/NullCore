@@ -14,6 +14,7 @@ struct heap_page {
   uint32 free_space; // 0x1000 - used address
   heap_block *last_block;
 };
+// [4byte next][4byte free_space][4byte last_block][4byte heap_block1]
 
 void *kmalloc(uint32 size);
 void kfree(void *p);
@@ -25,5 +26,5 @@ uint8 is_block_free(heap_block block);
 void show_physical_memory();
 void memset(void *addr, uint32 c, uint32 size);
 
-void *get_heap_start();
+heap_page *get_heap_start();
 #endif
