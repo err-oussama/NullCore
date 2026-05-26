@@ -24,7 +24,6 @@ void init_heap();
 uint32 block_size(heap_block block);
 uint8 is_block_free(heap_block block);
 void show_physical_memory();
-void memset(void *addr, uint32 c, uint32 size);
 
 heap_page *get_heap_start();
 #endif

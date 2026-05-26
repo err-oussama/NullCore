@@ -1,9 +1,8 @@
 #ifndef PMM_H
 #define PMM_H
-#include "kprint.h"
-#include "memory.h"
 #include "type.h"
 
+// PMM => Physical Memory Manager
 /*
 #################################################
 ##################### TYPES #####################

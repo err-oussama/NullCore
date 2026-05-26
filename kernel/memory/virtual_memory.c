@@ -1,7 +1,7 @@
 #include "virtual_memory.h"
-#include "cr.h"
+#include "control_registers.h"
 #include "pmm.h"
-#include "type.h"
+#include <string.h>
 
 uint32 mmu_make_entry(uint32 frame_address, uint16 flags) {
   return (frame_address & 0xfffff000) | flags;

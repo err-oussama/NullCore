@@ -1,4 +1,6 @@
 #include "pmm.h"
+#include "kprint.h"
+#include <string.h>
 
 static PMP pmp;       // Physical Memory Pool
 static uint8 *bitmap; // 0 = free / 1 = used

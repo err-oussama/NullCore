@@ -1,9 +1,10 @@
 #include "memory.h"
-#include "kernel.h"
-#include "kprint.h"
-#include "multiboot_metadata.h"
-#include "pmm.h"
-#include "type.h"
+#include <kernel.h>
+#include <kprint.h>
+#include <multiboot_metadata.h>
+#include <pmm.h>
+#include <string.h>
+#include <type.h>
 
 static heap_page *heap_memory = NULL; // the first page of the heap
 
@@ -99,13 +100,6 @@ void kfree(void *ptr) {
 
 uint32 block_size(heap_block block) { return block & ~1; }
 uint8 is_block_free(heap_block block) { return !(block & 1); }
-
-void memset(void *addr, uint32 c, uint32 size) {
-  uint8 *p = (uint8 *)addr;
-  while (size--) {
-    p[size] = c;
-  }
-}
 
 void show_physical_memory() {
 

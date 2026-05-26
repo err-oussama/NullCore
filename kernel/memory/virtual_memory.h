@@ -1,7 +1,6 @@
 #ifndef VIRTUAL_MEMORY_H
 #define VIRTUAL_MEMORY_H
 
-#include "pmm.h"
 #include "type.h"
 
 #define MMU_PTE_P 0x001      // present  			0x0 absent

@@ -1,8 +1,8 @@
 #ifndef MULTIBOOT_INFO_H
 #define MULTIBOOT_INFO_H
 
-#include "pmm.h"
-#include "type.h"
+#include <kprint.h>
+#include <type.h>
 
 extern uint32 kernel_end;
 

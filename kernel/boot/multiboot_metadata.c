@@ -1,6 +1,5 @@
 #include "multiboot_metadata.h"
-#include "type.h"
-#include "vga_print.h"
+#include <pmm.h>
 
 void show_multiboot_data(multiboot_info *boot_info) {
   kprint_str("\n------------MULTIBOOT METADATA------------\n");

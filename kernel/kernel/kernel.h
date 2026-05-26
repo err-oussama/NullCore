@@ -16,7 +16,6 @@ extern uint32 kernel_data;
 extern uint32 kernel_bss;
 extern uint32 kernel_end;
 
-int get_cs();
 int is64bit();
 void setup_hardware();
 

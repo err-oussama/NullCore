@@ -1,7 +1,9 @@
 #ifndef PMIO_H
 #define PMIO_H
 
-#include "type.h"
+#include <type.h>
+
+// PMIO => Port Mapped Input/Ouput
 
 void outb(uint16 port, uint8 value);
 void outw(uint16 port, uint16 value);

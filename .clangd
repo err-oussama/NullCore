@@ -1,0 +1,15 @@
+CompileFlags:
+  Add:
+    - -m32
+    - -ffreestanding
+    - -fno-stack-protector
+    - -nostdlib
+    - -nostdinc
+    - -I/home/void/Work/NullCore/kernel/interrupts
+    - -I/home/void/Work/NullCore/kernel/include
+    - -I/home/void/Work/NullCore/kernel/drivers
+    - -I/home/void/Work/NullCore/kernel/memory
+    - -I/home/void/Work/NullCore/kernel/kernel
+    - -I/home/void/Work/NullCore/kernel/klibc
+    - -I/home/void/Work/NullCore/kernel/boot
+    - -I/home/void/Work/NullCore/kernel/cpu
