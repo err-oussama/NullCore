@@ -1,13 +1,9 @@
 #include "isr.h"
-#include "keyboard_driver.h"
 #include "kprint.h"
-#include "pic.h"
 
 void divide_error_handler() {
   kprint_err("Interrupt: Division Error ");
   while (1)
-    ;
-  while (0)
     ;
 }
 void debug_handler() {
@@ -124,16 +120,4 @@ void security_exception_handler() {
   kprint_err("Interrupt: Security Exception");
   while (1)
     ;
-}
-
-void timer_handler() {
-  // kprint("tick");
-  pic_send_eoi(0);
-}
-
-void keyboard_handler() {
-  uint8 scancode = inb(0x60);
-  if (!(scancode & 0x80))
-    kprint_cha(scancode_map[scancode]);
-  pic_send_eoi(0x1);
 }

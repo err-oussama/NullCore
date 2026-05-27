@@ -23,7 +23,6 @@ extern hypervisor_injection_exception_handler
 extern VMM_communication_exception_handler
 extern security_exception_handler
 
-;
 extern timer_handler
 extern keyboard_handler
 

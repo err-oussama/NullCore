@@ -1,7 +1,9 @@
 #ifndef PIC_H
 #define PIC_H
 
-#include "pmio.h"
+#include <pmio.h>
+
+// Programmable Interrupt Controller
 
 #define PIC_MASTER_COMMAND 0x20
 #define PIC_MASTER_DATA 0x21
