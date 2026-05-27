@@ -1,6 +1,7 @@
-#ifndef KEYBOARD_DRIVER_H
-#define KEYBOARD_DRIVER_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
+#include <type.h>
 static char scancode_map[] = {
     '\0', '\0', '1',  '2', '3',  '4',  '5',  '6',  '7',  '8', '9', '0',
     '-',  '=',  '\b', ' ', 'q',  'w',  'e',  'r',  't',  'y', 'u', 'i',
