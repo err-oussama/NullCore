@@ -1,7 +1,6 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include "multiboot_metadata.h"
 #include "type.h"
 
 // bits 31-1 used as size of the block always 4 byte alignement

@@ -11,6 +11,10 @@ void kprint_cha(uint8 c) { vga_print_cha(c); }
 void kprint_dec(long n) { vga_print_dec(n); }
 void kprint_hex(unsigned long n) { vga_print_hex(n); }
 void kprint_bin(unsigned long n) { vga_print_bin(n); }
+void kprint_hex64(uint64 n) {
+  vga_print_hex((uint32)(n >> 32));
+  vga_print_hex((uint32)n);
+}
 
 void kmemory_dump_bin(void *ptr, unsigned long size) {
   vga_memory_dump_bin(ptr, size);

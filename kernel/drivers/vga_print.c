@@ -1,5 +1,6 @@
 #include "vga_print.h"
 #include "kernel.h"
+#include "type.h"
 
 /*
 
@@ -89,6 +90,7 @@ void vga_print_dec(long n) {
 }
 
 void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16); }
+
 void vga_print_base(uint32 n, char *base, uint32 base_len) {
   char buff[40];
   int i = 39;
