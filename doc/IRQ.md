@@ -167,18 +167,3 @@ Stes the CPU mode the PIC is operating with
 outb(0x21, 0x01)    →   master: 8086 mode 
 outb(0xA1, 0x01)    →   slave: 8086 mode      
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
