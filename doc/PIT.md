@@ -73,7 +73,7 @@ bit 3-1 →   operating mode
 bit 0   →   number format 
 ```
 
-**Bits 7-6  — Channel Select**
+##### Bits 7-6  — Channel Select
 
 ```
 00   →  channel 0 (IRQ0 timer) 
@@ -85,7 +85,7 @@ bit 0   →   number format
 
 
 
-**Bits 6-5 — Access Mode**
+##### Bits 6-5 — Access Mode
 
 ```
 00   →  latch count value 
@@ -95,11 +95,16 @@ bit 0   →   number format
 ```
 
 
-**Bits 3-1 — Operating Mode**
+**Latch Count Value**: It is a special command that freezes the current counter value so it can be readed safely. Latch clears automatically after both bytes read.
+
+
+
+
+##### Bits 3-1 — Operating Mode
 
 ```
 000     →   mode 0  interrupt on terminal count  
-001     →   mode 1  hardware re-triggerable on shot 
+001     →   mode 1  hardware re-triggerable one shot 
 010     →   mode 2  rate generator 
 011     →   mode 3  square wave generator 
 100     →   mode 4  software triggered strobe
@@ -107,10 +112,28 @@ bit 0   →   number format
 ```
 
 
-**Bit 0 — Number Format**
+**Mode 0 — Interrupt Terminal Count**: Counts down once from the divisor to zero, fires IRQ0 once, then stops. Does not reload - write a new divisor to start it again
+
+**Mode 1 — Hardware Retriggerable one Shot**: Same as mode 0 but the countdown restarts if a hardware trigger signal arrives on the gate pin before it reaches zero.
+
+**Mode 2 — Rate Generator**: Counts down to 1, fires IRQ0, reloads divisor automatically and repeats forever.
+
+**Mode 3 — Square Wave Generator**: Similar to mode 2 but the output pit alternates between high and low - producing a square wave. Used for the PC speaker.
+
+**Mode 4 — Software Triggered Strobe**: Counts down to zero, fires a single on the output pin, stops. Triggered by software writing the divisor.
+
+**Mode 5 — Hardware Triggered Strobe**: Same as mode 4 but triggered by a hardware signal on the gate pin instead of software.
+
+
+##### Bit 0 — Number Format
 
 ```
 0     →   binary 
 1     →   BCD (Binray Coded Decimal) 
 ```
+
+
+
+## Resource 
+[https://wiki.osdev.org/Programmable_Interval_Timer]
 
