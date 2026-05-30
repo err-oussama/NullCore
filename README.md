@@ -67,7 +67,7 @@ on x86.
 * [x] Kernel heap (kmalloc/kfree)
 
 ### Execution Model
-* [ ] Timer (PIT)
+* [x] Timer (PIT)
 * [ ] Task switching primitives
 * [ ] Basic scheduler
 * [ ] System call interface
