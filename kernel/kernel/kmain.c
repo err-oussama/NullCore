@@ -9,13 +9,12 @@ void kmain(multiboot_info *boot_info) {
   init_pmp(boot_info);
   setup_hardware();
   init_heap();
-  uint64 tick = pit_get_tick();
-  tick = 0xFFFFFFFF;
-  kprint_hex64(tick);
-  uint32 i = 0;
-  while (i++ < 0xFFFFFFFF)
-    ;
-  kprintf("\n");
-  tick = pit_get_tick();
-  kprint_hex64(tick);
+
+  uint64 start = pit_get_tick();
+  for (uint32 i = 0; i < 60; i++) {
+    start = pit_get_tick();
+    while (pit_get_tick() - start < 1000)
+      ;
+    kprintf("%d!! ", i + 1);
+  }
 }
