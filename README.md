@@ -157,7 +157,26 @@ This repository is meant to be both:
 ---
 
 ## Status
+Actively developed — core kernel infrastructure is complete and stable.
+Current focus is on the **execution model** — task switching and scheduling.
 
-Actively developed — focus is currently on **CPU control structures (GDT / IDT)** 
-and establishing a reliable interrupt handling foundation.
+### Completed
+- Kernel entry point and stack initialization
+- VGA text output and basic printing utilities
+- Global Descriptor Table (GDT) — flat 32-bit protected mode
+- Interrupt Descriptor Table (IDT) — all 32 CPU exceptions + hardware IRQs
+- PIC remapping and IRQ handling
+- Keyboard driver — scancode translation, modifier tracking
+- PIT timer — configured at 1000 Hz (1ms resolution)
+- Physical memory manager — bitmap-based frame allocator
+- Paging — identity mapped kernel, virtual memory enabled
+- Kernel heap — kmalloc/kfree
 
+### In Progress
+- Task switching primitives
+- Basic preemptive scheduler
+
+### Up Next
+- System call interface
+- User space processes
+- ELF loader
