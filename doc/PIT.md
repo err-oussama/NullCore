@@ -132,8 +132,6 @@ bit 0   →   number format
 1     →   BCD (Binray Coded Decimal) 
 ```
 
-
-
 ## Resource 
 [https://wiki.osdev.org/Programmable_Interval_Timer]
 
