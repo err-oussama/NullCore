@@ -12,12 +12,12 @@ LDFLAGS := -m elf_i386 -T linker.ld
 ASM_SRC := $(shell find . -name "*.asm")
 ASM_OBJ := $(ASM_SRC:.asm=.o)
 
-
-
 C_SRC   := $(shell find . -name "*.c")
 C_OBJ   := $(C_SRC:.c=.o)
 
-INCL   	= 	-I./kernel/interrupts/ \
+
+# Header 
+INCL   	:= 	-I./kernel/interrupts/ \
 						-I./kernel/drivers/ \
 						-I./kernel/include/ \
 						-I./kernel/memory/ \
@@ -57,4 +57,3 @@ fclean: clean
 
 
 .PHONY: clean fclean all run 
-
