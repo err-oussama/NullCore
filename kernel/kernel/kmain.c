@@ -20,8 +20,6 @@ void kmain(multiboot_info *boot_info) {
   new.esi = 0x55;
   context.eax = 0xff;
   load_context(&context);
-  save_context(&new);
 
-  kprintf("eax: %x\nebx: %x\necx: %x\nedx: %x\nedi: %x\nesi: %x\n", new.eax,
-          new.ebx, new.ecx, new.edx, new.edi, new.esi);
+  save_context(&new);
 }
