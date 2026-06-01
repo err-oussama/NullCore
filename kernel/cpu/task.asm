@@ -10,13 +10,15 @@ section .text
 
 
 save_context:
-	mov eax, [esp + 4]
+	push eax
+	mov eax, [esp + 8]
+	pop dword[eax]
 	mov [eax + 4], ebx
 	mov [eax + 8], ecx
 	mov [eax + 12], edx
 	mov [eax + 16], edi 
 	mov [eax + 20], esi
-
+	mov [eax + 24], ebp
 	ret
 
 load_context:

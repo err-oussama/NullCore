@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <multiboot_metadata.h>
 #include <pit.h>
+#include <string.h>
 #include <task.h>
 
 void kmain(multiboot_info *boot_info) {
@@ -12,14 +13,17 @@ void kmain(multiboot_info *boot_info) {
   init_heap();
   cpu_context context;
   cpu_context new;
-  new.eax = 0xAA;
-  new.ebx = 0xBB;
-  new.ecx = 0xCC;
-  new.edx = 0xDD;
-  new.edi = 0x99;
-  new.esi = 0x55;
-  context.eax = 0xff;
-  load_context(&context);
+  memset(&new, 0, sizeof(cpu_context));
+  context.eax = 0xAAAAAAAA;
+  context.ebx = 0xBBBBBBBB;
+  context.ecx = 0xCCCCCCCC;
+  context.edx = 0xDDDDDDDD;
+  context.edi = 0x99999999;
+  context.esi = 0x55555555;
 
-  save_context(&new);
+  load_context(&context);
+  kprint_hex(save_context(&new));
+  kprint_cha('\n');
+
+  kmemory_dump_hex(&new, sizeof(cpu_context));
 }
