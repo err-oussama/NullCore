@@ -8,8 +8,8 @@ struct cpu_context {
   uint32 eax, ebx, ecx, edx;
   uint32 edi, esi;
   uint32 ebp, esp;
-  uint32 eflags;
   uint32 eip;
+  uint32 eflags;
   uint16 cs, ds, es, fs, gs, ss;
 };
 

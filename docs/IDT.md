@@ -242,3 +242,8 @@ The 256 interrupt vectors are splite into two regions:
 -   Server unrecoverable error 
 -   EIP is **unreliable** -- you cannot trust saved state 
 -   Not recoverable -- system is considered dead, no meaningful `iret`
+
+## Resource 
+[https://wiki.osdev.org/Interrupt_Descriptor_Table]
+
+
