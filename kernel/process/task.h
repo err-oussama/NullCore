@@ -1,16 +1,15 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include <context.h>
-
 #include <type.h>
+
 typedef struct task task;
 
 struct task {
-  uint64 start_tick;
   uint32 id;
+  uint32 esp;
+  uint64 start_tick;
   uint8 is_running;
-  cpu_context context;
 };
 
 #endif
