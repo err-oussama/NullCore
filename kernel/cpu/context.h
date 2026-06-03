@@ -17,4 +17,6 @@ uint32 save_context(cpu_context *context);
 void load_context(cpu_context *context);
 void switch_context(cpu_context *current_context, cpu_context *new_context);
 
+uint32 get_esp();
+
 #endif

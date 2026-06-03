@@ -1,6 +1,7 @@
 global save_context
 global load_context
 global switch_context
+global get_esp
 
 
 section .text
@@ -32,6 +33,12 @@ load_context:
 	ret 
 
 switch_context:
+	ret
+
+
+
+get_esp:
+	mov eax, esp 
 	ret
 
 
