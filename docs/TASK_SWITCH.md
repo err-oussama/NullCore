@@ -83,15 +83,21 @@ At this point the **entire task state is on the stack**. This is the key insight
 
 
 ## Context Switching Using the stack 
+
 Because the full CPU state is on the stack, saving a task's context is as simple as saving its `esp`.
+
 When the task is resumed, loading its `esp` back and running `popa` + `iret` restores everything.
 
 
+### Full Flow 
 
-
-
-
-
-
-
+PIT interrupt fires 
+    └─  CPU pushes `eflgs`, `cs`, `eip` onto task A's(current task) stack 
+    └─  ISR stub calls `pusha` → all GPRs  now on task A's stack 
+    └─  scheduler decides to switch  
+    └─  switch_context saves task A's `esp` into its TCB
+    └─  switch_context loads task B's `esp` from its TCB 
+    └─  `popa` restores task B's GPRs from its stack 
+    └─  `iret` jumps to task B's saved eip 
+    └─  task B continues as if nothing happend
 
