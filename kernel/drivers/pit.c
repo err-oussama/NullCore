@@ -2,12 +2,19 @@
 #include "type.h"
 #include <pic.h>
 #include <pit.h>
+#include <task.h>
+
+#include <registers.h>
 
 static uint64 ticks = 0;
 
 void timer_handler() {
   ticks++;
   pic_send_eoi(0);
+  task t1 = get_task_queue()[0];
+  if (t1.esp) {
+    switch_esp(t1.esp);
+  }
 }
 
 uint64 pit_get_tick() { return ticks; }

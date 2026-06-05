@@ -20,6 +20,7 @@ C_OBJ   := $(C_SRC:.c=.o)
 INCL   	:= 	-I./kernel/interrupts/ \
 						-I./kernel/drivers/ \
 						-I./kernel/include/ \
+						-I./kernel/process/ \
 						-I./kernel/memory/ \
 						-I./kernel/kernel/ \
 						-I./kernel/klibc/ \

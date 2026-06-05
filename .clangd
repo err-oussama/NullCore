@@ -7,6 +7,7 @@ CompileFlags:
     - -nostdinc
     - -I/home/void/Work/NullCore/kernel/interrupts
     - -I/home/void/Work/NullCore/kernel/include
+    - -I/home/void/Work/NullCore/kernel/process
     - -I/home/void/Work/NullCore/kernel/drivers
     - -I/home/void/Work/NullCore/kernel/memory
     - -I/home/void/Work/NullCore/kernel/kernel

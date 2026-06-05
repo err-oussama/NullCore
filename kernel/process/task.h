@@ -12,4 +12,10 @@ struct task {
   uint8 is_running;
 };
 
+void task_init();
+
+int create_task(void (*task)());
+
+task *get_task_queue();
+
 #endif
