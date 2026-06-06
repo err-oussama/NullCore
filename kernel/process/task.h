@@ -16,6 +16,6 @@ void task_init();
 
 int create_task(void (*task)());
 
-task *get_task_queue();
+task *get_task();
 
 #endif

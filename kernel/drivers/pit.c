@@ -1,5 +1,6 @@
 #include "pmio.h"
 #include "type.h"
+#include <kprint.h>
 #include <pic.h>
 #include <pit.h>
 #include <task.h>
@@ -11,9 +12,9 @@ static uint64 ticks = 0;
 void timer_handler() {
   ticks++;
   pic_send_eoi(0);
-  task t1 = get_task_queue()[0];
-  if (t1.esp) {
-    switch_esp(t1.esp);
+  task *demo_task = get_task();
+  if (demo_task->id == 1 && demo_task->esp == 0x10CFF4) {
+    switch_esp(demo_task->esp);
   }
 }
 
