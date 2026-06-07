@@ -28,6 +28,7 @@ extern keyboard_handler
 
 global isr_dummy
 
+global isr_timer_handler:
 section .text 
 
 %macro ISR_STUB 1
@@ -41,6 +42,16 @@ isr_%1:
 	iret
 
 %endmacro
+
+isr_timer_handler:
+	pusha
+	mov eax, esp
+	push eax 
+	call timer_handler
+	add esp, 4
+	popa
+	iret
+
 
 ISR_STUB divide_error_handler
 ISR_STUB debug_handler
@@ -68,7 +79,7 @@ ISR_STUB VMM_communication_exception_handler
 ISR_STUB security_exception_handler
 
 ;
-ISR_STUB timer_handler
+;ISR_STUB timer_handler
 ISR_STUB keyboard_handler
 
 isr_dummy:

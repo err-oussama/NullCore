@@ -6,7 +6,12 @@
 #include <task.h>
 
 void task1() {
-  kprint_str("\nswitched to the task1\n");
+  kprint_str("\ntask 1 is running\n");
+  while (1)
+    ;
+}
+void task2() {
+  kprint_str("\ntask 2 is running\n");
   while (1)
     ;
 }
@@ -18,6 +23,7 @@ void kmain(multiboot_info *boot_info) {
   init_heap();
 
   task_init();
+  create_task(task2);
   create_task(task1);
   kprintf("\nafter creating task");
 }

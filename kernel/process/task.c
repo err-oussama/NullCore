@@ -2,10 +2,11 @@
 #include "type.h"
 
 #include <kprint.h>
+#include <pit.h>
 #include <pmm.h>
 #include <string.h>
 
-task tasks[10];
+task tasks[2];
 uint32 task_frame_buffer[10];
 
 uint32 id_vault = 0;
@@ -19,9 +20,10 @@ void task_init() {
 
 int create_task(void (*task)()) {
 
-  uint32 id = ++id_vault;
+  uint32 id = id_vault++;
   tasks[id].id = id;
   tasks[id].is_running = 0;
+  tasks[id].start_tick = pit_get_tick() + 10;
   task_frame_buffer[id] = pmm_alloc();
   uint32 *stack_frame = (uint32 *)(task_frame_buffer[id] + 0x1000);
   *--stack_frame = 0x206;        // EFLAGS
@@ -36,5 +38,4 @@ int create_task(void (*task)()) {
   *--stack_frame = 0x0;          // ESI
   *--stack_frame = 0x0;          // EDI
   tasks[id].esp = (uint32)stack_frame;
-  kprintf("esp -> %p", tasks[id].esp);
 }
