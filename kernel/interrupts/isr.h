@@ -1,7 +1,6 @@
 #ifndef ISR_H
 #define ISR_H
 
-#include <type.h>
 // Interrupt service routine caller
 
 // exception
@@ -31,7 +30,7 @@ void isr_VMM_communication_exception_handler();
 void isr_security_exception_handler();
 
 // pic
-void isr_timer_handler(uint32 esp);
+void isr_timer_handler();
 void isr_keyboard_handler();
 
 void isr_dummy();

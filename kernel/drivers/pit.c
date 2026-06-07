@@ -29,7 +29,7 @@ void timer_handler(uint32 esp) {
   if (!tasks[0].is_running && tasks[0].start_tick <= ticks) {
     tasks[0].is_running = 1;
     tasks[1].is_running = 0;
-    tasks[0].start_tick = ticks + 1000;
+    tasks[0].start_tick = ticks + 10000;
     tasks[1].esp = esp;
     kprint_str("switch to 1\n");
     switch_esp(tasks[0].esp);
@@ -38,7 +38,7 @@ void timer_handler(uint32 esp) {
   if (!tasks[1].is_running && tasks[1].start_tick <= ticks) {
     tasks[1].is_running = 1;
     tasks[0].is_running = 0;
-    tasks[1].start_tick = ticks + 1000;
+    tasks[1].start_tick = ticks + 10000;
     tasks[0].esp = esp;
     kprint_str("switch to 2\n");
     switch_esp(tasks[1].esp);

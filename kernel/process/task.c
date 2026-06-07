@@ -23,7 +23,7 @@ int create_task(void (*task)()) {
   uint32 id = id_vault++;
   tasks[id].id = id;
   tasks[id].is_running = 0;
-  tasks[id].start_tick = pit_get_tick() + 10;
+  tasks[id].start_tick = pit_get_tick() + 10 * id;
   task_frame_buffer[id] = pmm_alloc();
   uint32 *stack_frame = (uint32 *)(task_frame_buffer[id] + 0x1000);
   *--stack_frame = 0x206;        // EFLAGS
