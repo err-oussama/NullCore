@@ -14,6 +14,7 @@ void timer_handler() {
   pic_send_eoi(0);
   task *demo_task = get_task();
   if (demo_task->id == 1 && demo_task->esp == 0x10CFF4) {
+    demo_task->id = 0;
     switch_esp(demo_task->esp);
   }
 }
