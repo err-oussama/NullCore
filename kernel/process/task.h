@@ -10,6 +10,7 @@ struct task {
   uint32 esp;
   uint64 start_tick;
   uint8 is_running;
+  void *frame_buffer;
 };
 
 void task_init();

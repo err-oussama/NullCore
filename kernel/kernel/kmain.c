@@ -6,9 +6,7 @@
 #include <task.h>
 
 void task1() {
-  kprint_str("\nhellow\n");
-  kprint_str("hellow\n");
-
+  kprint_str("\nswitched to the task1\n");
   while (1)
     ;
 }
@@ -18,11 +16,6 @@ void kmain(multiboot_info *boot_info) {
   init_pmp(boot_info);
   setup_hardware();
   init_heap();
-
-  uint32 cs, eflags;
-  asm("mov %%cs, %0" : "=r"(cs));
-  asm("pushf; pop %0" : "=r"(eflags));
-  kprintf("cs: '%p'    eflags: '%p'\n", cs, eflags);
 
   task_init();
   create_task(task1);
