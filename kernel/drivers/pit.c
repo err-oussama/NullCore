@@ -36,6 +36,7 @@ void timer_handler(uint32 esp) {
 
     tasks[1].esp = esp;
     kprint_str("switch to 1\n");
+    kprintf("esp: %p\n", tasks[0].esp);
     switch_esp(tasks[0].esp);
   }
 
@@ -48,6 +49,7 @@ void timer_handler(uint32 esp) {
 
     tasks[0].esp = esp;
     kprint_str("switch to 2\n");
+    kprintf("esp: %p\n", tasks[1].esp);
     switch_esp(tasks[1].esp);
   }
 }

@@ -23,6 +23,7 @@ int create_task(void (*task)()) {
   disable_interrupt();
   uint32 id = id_vault++;
   tasks[id].id = id;
+
   tasks[id].is_running = 0;
   tasks[id].start_tick = pit_get_tick() + 10 * id;
   task_frame_buffer[id] = pmm_alloc();
