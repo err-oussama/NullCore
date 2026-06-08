@@ -4,4 +4,8 @@
 
 void switch_esp(uint32 esp);
 uint32 get_esp();
+
+void disable_interrupt();
+void enable_interrupt();
+
 #endif

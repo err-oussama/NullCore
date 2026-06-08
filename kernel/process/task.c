@@ -4,6 +4,7 @@
 #include <kprint.h>
 #include <pit.h>
 #include <pmm.h>
+#include <registers.h>
 #include <string.h>
 
 task tasks[2];
@@ -19,7 +20,7 @@ void task_init() {
 }
 
 int create_task(void (*task)()) {
-
+  disable_interrupt();
   uint32 id = id_vault++;
   tasks[id].id = id;
   tasks[id].is_running = 0;
@@ -38,4 +39,5 @@ int create_task(void (*task)()) {
   *--stack_frame = 0x0;          // ESI
   *--stack_frame = 0x0;          // EDI
   tasks[id].esp = (uint32)stack_frame;
+  enable_interrupt();
 }
