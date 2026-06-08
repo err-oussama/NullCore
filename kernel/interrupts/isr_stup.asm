@@ -45,8 +45,7 @@ isr_%1:
 
 isr_timer_handler:
 	pusha
-	mov eax, esp
-	push eax 
+	push esp 
 	call timer_handler
 	add esp, 4
 	popa
