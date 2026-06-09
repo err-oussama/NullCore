@@ -10,10 +10,15 @@
 task tasks[10];
 uint32 task_frame_buffer[10];
 
-uint32 id_vault = 0;
+static uint32 id_vault = 0;
 
-task *current_task() { return tasks; }
-task *next_task() { return tasks; }
+uint32 current_id = 0;
+
+void set_current(uint32 id) { current_id = id; }
+
+task *current_task() { return &tasks[current_id]; }
+
+task *next_task() { return &tasks[(current_id + id_vault + 1) % id_vault]; }
 
 void task_init() {
   memset(&tasks, 0, 10 * sizeof(task));

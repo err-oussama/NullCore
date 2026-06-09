@@ -9,11 +9,13 @@
 
 void task1() {
   uint64 i = 0;
-  kprint_str("TASK 1 RUNNING\n");
+  kprint_str("\nTASK 1: ");
+  kprint_hex64(pit_get_tick());
   while (1) {
     i++;
     if (i == T) {
-      kprint_str("TASK 1 RUNNING\n");
+      kprint_str("\nTASK 1: ");
+      kprint_hex64(pit_get_tick());
       i = 0;
     }
   }
@@ -21,22 +23,26 @@ void task1() {
 
 void task2() {
   uint64 i = 0;
-  kprint_str("TASK 2 RUNNING\n");
+  kprint_str("\nTASK 2: ");
+  kprint_hex64(pit_get_tick());
   while (1) {
     i++;
     if (i == T) {
-      kprint_str("TASK 2 RUNNING\n");
+      kprint_str("\nTASK 2: ");
+      kprint_hex64(pit_get_tick());
       i = 0;
     }
   }
 }
 void kernel_task() {
   uint64 i = 0;
-  kprint_str("KERNEL TASK RUNNING\n");
+  kprint_str("\nTASK 0: ");
+  kprint_hex64(pit_get_tick());
   while (1) {
     i++;
     if (i == T) {
-      kprint_str("KERNEL TASK RUNNING\n");
+      kprint_str("\nTASK 0: ");
+      kprint_hex64(pit_get_tick());
       i = 0;
     }
   }

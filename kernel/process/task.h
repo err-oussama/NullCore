@@ -19,5 +19,6 @@ int create_task(void (*task)());
 
 task *current_task();
 task *next_task();
+void set_current(uint32 id);
 
 #endif

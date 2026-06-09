@@ -6,7 +6,7 @@
 #include <registers.h>
 #include <task.h>
 
-#define TIME_SLICE 10000
+#define TIME_SLICE 1000
 
 static uint64 ticks = 0;
 
@@ -25,9 +25,9 @@ void pit_init(uint32 frequency) {
 uint32 timer_handler(uint32 esp) {
   ticks++;
   pic_send_eoi(0);
-  task *current = current_task();
 
-  if (current->start_tick + TIME_SLICE > ticks) {
+  task *current = current_task();
+  if (ticks - current->start_tick > TIME_SLICE) {
     task *next = next_task();
 
     current->is_running = 0;
@@ -35,6 +35,8 @@ uint32 timer_handler(uint32 esp) {
 
     next->is_running = 1;
     next->start_tick = ticks;
+    set_current(next->id);
+
     return next->esp;
   }
   return esp;
