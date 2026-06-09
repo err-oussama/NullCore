@@ -47,7 +47,7 @@ isr_timer_handler:
 	pusha
 	push esp 
 	call timer_handler
-	add esp, 4
+	mov esp, eax
 	popa
 	iret
 

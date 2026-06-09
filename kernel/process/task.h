@@ -17,6 +17,7 @@ void task_init();
 
 int create_task(void (*task)());
 
-task *get_task();
+task *current_task();
+task *next_task();
 
 #endif

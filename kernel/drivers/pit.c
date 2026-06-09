@@ -6,7 +6,7 @@
 #include <registers.h>
 #include <task.h>
 
-#define TIME 1000
+#define TIME_SLICE 10000
 
 static uint64 ticks = 0;
 
@@ -22,34 +22,20 @@ void pit_init(uint32 frequency) {
   outb(PIT_CHANNEL0, (divisor >> 0x8) & 0xFF);
 }
 
-void timer_handler(uint32 esp) {
+uint32 timer_handler(uint32 esp) {
   ticks++;
   pic_send_eoi(0);
-  task *tasks = get_task();
+  task *current = current_task();
 
-  if (!tasks[0].is_running && tasks[0].start_tick <= ticks) {
-    tasks[0].is_running = 1;
-    tasks[1].is_running = 0;
+  if (current->start_tick + TIME_SLICE > ticks) {
+    task *next = next_task();
 
-    tasks[0].start_tick = ticks + TIME;
-    tasks[1].start_tick = ticks + TIME * 2;
+    current->is_running = 0;
+    current->esp = esp;
 
-    tasks[1].esp = esp;
-    kprint_str("switch to 1\n");
-    kprintf("esp: %p\n", tasks[0].esp);
-    switch_esp(tasks[0].esp);
+    next->is_running = 1;
+    next->start_tick = ticks;
+    return next->esp;
   }
-
-  if (!tasks[1].is_running && tasks[1].start_tick <= ticks) {
-    tasks[1].is_running = 1;
-    tasks[0].is_running = 0;
-
-    tasks[1].start_tick = ticks + TIME;
-    tasks[0].start_tick = ticks + TIME * 2;
-
-    tasks[0].esp = esp;
-    kprint_str("switch to 2\n");
-    kprintf("esp: %p\n", tasks[1].esp);
-    switch_esp(tasks[1].esp);
-  }
+  return esp;
 }

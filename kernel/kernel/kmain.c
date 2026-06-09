@@ -13,8 +13,7 @@ void task1() {
   while (1) {
     i++;
     if (i == T) {
-
-      kprintf("TASK 1 RUNNING => %p\n", &i);
+      kprint_str("TASK 1 RUNNING\n");
       i = 0;
     }
   }
@@ -26,8 +25,7 @@ void task2() {
   while (1) {
     i++;
     if (i == T) {
-
-      kprintf("TASK 2 RUNNING => %p\n", &i);
+      kprint_str("TASK 2 RUNNING\n");
       i = 0;
     }
   }
@@ -38,8 +36,7 @@ void kernel_task() {
   while (1) {
     i++;
     if (i == T) {
-
-      kprintf("KERNEL TASK RUNNING => %p\n", &i);
+      kprint_str("KERNEL TASK RUNNING\n");
       i = 0;
     }
   }

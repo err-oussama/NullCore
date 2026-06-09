@@ -29,7 +29,7 @@
 
 #define PIT_COMMAND 0x43
 
-void timer_handler(uint32 esp);
+uint32 timer_handler(uint32 esp);
 uint64 pit_get_tick();
 
 void pit_init(uint32 frequency);
