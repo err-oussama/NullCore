@@ -68,8 +68,8 @@ on x86.
 
 ### Execution Model
 * [x] Timer (PIT)
-* [ ] Task switching primitives
-* [ ] Basic scheduler
+* [x] Task switching primitives
+* [x] Basic scheduler
 * [ ] System call interface
 
 ### User Space
