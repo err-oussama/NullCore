@@ -23,12 +23,16 @@ extern hypervisor_injection_exception_handler
 extern VMM_communication_exception_handler
 extern security_exception_handler
 
+extern system_call
+
 extern timer_handler
 extern keyboard_handler
 
 global isr_dummy
-
 global isr_timer_handler:
+
+global isr_system_call
+
 section .text 
 
 %macro ISR_STUB 1
@@ -42,6 +46,14 @@ isr_%1:
 	iret
 
 %endmacro
+
+isr_system_call:
+	pusha
+	push esp 
+	call system_call
+	add esp, 4
+	popa
+	iret
 
 isr_timer_handler:
 	pusha
@@ -80,6 +92,10 @@ ISR_STUB security_exception_handler
 ;
 ;ISR_STUB timer_handler
 ISR_STUB keyboard_handler
+
+
+
+
 
 isr_dummy:
 	iret

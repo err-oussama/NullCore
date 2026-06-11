@@ -33,5 +33,9 @@ void isr_security_exception_handler();
 void isr_timer_handler();
 void isr_keyboard_handler();
 
+// interrupts
+//
+void isr_system_call();
+
 void isr_dummy();
 #endif

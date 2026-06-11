@@ -60,5 +60,6 @@ void setup_IDT() {
   set_idt_entry(&gate_descriptors[0x11], (uint32)isr_alignment_check_handler,
                 0x08, kernel_attr_gate);
 
+  set_idt_entry(&gate_descriptors[0x80], (uint32)isr_system_call, 0x08, 0xEE);
   lidtr(&idt_reg);
 }
