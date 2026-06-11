@@ -52,7 +52,7 @@ int create_task(void (*task)()) {
 
   tasks[id].id = id;
   tasks[id].is_running = 0;
-  tasks[id].start_tick = pit_get_tick() + 10 * id;
+  tasks[id].start_tick = 0;
 
   task_frame_buffer[id] = pmm_alloc();
   uint32 *stack_frame = (uint32 *)(task_frame_buffer[id] + 0x1000);
