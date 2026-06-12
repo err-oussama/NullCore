@@ -158,7 +158,7 @@ This repository is meant to be both:
 
 ## Status
 Actively developed — core kernel infrastructure is complete and stable.
-Current focus is on the **execution model** — task switching and scheduling.
+Current focus is on  **user space** — processes and ELF loading.
 
 ### Completed
 - Kernel entry point and stack initialization
@@ -171,12 +171,12 @@ Current focus is on the **execution model** — task switching and scheduling.
 - Physical memory manager — bitmap-based frame allocator
 - Paging — identity mapped kernel, virtual memory enabled
 - Kernel heap — kmalloc/kfree
+- Task switching primitives 
+- Basic preemitive scheduler (round-robin)
+- System call inferface (dispatch mechanism + user-side entry)
 
 ### In Progress
-- Task switching primitives
-- Basic preemptive scheduler
+- User space processes
 
 ### Up Next
-- System call interface
-- User space processes
 - ELF loader
