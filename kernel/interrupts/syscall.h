@@ -3,11 +3,24 @@
 
 #include <type.h>
 
-void system_call(uint32 *esp);
+typedef struct syscall_registers registers;
 
-void make_syscall();
+struct syscall_registers {
+  uint32 edi;
+  uint32 esi;
+  uint32 ebp;
+  uint32 ebx;
+  uint32 edx;
+  uint32 ecx;
+  uint32 eax;
+};
 
-void syscall(uint32 syscall_n, uint32 ebx, uint32 ecx, uint32 edx, uint32 esi,
-             uint32 edi, uint32 ebp);
+typedef void (*syscall_handler)(registers *regs);
+
+void syscall_enter(uint32 syscall_enter_n, uint32 ebx, uint32 ecx, uint32 edx,
+                   uint32 esi, uint32 edi, uint32 ebp);
+
+void syscall_dispatch(uint32 edi, uint32 esi, uint32 edp, uint32 ESP,
+                      uint32 ebx, uint32 edx, uint32 ecx, uint32 eax);
 
 #endif

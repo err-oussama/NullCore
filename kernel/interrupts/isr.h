@@ -35,7 +35,7 @@ void isr_keyboard_handler();
 
 // interrupts
 //
-void isr_system_call();
+void isr_syscall_handler();
 
 void isr_dummy();
 #endif

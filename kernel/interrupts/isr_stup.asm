@@ -1,3 +1,9 @@
+global isr_dummy
+global isr_timer_handler:
+global isr_syscall_handler
+
+
+; CPU exception
 extern divide_error_handler
 extern debug_handler
 extern non_maskable_interrupt_handler
@@ -23,15 +29,16 @@ extern hypervisor_injection_exception_handler
 extern VMM_communication_exception_handler
 extern security_exception_handler
 
-extern system_call
-
+; TIME
 extern timer_handler
+
+; KEYBAORD
 extern keyboard_handler
 
-global isr_dummy
-global isr_timer_handler:
 
-global isr_system_call
+; SYSTEM CALL 
+extern syscall_dispatch
+
 
 section .text 
 
@@ -47,11 +54,9 @@ isr_%1:
 
 %endmacro
 
-isr_system_call:
+isr_syscall_handler:
 	pusha
-	push esp 
-	call system_call
-	add esp, 4
+	call syscall_dispatch 
 	popa
 	iret
 
@@ -94,11 +99,5 @@ ISR_STUB security_exception_handler
 ISR_STUB keyboard_handler
 
 
-
-
-
 isr_dummy:
 	iret
-
-
-

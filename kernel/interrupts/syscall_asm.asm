@@ -1,7 +1,7 @@
-global syscall
+global syscall_enter
 
 
-syscall:
+syscall_enter:
 	mov eax, [esp + 4]
 	mov ebx, [esp + 8]
 	mov ecx, [esp + 12]
