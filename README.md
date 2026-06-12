@@ -70,7 +70,7 @@ on x86.
 * [x] Timer (PIT)
 * [x] Task switching primitives
 * [x] Basic scheduler
-* [ ] System call interface
+* [x] System call interface
 
 ### User Space
 * [ ] Address space control
