@@ -154,29 +154,3 @@ This repository is meant to be both:
 * No external libraries are used
 * All behavior is verified through QEMU
 
----
-
-## Status
-Actively developed — core kernel infrastructure is complete and stable.
-Current focus is on  **user space** — processes and ELF loading.
-
-### Completed
-- Kernel entry point and stack initialization
-- VGA text output and basic printing utilities
-- Global Descriptor Table (GDT) — flat 32-bit protected mode
-- Interrupt Descriptor Table (IDT) — all 32 CPU exceptions + hardware IRQs
-- PIC remapping and IRQ handling
-- Keyboard driver — scancode translation, modifier tracking
-- PIT timer — configured at 1000 Hz (1ms resolution)
-- Physical memory manager — bitmap-based frame allocator
-- Paging — identity mapped kernel, virtual memory enabled
-- Kernel heap — kmalloc/kfree
-- Task switching primitives 
-- Basic preemitive scheduler (round-robin)
-- System call inferface (dispatch mechanism + user-side entry)
-
-### In Progress
-- User space processes
-
-### Up Next
-- ELF loader
