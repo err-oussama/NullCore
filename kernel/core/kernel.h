@@ -18,5 +18,6 @@ extern uint32 kernel_end;
 
 int is64bit();
 void setup_hardware();
+void init_kernel(multiboot_info *boot_info);
 
 #endif

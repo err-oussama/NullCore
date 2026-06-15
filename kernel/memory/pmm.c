@@ -49,13 +49,13 @@ uint8 pmm_is_addre_free(uint32 addre) {
 
 void show_bitmap() { kmemory_dump_bin(bitmap, bitmap_size); }
 
-void pmm_use_frame(uint32 frame) {
-  uint32 frame_offset = frame / 8;
-  bitmap[frame_offset] = bitmap[frame_offset] | (1 << (frame % 8));
+void pmm_use_frame(uint32 frame_number) {
+  uint32 frame_offset = frame_number / 8;
+  bitmap[frame_offset] = bitmap[frame_offset] | (1 << (frame_number % 8));
 }
-void pmm_free_frame(uint32 frame) {
-  uint32 frame_offset = frame / 8;
-  bitmap[frame_offset] = bitmap[frame_offset] & ~(1 << (frame % 8));
+void pmm_free_frame(uint32 frame_number) {
+  uint32 frame_offset = frame_number / 8;
+  bitmap[frame_offset] = bitmap[frame_offset] & ~(1 << (frame_number % 8));
 }
 
 uint32 pmm_alloc() {

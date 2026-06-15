@@ -26,9 +26,14 @@
 typedef uint32 PTE;
 typedef uint32 PDE;
 
-uint32 mmu_make_entry(uint32 frame_address, uint16 flags);
-
 void mmu_kernel_setup();
-
+uint32 mmu_make_entry(uint32 frame_address, uint16 flags);
 void mmu_map_pt(uint32 *pd, uint16 flags);
+
+uint32 *mmu_create_address_space();
+void mmu_destroy_address_space(uint32 *pd);
+void mmu_map_page(uint32 *pd, uint32 vaddr, uint32 paddr, uint16 flags);
+void mmu_unmap_page(uint32 *pd, uint32 vaddr);
+void mmu_switch(uint32 *pd);
+
 #endif

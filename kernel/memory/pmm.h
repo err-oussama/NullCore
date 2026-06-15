@@ -37,8 +37,8 @@ uint32 pmm_frame_to_addre(uint32 frame);
 uint8 pmm_is_frame_free(uint32 frame);
 uint8 pmm_is_addre_free(uint32 addre);
 
-void pmm_use_frame(uint32 frame);
-void pmm_free_frame(uint32 frame);
+void pmm_use_frame(uint32 frame_number);
+void pmm_free_frame(uint32 frame_number);
 
 uint32 pmm_alloc();
 

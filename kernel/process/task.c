@@ -1,6 +1,7 @@
 #include "task.h"
 #include "type.h"
 
+#include <control_registers.h>
 #include <kprint.h>
 #include <pit.h>
 #include <pmm.h>
@@ -28,6 +29,8 @@ task *next_task() {
   return next == id_vault ? &tasks[0] : &tasks[next];
 }
 
+uint32 *get_kernel_vmm() { return tasks[0].pd; }
+
 void task_init() {
   memset(&tasks, 0, 10 * sizeof(task));
   memset(&task_frame_buffer, 0, 10 * sizeof(uint32));
@@ -36,6 +39,7 @@ void task_init() {
   tasks[0].is_dead = 0;
   tasks[0].start_tick = 0;
   tasks[0].esp = 0x0;
+  tasks[0].pd = (uint32 *)read_cr3();
 }
 
 void clean_task(uint32 id) {
@@ -53,6 +57,7 @@ int create_task(void (*task)()) {
   tasks[id].id = id;
   tasks[id].is_running = 0;
   tasks[id].start_tick = 0;
+  tasks[id].pd = tasks[0].pd;
 
   task_frame_buffer[id] = pmm_alloc();
   uint32 *stack_frame = (uint32 *)(task_frame_buffer[id] + 0x1000);

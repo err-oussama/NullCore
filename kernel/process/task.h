@@ -12,6 +12,7 @@ struct task {
   uint8 is_running;
   uint8 is_dead;
   void *frame_buffer;
+  uint32 *pd;
 };
 
 void task_init();
@@ -22,4 +23,5 @@ task *current_task();
 task *next_task();
 void set_current(uint32 id);
 
+uint32 *get_kernel_vmm();
 #endif
