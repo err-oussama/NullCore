@@ -1,4 +1,4 @@
-#include "memory.h"
+#include "kheap.h"
 #include <kernel.h>
 #include <kprint.h>
 #include <multiboot_metadata.h>
@@ -93,7 +93,6 @@ void kfree(void *ptr) {
   heap_block *block = (heap_block *)(p - sizeof(heap_block));
   *block &= ~0x3;
   page_start &= ~0xFFF;
-  kprintf("page address is : %p\n", page_start);
   page = (heap_page *)page_start;
   page->free_space += block_size(*block);
 }

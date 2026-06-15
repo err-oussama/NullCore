@@ -10,7 +10,7 @@ CompileFlags:
     - -I/home/void/Work/NullCore/kernel/process
     - -I/home/void/Work/NullCore/kernel/drivers
     - -I/home/void/Work/NullCore/kernel/memory
-    - -I/home/void/Work/NullCore/kernel/kernel
     - -I/home/void/Work/NullCore/kernel/klibc
     - -I/home/void/Work/NullCore/kernel/boot
+    - -I/home/void/Work/NullCore/core/kernel
     - -I/home/void/Work/NullCore/kernel/cpu

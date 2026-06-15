@@ -1,4 +1,4 @@
-#include "virtual_memory.h"
+#include "vmm.h"
 #include "control_registers.h"
 #include "pmm.h"
 #include <string.h>

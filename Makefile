@@ -22,9 +22,9 @@ INCL   	:= 	-I./kernel/interrupts/ \
 						-I./kernel/include/ \
 						-I./kernel/process/ \
 						-I./kernel/memory/ \
-						-I./kernel/kernel/ \
 						-I./kernel/klibc/ \
 						-I./kernel/boot/ \
+						-I./kernel/core/ \
 						-I./kernel/cpu/ \
 
 TARGET  := kernel.bin

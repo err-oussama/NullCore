@@ -1,5 +1,5 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef KHEAP_H
+#define KHEAP_H
 
 #include "type.h"
 

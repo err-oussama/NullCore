@@ -1,6 +1,6 @@
 #include <kernel.h>
+#include <kheap.h>
 #include <kprint.h>
-#include <memory.h>
 #include <multiboot_metadata.h>
 #include <pit.h>
 #include <syscall.h>

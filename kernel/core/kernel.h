@@ -7,7 +7,7 @@
 #include "pic.h"
 #include "pmm.h"
 #include "vga_print.h"
-#include "virtual_memory.h"
+#include "vmm.h"
 
 extern uint32 multiboot_header;
 extern uint32 kernel_text;

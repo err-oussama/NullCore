@@ -1,5 +1,5 @@
-#ifndef VIRTUAL_MEMORY_H
-#define VIRTUAL_MEMORY_H
+#ifndef VMM_H
+#define VMM_H
 
 #include "type.h"
 
