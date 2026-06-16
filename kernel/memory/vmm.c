@@ -2,6 +2,7 @@
 #include "control_registers.h"
 #include "pmm.h"
 #include "type.h"
+#include <kprint.h>
 #include <string.h>
 #include <task.h>
 
@@ -41,3 +42,23 @@ void mmu_destroy_address_space(uint32 *pd) {
   }
   pmm_free_frame((uint32)pd >> 12);
 }
+
+void mmu_map_page(uint32 *pd, uint32 vaddr, uint32 paddr, uint16 flags) {
+  uint32 pti = vaddr >> 22;
+  uint32 ptv = pd[pti];
+  uint32 *ptp;
+  if (!(ptv & MMU_PDE_P)) {
+    ptp = (uint32 *)pmm_alloc();
+    memset(ptp, 0, 0x1000);
+    pd[pti] =
+        ((uint32)ptp & 0xFFFFF000) | MMU_PDE_P | MMU_PDE_RW | MMU_PDE_U_MODE;
+  }
+  ptp = (uint32 *)(pd[pti] & 0xFFFFF000);
+  ptp[(vaddr >> 12) & 0x3FF] = (paddr & 0xFFFFF000) | (flags & 0xFFF);
+}
+void mmu_unmap_page(uint32 *pd, uint32 vaddr) {
+  uint32 *pt = (uint32 *)(pd[vaddr >> 22] & 0xFFFFF000);
+  pt[(vaddr >> 12) & 0x3FF] = 0;
+}
+
+void mmu_switch(uint32 *pd) { write_cr3((uint32)pd); }
