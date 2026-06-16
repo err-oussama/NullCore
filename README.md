@@ -73,10 +73,10 @@ on x86.
 * [x] System call interface
 
 ### User Space
-* [ ] Address space control
 * [x] User space segments (already in GDT)
-* [ ] First user process
+* [ ] Address space control
 * [ ] ELF loader
+* [ ] First user process
 
 ---
 
