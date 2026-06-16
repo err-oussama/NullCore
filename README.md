@@ -74,7 +74,7 @@ on x86.
 
 ### User Space
 * [x] User space segments (already in GDT)
-* [ ] Address space control
+* [x] Address space control
 * [ ] ELF loader
 * [ ] First user process
 
