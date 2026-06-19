@@ -1,8 +1,7 @@
 # Task State Segment (x86 32-bit Protected Mode)
 
 ## Definition
-
-the **Task State Segment (TSS)** is an architectural memory structred defined by the *x86 Instruction Set Architecture (ISA)* that encapsulates the complete execution context of a task. It serves as the hardware-backed state container for processor registers, memory management state, and privilege-level transition parameters.
+The **Task State Segment (TSS)** is a fixed-format structure that the x86 CPU reads directly during privilege-level transitions. Its core job is to tell the CPU which kernel stack to switch to whenever code running in ring 3 triggers an interrupt or syscall into ring 0. The CPU reads `ss0` and `esp0` from the TSS and switchs to that stack automatically, before the kernel ever runs a single instruction. The kernel's only real resposibitiy is keeping `esp0` updated to point to the current task's kernel stack on every task switch. The TSS ir registerd through a descriptor in the GDT, and the `ltr` instruction loads its selector into the `Task Register` so the CPU knows where to find it. Everythings else in the TSS struct (general registers, segment, `cr3`, `previous_task_link`) is a leftover from hardware task switching and is unused in modern software-scheduled kernels.
 
 
 
@@ -72,7 +71,6 @@ It is an array of bits whre each bit corresponds to one of the 65536 possible I/
 ## Ring 3 → Ring 0 Transition Flow
 
 
-## Resource 
-
+## Resource
 
 [TSS](https://wiki.osdev.org/Task_State_Segment)
