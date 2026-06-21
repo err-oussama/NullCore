@@ -11,6 +11,18 @@ call 0x8:0x415653525
 jmp 0x8:0x415653525
 ```
 
+## Valid Targets for Far Jump/Call
+
+
+
+|*Descriptor Type*  |*Far Jump (`JMP`)* |*Far Call (`CALL`)*|
+|-------------------|-------------------|-------------------|
+|Code Segment       |Yes                |Yes                |
+|Task Gate          |Yes                |Yes                |
+|Available TSS      |Yes                |Yes                |
+|Busy TSS           |Yes                |No (`#GP`)         |
+|Call Gate          |No (`#GP`)         |Yes                |
+|Data/LDT/Int Gates |No (`#GP`)         |No (`#GP`)         |
 
 
 
@@ -18,7 +30,19 @@ jmp 0x8:0x415653525
 
 
 
+## Far Control Transfers: Descriptor-Dependent Behavior
 
+
+### Standard Code Segment Transfer
+
+
+### Call Gate: Controlled Privilege Change
+
+
+### Task Gate: Indirect Task Switching
+
+
+### TSS: Direct Hardware Task Switch
 
 
 
