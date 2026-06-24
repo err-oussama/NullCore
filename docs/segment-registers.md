@@ -53,9 +53,26 @@ There is only one CPL at any moment, and it always comes from the lowest 2 bits 
 
 ### RPL (Requested Privilege Level)
 
-The lowest 2 bits of a selector that is **about to loaded** into a segment register.
-RPL only matters at that moment a selector is loaded (`mov ds, ax`, far jump, far call), once loaded, RPL plays no further role in subsequent uses of that register.
-It exists so privileged code can deliberately request a selector be treated as if it came from a lower privilege level, without actually being at that level. 
+
+The lowest  bits of a selector, set once when the selector constant is build, not recalculated dynamically. RPL only matters at the moment a selector is loaded into a segment register (`mov ds, ax`, far jump, far call); once loaded, it plays no further role in subsequent uses of that register.
+
+
+
+**The OSDev convention**: always set `RPL` to match the privilege level the selector is meant for.
+
+```
+kernel CS → RPL = 0
+user CS → RPL = 3
+```
+
+This makes `RPL` always equeal CPL in practice, so the load-time check collapses:
+
+`max(CPL, RPL) <= DPL     →     max(CPL, CPL) <= PDL    →   CPL <= DPL`
+
+**What `RPL` is actually for**: privilege code can set RPL higher than its onw CPL to make a check stricter than `CPL <= DPL`, simulating "would a less-privilege caller be allowed to use this selector?" This matters in segmentation-based designs, where different selectors point to genuinely different memory regions.
+
+**In a flat, paging-protected kernel** like NullCore and most of moder kernels, this scenario never comes up, every selector points to the same flat address space, and the real security boundary is the page table's `User/Supervisor` bit, not the selector used.
+
 
 
 
