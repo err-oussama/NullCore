@@ -95,8 +95,109 @@ Using an already-loaded segment register (no RPL involved):
 
 ## How Privilege Checking works Per Access 
 
+Every instruction that touches memory triggers at least one privilege check, sometimes tow or three, depending on how many distinct memory operands it has.
+Each check is independent and uses whichever segment register actually applies to that specific access.
+
+
+### Step I: Fetch Check (always happens)
+
+Before the CPU can even fetch an instruction's bytes, it check:
+`CPL <= DPL of the segment CS curretnly points to`
+
+This check is, in practice, always satisified once `CS` is loaded, it's an automatic consistency guarantee rather then something that can fial mid-stream, since `CPL` is set equal to that segment's `DPL` the moment `CS` was last loaded.
+
+
+
+### Step II: Data/Stack Access check (only if the instruction touches memory)
+
+
+For every memory operand the instruction has, the CPU checks:
+
+`CPL <= DPL of the segment register that operand routes through`.
+
+Which segment register applies depends on the operand, not the instruction:
+
+```
+- push eax/ pop eax     → Uses SS (always, for any stack operation)
+- mor eax, [ebp + 4]    → Uses SS
+- mov eax, [ebx]        → Uses DS (default)
+- mov eax, [gs:0xF10]   → Uses GD (explicit segment prefix overrides DS)
+```
+
+### Worked Example: `pop [eax]`
+
+
+This instruction has two separate memory operands, so three total check occur:
+
+1. Fetch check              : `CPL <= DPL(CS)`
+2. Stack read(the pop)      : `CPL <= DPL(SS)`
+3. Memory write(to \[eax\]) : `CPL <= DPL(DS)`
+
+
+
+### Why No RPL Term Appears Here.
+
+The `max(CPL, RPL) <= DPL` formula only applies at the moment a segment register is **loaded** with a new selector. Once loaded, ordinary use of that register, any later instruction reading or writing through it only checks `CPL <= DPL` with no RPL involved at all.
 
 ## Why Segmentation Still Matters Under Paging
+
+Paging and segmentation solve two completely different problems, and one did not replace the other, paging only took over the job segmentation used to do for **addressing**.
+
+
+
+**Paging** answers: 
+
+- *Where is this byte of memory, physically*?
+- *Is this PAGE accessible from ring 3*?
+
+
+**Segmentation** answers: 
+- *What ring am I currently running at*?
+- *Am I allowed to fetch/execute this code*?
+- *Am I allowed to touch this data, through this specific segment, right now*?
+
+
+
+
+### What Paging Took Over 
+
+
+In a flat memory model , base=0, limit=max on every segment, segmentation no longer contributes anything to address translation. `CS.base + EIP` is just `EIP`.
+The segment registers stop describing distanct memory regions entirely.
+
+
+
+### What Paging Never Did 
+
+Paging's only privilege-related feature is a single bit per page: The `User/Supervisor` bit, which says *Can ring 3 touch this page at all*. That's coarse and binary, it says nothing about: 
+
+- What ring is curretnly executing right now (`CPL`).
+- Whetever a specific instruction is even allowed to be fetched.
+- Where the correct kernel stack lives when crossing from ring 3 to ring 0.
+- Whether a far jump/call/interrupt is permitted to chenge privilege level.
+
+None of this was ever paging's job, and none of it was reassigned elsewhere, it still belongs entirely to segmentation.
+
+
+### The two systems run in parallel
+
+Evey single memory access goes through **both** checks, independently, for different reasons:
+
+
+1. Segmentation check: is this access allowed given the current privilege level and the segment it routes through?
+
+2. Paging check: Where physically is this address, and does the page itself permit this ring  to touch it?
+
+
+
+
+
+
+
+
+
+
+
 
 
 
