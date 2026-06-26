@@ -87,5 +87,25 @@ The only difference is that **Far Call** additionally writes the calling task's 
 
 ## Can Far Jump/Call Escalate Privilege?
 
+The answer depends entirely on what the target selector resolves to in the GDT, not the instruction itself.
+
+
+### Normal Code Segment: Cannot Escalate 
+
+`max(CPL, RPL) <= DPL`
+
+This check can only ever stay the same or de-escalate (jump to a segment with **higher** DPL number, less privileged). It can never succeed if the target's `DPL` is numerically lower then the current `CPL`, so a plain far jump/call to an ordinary code segment can never raise privilege, no matter what selector values are constructed.
+
+
+### Call Gate: Can Escalate 
+
+A Call gate has it own `DPL`, checked against the **caller's** `CPL`/`RPL`, but the gate's **contents** point to a fixed, kernel-defined ring 0 entry point. This lets ring 3 code legitimately call into ring 0, with the CPU automatically switching `SS:ESP` to the kernel stack (via the TSS) as part of the transition.
+
+
+
+### Task Gate & TSS: Can Escalate
+
+A full hardware task switch loads `CS` (and everything else) directly from whatever was saved in the target TSS, with no `max(CPL, RPL) <= DPL` ceiling at all.
+The new privilege level is simply whatever the target TSS says it is, including a higher one then caller's current `CPL`.
 
 
