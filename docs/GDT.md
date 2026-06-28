@@ -168,16 +168,16 @@ The **User Code Descriptor**: is an 8-byte GDT entry loaded into `CS` to enable 
 - **The Real Job**: Pure privilege declaration. It exists solely to tell the CPU two things: execute at lowest privilege (DPL=3) and use 64-bit mode(L=1, D=0) -- and critically, its selector `0x0023` carries RPL=3 in bits{1:0}, which is what forces CPL to 3 the moment SYSRET loads it into CS, makeing the hardware instantly aware that the next instruction fetch is no longer trusted kernel code.
 
 
-### TSS descriptor (16byte) 
+### TSS descriptor (8 byte) 
     used by TR (Task Register)
 
-The **TSS Descriptor** is a *16-byte* GDT entry (not 8-byte like the others) that points to the Task State Segment structure in memory, giving the CPU a fixed location to find the kernel stack pointer during a privilege transition.
-
-- **The Authority**: IT is the CPU's mandatory hardware contract for ring transitions -- the moment an interrup or a syscall fires and the CPU needs to swith from Ring 3 to Ring 0, it reads `RSP0` directly out of the TSS that this descriptor points to, loading it as the new kernel stack pointer before single byte of kernel code executes. There is no software involvement in this step; the CPU does it autonomously in microcode. 
+The **TSS Descriptor** is an 8-byte GDT enrtry, the same size as every other descriptor in 32-bit mode, that points to the `Task State Segment` structure in memory, giving the CPU a fixed location to find the kernel stack pointer during a privilege transition.
 
 
-- **The Reality**: Unlike the four flat segment descriptor, the TSS descriptor is no a fiction the kernel maintains for foramlity  -- its base address field is full live and must contain the exact virual address of the kernel's `tss_struct`, because the CPU dereference it on every single ring transation. Getting this address wrong does not produce a clean fault; It sends the CPU stack pointer into garbage memory and the system dies silently.
-
-- **The Real Job**: It is a hardware pointer, not a privilege declaration. It exists solely to answer one question the CPU asks at the start of every privilege elevation: *where is the kernel stack for this CPU?* which is why it is per-CPU (each logical CPU has its own TSS and its own TSS descriptor in its own GDT), why it must be loaded explicitly with `LTR` before interrupts are ever enabled, and why its system descriptor type `0x9`(64-bit Available TSS) is the one value in the Type field that makes the CPU treat the descriptor as apointer to a live hardware structure rather then a flat segment definition.
+- **The Authority**: It is the CPU's mandatory hardware contract for ring transitions, the moment an interrupt or syscall fires and the CPU needs to switch from ring 3 to ring 0, it reads `ESP0` directly out of the TSS that this descriptor points to, loading it as the new kernel stack pointer before a single byte of kernel code executes. There is no software involvement in this step; the CPU does not autonomously in microcode.
 
 
+- **The Reality**: unlike the flat segment descriptors, the TSS descriptor is not a fiction the kernel maintains for formality, its base address field is fully live and must contain the exact address of the kernel's `tss` struct, because the CPU dereferences it on every single ring transition. Getting this address wrong does not produce a clean fault; it sends the CPU's stack pointer into a garbage memory and the system dies silently.
+
+
+- **The Real Job**: it is a hardware pointer, not a privilege declaration. It exists solely to answer one question the CPU asks at the start of every privilege elevation: *where is the kernel stack?*, which is why it must be loaded explicitly with `ltr` before interrupts are ever enabled, and why its system descriptor type `0x9` (32-bit Available TSS) is the one value in the Type field that makes the CPU treat the descriptor as a pointer to a live hardware structure rather than a flat segment definition.
