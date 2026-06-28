@@ -71,11 +71,8 @@ void sgdtr(gdt_register *gdt_ptr);
 
 void gdt_set_entry(gdt_entry *entry, uint32 base, uint32 limit,
                    uint8 access_byte, uint8 flags);
-void gdt_set_TSS_descriptor(gdt_entry *entry, unsigned long base, uint32 limit,
-                            uint8 access_byte, uint8 flags);
 
 void setup_gdt_entrys(gdt_entry *entrys);
 
-static gdt_entry gdt_entrys[8];
 void setup_GDT();
 #endif
