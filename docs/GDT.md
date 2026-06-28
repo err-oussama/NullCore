@@ -10,15 +10,15 @@
 
 ## GDT Entry format
 
-|*Bytes*|*Bits* |       *Name*          |               *Role*                  |
-|-------|-------|-----------------------|---------------------------------------|
-|0-1    | 0-15  | Segment Limit-low     | Lowset part of Segment Limit 0-15     |
-|2-3    |16-31  | Base Address-low      | Lowset part of Base Address 0-15      |
-|4      |32-39  | Base Address-Middle   | Middle part of Base Address 16-31     |
-|5      |40-47  | Access Byte           | Access info for segment               |
-|6      |48-51  | Segment Limit-high    | Highest part of Segment Limit 16-19   |
-|6      |52-55  | Flags                 | Info about Segment                    |
-|7      |56-63  | Base Address-high     | Highest part of Base Address 24-31    |
+|*Bytes*|*Bits* |       *Name*          |               *Role*               |
+|-------|-------|-----------------------|------------------------------------|
+|0-1    | 0-15  | Segment Limit-low     | Lowset part of Segment Limit 0-15  |
+|2-3    |16-31  | Base Address-low      | Lowset part of Base Address 0-15   |
+|4      |32-39  | Base Address-Middle   | Middle part of Base Address 16-23  |
+|5      |40-47  | Access Byte           | Access info for segment            |
+|6      |48-51  | Segment Limit-high    | Highest part of Segment Limit 16-19|
+|6      |52-55  | Flags                 | Info about Segment                 |
+|7      |56-63  | Base Address-high     | Highest part of Base Address 24-31 |
 
 ### Flage byte 
 
@@ -181,3 +181,67 @@ The **TSS Descriptor** is an 8-byte GDT enrtry, the same size as every other des
 
 
 - **The Real Job**: it is a hardware pointer, not a privilege declaration. It exists solely to answer one question the CPU asks at the start of every privilege elevation: *where is the kernel stack?*, which is why it must be loaded explicitly with `ltr` before interrupts are ever enabled, and why its system descriptor type `0x9` (32-bit Available TSS) is the one value in the Type field that makes the CPU treat the descriptor as a pointer to a live hardware structure rather than a flat segment definition.
+
+
+
+## GDT entry format 
+
+
+### Segment-style (base/limit/access/flags)
+
+**Used by**: *Code/Data segment, TSS descriptor, LDT descriptor*.
+
+|*Bytes*|*Bits* |       *Name*          |               *Role*               |
+|-------|-------|-----------------------|------------------------------------|
+|0-1    |00-15  | Segment Limit-low     | Lowset part of Segment Limit 0-15  |
+|2-3    |16-31  | Base Address-low      | Lowset part of Base Address 0-15   |
+|4      |32-39  | Base Address-Middle   | Middle part of Base Address 16-23  |
+|5      |40-47  | Access Byte           | Access info for segment            |
+|6      |48-51  | Segment Limit-high    | Highest part of Segment Limit 16-19|
+|6      |52-55  | Flags                 | Info about Segment                 |
+|7      |56-63  | Base Address-high     | Highest part of Base Address 24-31 |
+
+
+
+
+### Call Gate  (offset/selector/param_count/access)
+
+**Used by**: *Call Gate only*.
+
+|*Bytes*|*Bits* |       *Name*          |               *Role*               |
+|-------|-------|-----------------------|------------------------------------|
+|0-1    |00-15  | Offset-low            | Target EIP, bits 0-15              |
+|2-3    |16-31  | Selector              | Target CODE SEGMENT selector       |
+|4      |32-36  | Param Count           | Number of stack params to copy     |
+|4      |37-39  | Reserved              | -                                  |
+|5      |40-47  | Access Byte           | Access info for segment            |
+|6-7    |48-63  | Offset High           | Target EIP, bits 16-31             |
+
+
+
+### Gate-style  (offset/selector/access)
+
+**Used by**: *Interrupt Gate, Trap Gate*.
+
+|*Bytes*|*Bits* |       *Name*          |               *Role*               |
+|-------|-------|-----------------------|------------------------------------|
+|0-1    |00-15  | Offset-low            | Target EIP, bits 0-15              |
+|2-3    |16-31  | Selector              | Target CODE SEGMENT selector       |
+|4      |32-39  | Reserved              | -                                  |
+|5      |40-47  | Access Byte           | Access info for segment            |
+|6-7    |48-63  | Offset High           | Target EIP, bits 16-31             |
+
+
+
+### Task Gate 
+
+**Used by**: *Task Gate only*.
+
+|*Bytes*|*Bits* |       *Name*          |               *Role*               |
+|-------|-------|-----------------------|------------------------------------|
+|0-1    |00-15  | Reserved              | -                                  |
+|2-3    |16-31  | TSS selector          | Selector to TSS descriptor         |
+|4      |32-39  | Reserved              | -                                  |
+|5      |40-47  | Access Byte           | Access info for segment            |
+|6-7    |48-63  | Reserved              | -                                  |
+
