@@ -1,4 +1,6 @@
 #include "gdt.h"
+#include "tss.h"
+#include <kprint.h>
 
 static gdt_entry gdt_entrys[8];
 
@@ -21,10 +23,7 @@ void setup_gdt_entrys(gdt_entry *entrys) {
                   Kernel Data,
                   User 32-bit Code,
                   User Data,
-                  User 64-bit Code,
-                  TSS low 8 byte
-                  TSS high 8 byte
-
+                  TSS
         ]
   */
   // setup  NULL
@@ -58,15 +57,19 @@ void setup_gdt_entrys(gdt_entry *entrys) {
                 GDT_FLAG_AVL_0 | GDT_FLAG_32BIT | GDT_FLAG_OP_SIZE_32 |
                     GDT_FLAG_SEG_UNIT_4KB);
   // setup TSS descriptor
-  gdt_set_entry(&entrys[5], 0, 0x67, 0x89, 0x0);
+  gdt_set_entry(
+      &entrys[5], (uint32)get_tss(), sizeof(tss_t) - 1,
+      GDT_ACC_PRESENT | GDT_ACC_S_SYSTEM | GDT_TYPE_32BIT_TSS_AVAILABLE, 0x0);
 }
 
 void setup_GDT() {
 
+  tss_init();
   setup_gdt_entrys(gdt_entrys);
 
   gdt_register gdtr;
   gdtr.base = (uint32)&gdt_entrys;
   gdtr.limit = (sizeof(gdt_entry) * 8) - 1;
   lgdtr(&gdtr);
+  tss_load(0x28);
 }

@@ -41,6 +41,10 @@ typedef struct __attribute__((packed)) {
   uint16 LDT_reserved;
   uint16 trap;
   uint16 iobp_offset;
-} tss;
+} tss_t;
+
+void tss_init();
+tss_t *get_tss();
+void tss_load(uint32 tss_selector);
 
 #endif
