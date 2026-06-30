@@ -46,5 +46,7 @@ typedef struct __attribute__((packed)) {
 void tss_init();
 tss_t *get_tss();
 void tss_load(uint32 tss_selector);
+void deascalate(void *addr, uint32 user_stack);
+void tss_test();
 
 #endif
