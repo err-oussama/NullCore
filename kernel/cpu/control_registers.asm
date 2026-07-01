@@ -4,6 +4,8 @@ global read_cr3
 global write_cr0
 global read_cr0
 
+global read_cr2
+
 section .text
 
 write_cr3:
@@ -30,3 +32,6 @@ read_cr0:
 	ret
 
 
+read_cr2:
+	mov eax, cr2;
+	ret
