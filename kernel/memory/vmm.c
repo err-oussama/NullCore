@@ -32,6 +32,9 @@ void mmu_map_pt(uint32 *pd, uint16 flags) {
 uint32 *mmu_create_address_space() {
   uint32 *pd = (uint32 *)pmm_alloc();
   memcpy(pd, get_kernel_vmm(), 0x1000);
+  for (int i = 0; i < 1024; i++) {
+    pd[i] = pd[i] | 0x4;
+  }
   return pd;
 }
 

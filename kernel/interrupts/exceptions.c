@@ -85,6 +85,15 @@ void page_fault_handler(uint32 error) {
   kprint_str(error & (0x1 << 3) ? "\nReserved-bits" : "\nNoReserved-bits");
   kprint_str(error & (0x1 << 4) ? "\nInstruction fetch" : "\nData access");
 
+  uint32 pdi = read_cr2() >> 22;
+  uint32 pti = (read_cr2() >> 12) & 0x3FF;
+  uint32 *pd = (uint32 *)read_cr3();
+  uint32 *pt = (uint32 *)(pd[pdi] & 0xFFFFF000);
+  kprint_str("\n");
+  kprint_dec(pd[pdi] & 0x4);
+  kprint_str("\n");
+  kprint_dec(pt[pti] & 0x4);
+
   while (1)
     ;
 }
