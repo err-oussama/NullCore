@@ -14,7 +14,7 @@ void mmu_kernel_setup() {
   uint32 *pd = (uint32 *)pmm_alloc();
   memset((void *)pd, 0, 0x1000);
 
-  mmu_map_pt(pd, MMU_PDE_P | MMU_PDE_RW | MMU_PDE_U_MODE);
+  mmu_map_pt(pd, MMU_PDE_P | MMU_PDE_RW);
 
   write_cr3((uint32)pd);
   write_cr0(read_cr0() | 0x80000000);
@@ -24,7 +24,7 @@ void mmu_map_pt(uint32 *pd, uint16 flags) {
   uint32 *pt = (uint32 *)pmm_alloc();
   memset((void *)pt, 0, 0x1000);
   for (uint32 i = 0; i < 1024; i++) {
-    pt[i] = mmu_make_entry(i << 12, MMU_PTE_P | MMU_PTE_RW | MMU_PDE_U_MODE);
+    pt[i] = mmu_make_entry(i << 12, MMU_PTE_P | MMU_PTE_RW);
   }
   *pd = mmu_make_entry((uint32)pt, flags);
 }
