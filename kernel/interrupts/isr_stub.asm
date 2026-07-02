@@ -2,6 +2,7 @@ global isr_dummy
 global isr_timer_handler:
 global isr_syscall_handler
 
+global isr_page_fault_handler
 
 ; CPU exception
 extern divide_error_handler
@@ -69,6 +70,16 @@ isr_timer_handler:
 	iret
 
 
+isr_page_fault_handler:
+	pusha
+	mov eax, [esp + 32]
+	push eax 
+	call page_fault_handler
+	add esp, 4
+	popa 
+	add esp, 4
+	iret
+
 ISR_STUB divide_error_handler
 ISR_STUB debug_handler
 ISR_STUB non_maskable_interrupt_handler
@@ -83,7 +94,6 @@ ISR_STUB invalid_TSS_handler
 ISR_STUB segment_not_present_handler
 ISR_STUB stack_segment_fault_handler
 ISR_STUB general_protection_fault_handler
-ISR_STUB page_fault_handler
 ISR_STUB x87_floating_point_exception_handler
 ISR_STUB alignment_check_handler
 ISR_STUB machine_check_handler

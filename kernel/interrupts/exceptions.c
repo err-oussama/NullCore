@@ -1,5 +1,6 @@
 #include "isr.h"
 #include "kprint.h"
+#include "type.h"
 #include <control_registers.h>
 
 void divide_error_handler() {
@@ -72,10 +73,18 @@ void general_protection_fault_handler() {
   while (1)
     ;
 }
-void page_fault_handler() {
-  kprint_err("Exception: Page Fault [0x");
+void page_fault_handler(uint32 error) {
+  kprint_err("Exception: Page Fault\n");
+  kprint_str("CR2: 0x");
   kprint_hex(read_cr2());
-  kprint_err("]");
+  kprint_str("\nerror code: 0x");
+  kprint_hex(error);
+  kprint_str(error & 0x1 ? "\nPresent" : "\nNotPresnet");
+  kprint_str(error & (0x1 << 1) ? "\nWrite" : "\nRead");
+  kprint_str(error & (0x1 << 2) ? "\nUser mode" : "\nSupervisor mode");
+  kprint_str(error & (0x1 << 3) ? "\nReserved-bits" : "\nNoReserved-bits");
+  kprint_str(error & (0x1 << 4) ? "\nInstruction fetch" : "\nData access");
+
   while (1)
     ;
 }

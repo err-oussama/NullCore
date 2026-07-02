@@ -1,6 +1,8 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
+#include <type.h>
+
 void divide_error_handler();
 void debug_handler();
 void non_maskable_interrupt_handler();
@@ -15,7 +17,7 @@ void invalid_TSS_handler();
 void segment_not_present_handler();
 void stack_segment_fault_handler();
 void general_protection_fault_handler();
-void page_fault_handler();
+void page_fault_handler(uint32 error_code);
 void x87_floating_point_exception_handler();
 void alignment_check_handler();
 void machine_check_handler();
