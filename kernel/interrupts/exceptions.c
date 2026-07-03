@@ -3,6 +3,55 @@
 #include "type.h"
 #include <control_registers.h>
 
+#define PF_PRESENT (1 << 0)
+#define PF_WRITE (1 << 1)
+#define PF_USER (1 << 2)
+#define PF_RESERVED (1 << 3)
+#define PF_FETCH (1 << 4)
+
+void page_fault_handler(uint32 error) {
+  kprint_err("\n==========[EXCEPTION: PAGE FAULT]==========\n");
+  kprint_str("Faulting Address (CR2): 0x");
+  kprint_hex(read_cr2());
+  kprint_str("\nError Code Bitmask: 0x");
+  kprint_hex(error);
+  kprint_str("\n\nCause: ");
+  kprint_str(error & PF_PRESENT ? "[Protection Violation] "
+                                : "[Non-Present Page] ");
+  kprint_str(error & (0x1 << 1) ? "[Write Access] " : "[Read Access] ");
+  kprint_str(error & (0x1 << 2) ? "[User Mode] " : "[Supervisor Mode] ");
+  kprint_str(error & (0x1 << 4) ? "[Instruction Fetch]\n" : "[Data Access]\n");
+
+  if (error & PF_RESERVED)
+    kprint_str("--> WARNING: Architecture-reserved bits were overwritten!\n");
+
+  kprint_str("---------------------------------------------------\n");
+  uint32 pdi = read_cr2() >> 22;
+  uint32 pti = (read_cr2() >> 12) & 0x3FF;
+  uint32 *pd = (uint32 *)read_cr3();
+  uint32 *pt = (uint32 *)(pd[pdi] & 0xFFFFF000);
+  kprint_str("Page Table Walk Info:\n");
+  kprint_str("  Page Directory Index: ");
+  kprint_dec(pdi);
+  kprint_str("\n  Page Table Index: ");
+  kprint_dec(pti);
+  kprint_str("\n");
+  if (!(pd[pdi] & 0x1))
+    kprint_str(
+        "  Page Directory Entry: NOT PRESENT (No Page Table mapped here)\n");
+  else {
+
+    kprint_str("  PDE Privilege: ");
+    kprint_str(pd[pdi] & 0x4 ? "User-Mode(U/S=1)\n"
+                             : "Supervisor-Mode (U/S=0)\n");
+    kprint_str("  PTE Privilege: ");
+    kprint_str(pt[pti] & 0x4 ? "User-Mode(U/S=1)\n"
+                             : "Supervisor-Mode (U/S=0)\n");
+  }
+  kprint_err("===========================================\n");
+  while (1)
+    ;
+}
 void divide_error_handler() {
   kprint_err("Exception: Division Error ");
   while (1)
@@ -70,30 +119,6 @@ void stack_segment_fault_handler() {
 }
 void general_protection_fault_handler() {
   kprint_err("Exception: General Protection Fault");
-  while (1)
-    ;
-}
-void page_fault_handler(uint32 error) {
-  kprint_err("Exception: Page Fault\n");
-  kprint_str("CR2: 0x");
-  kprint_hex(read_cr2());
-  kprint_str("\nerror code: 0x");
-  kprint_hex(error);
-  kprint_str(error & 0x1 ? "\nPresent" : "\nNotPresnet");
-  kprint_str(error & (0x1 << 1) ? "\nWrite" : "\nRead");
-  kprint_str(error & (0x1 << 2) ? "\nUser mode" : "\nSupervisor mode");
-  kprint_str(error & (0x1 << 3) ? "\nReserved-bits" : "\nNoReserved-bits");
-  kprint_str(error & (0x1 << 4) ? "\nInstruction fetch" : "\nData access");
-
-  uint32 pdi = read_cr2() >> 22;
-  uint32 pti = (read_cr2() >> 12) & 0x3FF;
-  uint32 *pd = (uint32 *)read_cr3();
-  uint32 *pt = (uint32 *)(pd[pdi] & 0xFFFFF000);
-  kprint_str("\n");
-  kprint_dec(pd[pdi] & 0x4);
-  kprint_str("\n");
-  kprint_dec(pt[pti] & 0x4);
-
   while (1)
     ;
 }

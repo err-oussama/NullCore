@@ -37,7 +37,8 @@ void tss_test() {
     return;
   mmu_map_page(pd, user_stack, user_stack,
                MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
-  mmu_map_page(pd, 0x100000, 0x100000, MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
+  //  mmu_map_page(pd, 0x100000, 0x100000, MMU_PTE_P | MMU_PTE_U_MODE |
+  //  MMU_PTE_RW);
   mmu_map_page(pd, user_code, user_code,
                MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
   mmu_switch(pd);
