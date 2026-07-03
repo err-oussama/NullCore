@@ -11,6 +11,5 @@
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprintf("Working on: Privilege Transition\n");
-  tss_test();
+  kprintf("Working on: Executable & Linkable Format (ELF)\n");
 }
