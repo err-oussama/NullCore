@@ -20,12 +20,14 @@ tss_t *get_tss() { return &tss; }
 extern void syscall();
 
 __attribute__((section(".user_test"))) void user_procees_mock() {
-  for (volatile int i = 4; i < 10; i++)
-    i--;
   syscall();
-  while (1) {
-  }
+  for (volatile int i = 4; i < 100000000; i++)
+    i;
+  syscall();
+  while (1)
+    ;
 }
+
 void tss_test() {
   uint32 *pd = mmu_create_address_space(); // 10D000
   uint32 user_stack = (uint32)pmm_alloc(); // 10E000
