@@ -1,9 +1,8 @@
 #include "tss.h"
-#include "type.h"
 #include <control_registers.h>
 #include <kprint.h>
+#include <kstring.h>
 #include <pmm.h>
-#include <string.h>
 #include <vmm.h>
 
 tss_t tss;

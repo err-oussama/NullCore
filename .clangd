@@ -14,3 +14,4 @@ CompileFlags:
     - -I/home/void/Work/NullCore/kernel/boot
     - -I/home/void/Work/NullCore/kernel/core
     - -I/home/void/Work/NullCore/kernel/cpu
+    - -I/home/void/Work/NullCore/kernel/elf

@@ -1,8 +1,7 @@
-#include "pmio.h"
-#include "type.h"
 #include <kprint.h>
 #include <pic.h>
 #include <pit.h>
+#include <pmio.h>
 #include <registers.h>
 #include <task.h>
 

@@ -1,5 +1,4 @@
 #include "pic.h"
-#include "type.h"
 
 void pic_init() {
   outb(PIC_MASTER_COMMAND, 0x11);

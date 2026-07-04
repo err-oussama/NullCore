@@ -1,7 +1,7 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
 
-#include <type.h>
+#include <types.h>
 
 typedef struct syscall_registers registers;
 

@@ -1,7 +1,7 @@
 #ifndef PMIO_H
 #define PMIO_H
 
-#include <type.h>
+#include <types.h>
 
 // PMIO => Port Mapped Input/Ouput
 

@@ -1,6 +1,6 @@
 #ifndef PIT_H
 #define PIT_H
-#include <type.h>
+#include <types.h>
 // Programmable Interval Timer
 
 #define PIT_MODE_CHANNEL_0 0x00

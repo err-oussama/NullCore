@@ -1,6 +1,6 @@
 #ifndef TSS_H
 #define TSS_H
-#include <type.h>
+#include <types.h>
 
 typedef struct __attribute__((packed)) {
   uint16 previous_task_link;

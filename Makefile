@@ -26,6 +26,7 @@ INCL   	:= 	-I./kernel/interrupts/ \
 						-I./kernel/boot/ \
 						-I./kernel/core/ \
 						-I./kernel/cpu/ \
+						-I./kernel/elf/ \
 
 TARGET  := kernel.bin
 

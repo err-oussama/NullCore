@@ -1,10 +1,9 @@
 #include "kheap.h"
 #include <kernel.h>
 #include <kprint.h>
+#include <kstring.h>
 #include <multiboot_metadata.h>
 #include <pmm.h>
-#include <string.h>
-#include <type.h>
 
 static heap_page *heap_memory = NULL; // the first page of the heap
 

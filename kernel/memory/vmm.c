@@ -1,9 +1,8 @@
 #include "vmm.h"
 #include "control_registers.h"
 #include "pmm.h"
-#include "type.h"
 #include <kprint.h>
-#include <string.h>
+#include <kstring.h>
 #include <task.h>
 
 uint32 mmu_make_entry(uint32 frame_address, uint16 flags) {

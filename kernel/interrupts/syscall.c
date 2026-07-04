@@ -1,5 +1,4 @@
 #include "syscall.h"
-#include "type.h"
 #include <kprint.h>
 
 void syscall_not_implemented(registers *regs) {

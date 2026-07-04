@@ -1,7 +1,7 @@
 #ifndef IDT_H
 #define IDT_H
-#include "isr.h"
-#include "type.h"
+#include <isr.h>
+#include <types.h>
 
 // SELECTOR
 

@@ -1,7 +1,7 @@
 #ifndef VMM_H
 #define VMM_H
 
-#include "type.h"
+#include <types.h>
 
 #define MMU_PTE_P 0x001      // present  			0x0 absent
 #define MMU_PTE_RW 0x002     // read/write  	0x0 read-only

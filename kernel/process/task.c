@@ -1,12 +1,11 @@
 #include "task.h"
-#include "type.h"
 
 #include <control_registers.h>
 #include <kprint.h>
+#include <kstring.h>
 #include <pit.h>
 #include <pmm.h>
 #include <registers.h>
-#include <string.h>
 
 task tasks[10];
 uint32 task_frame_buffer[10];

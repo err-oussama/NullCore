@@ -1,6 +1,6 @@
 #ifndef GDT_H
 #define GDT_H
-#include "type.h"
+#include <types.h>
 
 // FLAG BYTE
 #define GDT_FLAG_AVL_1 0b1

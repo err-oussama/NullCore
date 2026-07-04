@@ -1,8 +1,8 @@
 #ifndef PRINT_H
 #define PRINT_H
 
-#include "type.h"
-#include "vga_print.h"
+#include <types.h>
+#include <vga_print.h>
 
 void kclear_screen();
 void kprintf(char *format, ...);

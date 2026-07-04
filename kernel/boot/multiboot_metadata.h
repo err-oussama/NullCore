@@ -2,7 +2,7 @@
 #define MULTIBOOT_INFO_H
 
 #include <kprint.h>
-#include <type.h>
+#include <types.h>
 
 extern uint32 kernel_end;
 

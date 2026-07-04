@@ -1,5 +1,4 @@
-#include <string.h>
-#include <type.h>
+#include <kstring.h>
 
 void memset(void *addr, uint32 c, uint32 size) {
   uint8 *p = (uint8 *)addr;

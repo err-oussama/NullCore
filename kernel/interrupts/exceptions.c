@@ -1,7 +1,5 @@
-#include "isr.h"
-#include "kprint.h"
-#include "type.h"
 #include <control_registers.h>
+#include <kprint.h>
 
 #define PF_PRESENT (1 << 0)
 #define PF_WRITE (1 << 1)

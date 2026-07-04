@@ -1,7 +1,7 @@
 #ifndef CONTROL_REGISTERS_H
 #define CONTROL_REGISTERS_H
 
-#include <type.h>
+#include <types.h>
 
 // Control Registers
 

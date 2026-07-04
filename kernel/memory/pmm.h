@@ -1,6 +1,6 @@
 #ifndef PMM_H
 #define PMM_H
-#include "type.h"
+#include <types.h>
 
 // PMM => Physical Memory Manager
 /*

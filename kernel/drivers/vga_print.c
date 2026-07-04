@@ -1,6 +1,4 @@
 #include "vga_print.h"
-#include "kernel.h"
-#include "type.h"
 
 /*
 

@@ -1,7 +1,7 @@
 #ifndef VGA_PRINT_H
 #define VGA_PRINT_H
 
-#include "type.h"
+#include <types.h>
 
 #define VGA_BLACK 0x0
 #define VGA_BLUE 0x1

@@ -1,6 +1,5 @@
 #include "idt.h"
-#include "isr.h"
-#include "type.h"
+#include <isr.h>
 
 void set_idt_entry(gate_descriptor *gate, uint32 ISR_address, uint16 selector,
                    uint8 type_attr) {

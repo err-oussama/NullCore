@@ -1,7 +1,7 @@
 #ifndef KHEAP_H
 #define KHEAP_H
 
-#include "type.h"
+#include <types.h>
 
 // bits 31-1 used as size of the block always 4 byte alignement
 // bit 0 used as flage for free and used state: 0=free, 1=used
