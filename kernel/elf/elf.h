@@ -1,15 +1,8 @@
 #ifndef ELF_H
 #define ELF_H
 
+#include <elf_header_macro.h>
 #include <types.h>
-
-/*
- *  EI  		=> ELF Identification
- *  NIDENT 	=> Number of Identification Bytes
- *
- *
- */
-#define EI_NIDENT 0x10
 
 typedef struct elf_s elf_t;
 

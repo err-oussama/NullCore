@@ -1,6 +1,7 @@
 #ifndef ELF_HEADER_MACRO_H
 #define ELF_HEADER_MACRO_H
 
+// IDENT array
 #define EI_MAG0 0x0
 #define EI_MAG1 0x1
 #define EI_MAG2 0x2
