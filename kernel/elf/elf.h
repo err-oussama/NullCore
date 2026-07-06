@@ -1,7 +1,7 @@
 #ifndef ELF_H
 #define ELF_H
 
-#include <elf_header_macro.h>
+#include "elf_header_macro.h"
 #include <types.h>
 
 typedef struct elf_s elf_t;
