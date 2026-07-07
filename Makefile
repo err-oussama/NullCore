@@ -30,8 +30,15 @@ INCL   	:= 	-I./kernel/interrupts/ \
 
 TARGET  := kernel.bin
 
+
+user_program: user_program.c 
+	$(CC) -m32 -nostdlib -nostartfiles -o $@ $<
+
+
+
+
 # Default target
-all: $(TARGET)
+all: user_program $(TARGET)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
@@ -55,7 +62,7 @@ run: $(TARGET)
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) 
 fclean: clean
-	rm -f $(TARGET)
+	rm -f $(TARGET) user_program
 
 
 .PHONY: clean fclean all run 

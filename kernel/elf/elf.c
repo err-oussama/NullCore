@@ -2,7 +2,7 @@
 #include "elf_header_macro.h"
 #include <kprint.h>
 void print_Ehdr(void *buff) {
-  elf_t *elf = (elf_t *)buff;
+  elf_t *elf = (elf_t *)initrd_start;
   uint8 arch = elf->ident[EI_CLASS];
   uint8 data = elf->ident[EI_DATA];
   uint8 version = elf->ident[EI_VERSION];

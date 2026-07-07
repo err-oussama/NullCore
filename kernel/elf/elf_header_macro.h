@@ -35,4 +35,10 @@
 #define ELFOSABI_SYSV 0x0
 #define ELFOSABI_LINUX 0x3
 
+#define ET_NONE 0x0
+#define ET_ERL 0x1
+#define ET_EXEC 0x2
+#define ET_DYN 0x3
+#define ET_CORE 0x4
+
 #endif

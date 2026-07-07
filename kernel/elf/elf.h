@@ -23,4 +23,9 @@ struct elf_s {
   uint16 shstrndx;
 };
 
+extern uint8 initrd_start[];
+extern uint8 initrd_end[];
+
+void print_Ehdr(void *buff);
+
 #endif
