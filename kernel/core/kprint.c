@@ -30,7 +30,10 @@ void kprintf(char *format, ...) {
   while (*format) {
     if (*format == '%') {
       format++;
-      if (*format == 'd') {
+      if (*format == 'd' || *format == 'i') {
+        kprint_dec(*(int32 *)(ptr));
+        ptr += sizeof(uint32);
+      } else if (*format == 'u') {
         kprint_dec(*(uint32 *)(ptr));
         ptr += sizeof(uint32);
       } else if (*format == 'c') {
@@ -39,15 +42,14 @@ void kprintf(char *format, ...) {
       } else if (*format == 's') {
         kprint_str(*(char **)ptr);
         ptr += sizeof(char *);
-      } else if (*format == 'x') {
+      } else if (*format == 'x' || *format == 'X') {
         kprint_hex(*(uint32 *)(ptr));
         ptr += sizeof(uint32);
       } else if (*format == 'p') {
         kprint_str("0x");
         kprint_hex(*(uint32 *)(ptr));
         ptr += sizeof(void *);
-      } else
-        break;
+      }
       format++;
       continue;
     }

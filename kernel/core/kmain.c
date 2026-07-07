@@ -9,7 +9,11 @@
 #include <task.h>
 #include <tss.h>
 
+#include <elf.h>
+
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprintf("Working on: Executable & Linkable Format (ELF)\n");
+  kprintf(
+      "======== [Working on: Executable & Linkable Format (ELF)] ========\n\n");
+  print_Ehdr(NULL);
 }
