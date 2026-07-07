@@ -12,7 +12,7 @@
 #define EI_OSABI 0x7      // OS ABI? ARM or LINUX or STANDALONE or ...
 #define EI_ABIVERSION 0x8 // ABI version
 #define EI_PAD 0x9
-#define EI_NIDENT 0xA // size of the elf_t array
+#define EI_NIDENT 0x10 // size of the elf_t array
 
 // IDENT array values
 
@@ -40,5 +40,9 @@
 #define ET_EXEC 0x2
 #define ET_DYN 0x3
 #define ET_CORE 0x4
+
+#define EM_X86_64 0x3E
+#define EM_AI_64 0x32
+#define EM_860 0x7
 
 #endif
