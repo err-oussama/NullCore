@@ -55,7 +55,7 @@ kernel/%.o: kernel/%.asm
 
 
 # Running
-run: $(TARGET) 
+run: all
 	qemu-system-x86_64 -kernel $(TARGET)
 
 # Clean

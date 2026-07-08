@@ -44,5 +44,9 @@
 #define EM_X86_64 0x3E
 #define EM_AI_64 0x32
 #define EM_860 0x7
+#define EM_386 0x3
+
+#define EV_NONE 0x0
+#define EV_CURRENT 0x1
 
 #endif
