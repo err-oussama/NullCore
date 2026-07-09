@@ -7,8 +7,7 @@ char *types_s[] = {"Unknown", "Relocatable", "Executable", "Shared object",
 char *archs_s[] = {"Unknown", "32", "64"};
 char *data_s[] = {"Unknown", "Littel indian", "Big indian"};
 
-void print_Ehdr(void *buff) {
-  elf_t *elf = (elf_t *)initrd_start;
+void print_Ehdr(elf_t *elf) {
   uint8 arch = elf->ident[EI_CLASS];
   uint8 data = elf->ident[EI_DATA];
   uint8 version = elf->ident[EI_VERSION];
@@ -57,4 +56,32 @@ void print_Ehdr(void *buff) {
   kprintf("Number of program header          : %u\n", elf->phnum);
   kprintf("Number of section header          : %u\n", elf->shnum);
   kprintf("Section header string table index : %u\n", elf->shstrndx);
+}
+
+void print_ph_n(elf_t *elf, uint32 n) {
+  if (n >= elf->phnum)
+    return;
+  Elf32_Phdr *ph = (Elf32_Phdr *)(elf->phoff + ((char *)elf));
+  kprintf("Type        : 0x%x\n", ph[n].type);
+  kprintf("Offset      : 0x%x\n", ph[n].offset);
+  kprintf("Vaddr       : 0x%x\n", ph[n].vaddr);
+  kprintf("Paddr       : 0x%x\n", ph[n].paddr);
+  kprintf("File size   : 0x%x\n", ph[n].filesz);
+  kprintf("Memory size : 0x%x\n", ph[n].memsz);
+  kprintf("Flags       : %c%c%c\n", ph[n].flags & PF_R ? 'R' : ' ',
+          ph[n].flags & PF_W ? 'W' : ' ', ph[n].flags & PF_X ? 'X' : ' ');
+  kprintf("Align       : 0x%x\n", ph[n].align);
+}
+
+void load_elf(void *buff) {
+  elf_t *elf = buff;
+  Elf32_Phdr *ph = (Elf32_Phdr *)(elf->phoff + ((char *)buff));
+  for (int i = 0; i < elf->phnum; i++) {
+    if (ph[i].type == PT_LOAD)
+      ;
+  }
+
+  print_ph_n(elf, 4);
+  kprintf("===========================\n");
+  print_ph_n(elf, 5);
 }

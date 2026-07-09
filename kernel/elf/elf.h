@@ -5,6 +5,10 @@
 #include <types.h>
 
 typedef struct elf_s elf_t;
+typedef struct Elf32_Phdr_s Elf32_Phdr;
+
+extern uint8 initrd_start[];
+extern uint8 initrd_end[];
 
 struct elf_s {
   uint8 ident[EI_NIDENT];
@@ -22,10 +26,18 @@ struct elf_s {
   uint16 shnum;
   uint16 shstrndx;
 };
+struct Elf32_Phdr_s {
+  uint32 type;
+  uint32 offset;
+  uint32 vaddr;
+  uint32 paddr;
+  uint32 filesz;
+  uint32 memsz;
+  uint32 flags;
+  uint32 align;
+};
 
-extern uint8 initrd_start[];
-extern uint8 initrd_end[];
-
-void print_Ehdr(void *buff);
+void print_Ehdr(elf_t *elf);
+void load_elf(void *buff);
 
 #endif
