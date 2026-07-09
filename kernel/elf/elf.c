@@ -78,10 +78,7 @@ void load_elf(void *buff) {
   Elf32_Phdr *ph = (Elf32_Phdr *)(elf->phoff + ((char *)buff));
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type == PT_LOAD)
+      // load to memory ;
       ;
   }
-
-  print_ph_n(elf, 4);
-  kprintf("===========================\n");
-  print_ph_n(elf, 5);
 }
