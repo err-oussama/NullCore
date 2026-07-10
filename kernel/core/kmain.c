@@ -1,14 +1,16 @@
 #include <control_registers.h>
+#include <elf.h>
 #include <kernel.h>
 #include <kheap.h>
 #include <kprint.h>
 #include <multiboot_metadata.h>
 #include <pit.h>
+#include <registers.h>
 #include <syscall.h>
 #include <task.h>
 #include <tss.h>
 
-#include <elf.h>
+void task1() { syscall_enter(0, 0, 0, 0, 0, 0, 0); }
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);

@@ -9,6 +9,7 @@ void setup_hardware() {
   pic_init();
   pit_init(1000);
   mmu_kernel_setup();
+
   activate_interrupt();
 }
 

@@ -59,6 +59,8 @@ int create_task(void (*task)()) {
   tasks[id].pd = tasks[0].pd;
 
   task_frame_buffer[id] = pmm_alloc();
+  if (task_frame_buffer[id] == 0)
+    return 1;
   uint32 *stack_frame = (uint32 *)(task_frame_buffer[id] + 0x1000);
 
   *--stack_frame = id;                 // ID of the task
@@ -77,4 +79,5 @@ int create_task(void (*task)()) {
   *--stack_frame = 0x0;                // EDI
   tasks[id].esp = (uint32)stack_frame;
   enable_interrupt();
+  return 0;
 }

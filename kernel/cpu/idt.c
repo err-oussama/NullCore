@@ -32,6 +32,8 @@ void setup_IDT() {
 
   set_idt_entry(&gate_descriptors[0x21], (uint32)isr_keyboard_handler, 0x08,
                 kernel_attr_gate);
+  set_idt_entry(&gate_descriptors[0x20], (uint32)isr_timer_handler, 0x08,
+                kernel_attr_gate);
 
   set_idt_entry(&gate_descriptors[0x0E], (uint32)isr_page_fault_handler, 0x08,
                 kernel_attr_gate);

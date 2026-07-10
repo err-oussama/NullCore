@@ -1,6 +1,12 @@
 #include "elf.h"
 #include "elf_header_macro.h"
+#include "types.h"
 #include <kprint.h>
+#include <kstring.h>
+#include <pmm.h>
+#include <task.h>
+#include <tss.h>
+#include <vmm.h>
 
 char *types_s[] = {"Unknown", "Relocatable", "Executable", "Shared object",
                    "Core"};
@@ -75,10 +81,25 @@ void print_ph_n(elf_t *elf, uint32 n) {
 
 void load_elf(void *buff) {
   elf_t *elf = buff;
+  uint32 *pd = mmu_create_address_space();
+  if (pd == NULL)
+    return;
+  uint32 flag = MMU_PTE_P | MMU_PTE_U_MODE;
   Elf32_Phdr *ph = (Elf32_Phdr *)(elf->phoff + ((char *)buff));
   for (int i = 0; i < elf->phnum; i++) {
-    if (ph[i].type == PT_LOAD)
-      // load to memory ;
-      ;
+    if (ph[i].type == PT_LOAD) {
+      if (ph[i].flags & PF_W)
+        flag |= MMU_PTE_RW;
+      mmu_map_page(pd, ph[i].vaddr, ph[i].paddr, flag);
+    }
+    flag = MMU_PTE_P | MMU_PTE_U_MODE;
   }
+  mmu_switch(pd);
+  mmu_map_page(pd, 0x403000, 0x403000, flag);
+  for (int i = 0; i < elf->phnum; i++) {
+    if (ph[i].type == PT_LOAD) {
+      memcpy((void *)ph[i].vaddr, ((char *)elf) + ph[i].offset, ph[i].memsz);
+    }
+  }
+  deascalate((void *)elf->entry, pmm_alloc() + 0x1000);
 }
