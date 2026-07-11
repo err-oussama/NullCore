@@ -76,7 +76,7 @@ on x86.
 * [x] User space segments (already in GDT)
 * [x] Address space control
 * [x] TSS (ring -> 3 ring 0 stack switch) 
-* [ ] ELF loader
+* [x] ELF loader
 * [ ] First user process
 
 ---
