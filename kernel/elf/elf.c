@@ -90,17 +90,28 @@ void load_elf(void *buff) {
     if (ph[i].type == PT_LOAD) {
       if (ph[i].flags & PF_W)
         flag |= MMU_PTE_RW;
-      mmu_map_page(pd, ph[i].vaddr, ph[i].paddr, flag);
+      uint32 vadd_s = ph[i].vaddr;            // start of segment
+      uint32 vadd_e = (vadd_s + ph[i].memsz); // end of segment
+
+      mmu_map_page(pd, vadd_s, pmm_alloc(), flag);
+      if ((vadd_s & -0xFFF) != (vadd_e & -0xFFF))
+        mmu_map_page(pd, vadd_e, pmm_alloc(), flag);
     }
     flag = MMU_PTE_P | MMU_PTE_U_MODE;
   }
   uint32 stack = pmm_alloc();
-  mmu_map_page(pd, stack, stack, MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
+  mmu_map_page(pd, stack, pmm_alloc(), MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
 
   mmu_switch(pd);
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type == PT_LOAD) {
-      memcpy((void *)ph[i].vaddr, ((char *)elf) + ph[i].offset, ph[i].filesz);
+      void *vaddr = (void *)ph[i].vaddr;
+      void *offset = (void *)((char *)(elf)) + ph[i].offset;
+      uint32 filesz = ph[i].filesz;
+      uint32 memsz = ph[i].memsz;
+      memcpy(vaddr, offset, filesz);
+      if (filesz < memsz)
+        memset(vaddr + filesz, 0, memsz - filesz);
     }
   }
   deascalate((void *)elf->entry, stack + 0x1000);
