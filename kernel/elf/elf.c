@@ -94,12 +94,14 @@ void load_elf(void *buff) {
     }
     flag = MMU_PTE_P | MMU_PTE_U_MODE;
   }
+  uint32 stack = pmm_alloc();
+  mmu_map_page(pd, stack, stack, MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
+
   mmu_switch(pd);
-  mmu_map_page(pd, 0x403000, 0x403000, flag);
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type == PT_LOAD) {
-      memcpy((void *)ph[i].vaddr, ((char *)elf) + ph[i].offset, ph[i].memsz);
+      memcpy((void *)ph[i].vaddr, ((char *)elf) + ph[i].offset, ph[i].filesz);
     }
   }
-  deascalate((void *)elf->entry, pmm_alloc() + 0x1000);
+  deascalate((void *)elf->entry, stack + 0x1000);
 }

@@ -9,10 +9,10 @@ ASFLAGS := -f elf32
 LDFLAGS := -m elf_i386 -T linker.ld
 
 # Files
-ASM_SRC := $(shell find . -name "*.asm")
+ASM_SRC := $(shell find . -name "*.asm" ! -name "user_program_asm.asm")
 ASM_OBJ := $(ASM_SRC:.asm=.o)
 
-C_SRC   := $(shell find . -name "*.c")
+C_SRC   := $(shell find . -name "*.c" ! -name "user_program.c")
 C_OBJ   := $(C_SRC:.c=.o)
 
 
@@ -30,10 +30,10 @@ INCL   	:= 	-I./kernel/interrupts/ \
 
 TARGET  := kernel.bin
 
-user_program_asm.o: user_program_asm.asm 
+user/user_program_asm.o: user/user_program_asm.asm 
 	$(ASM) $(ASFLAGS) $< -o $@
 
-user_program: user_program_asm.o user_program.c 
+user_program: user/user_program_asm.o user/user_program.c 
 	$(CC) -m32 -nostdlib -nostartfiles -static -no-pie -Ttext=0x400000 -o $@ $^
 
 
