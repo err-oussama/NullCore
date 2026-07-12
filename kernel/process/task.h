@@ -11,14 +11,16 @@ struct task {
   uint64 start_tick;
   uint8 is_running;
   uint8 is_dead;
-  void *frame_buffer;
+  void *user_stack;
   uint32 *pd;
+  void *kernel_stack;
 };
 
 void task_init();
 
 int create_task(void (*task)());
 
+int create_user_task(void (*task)(), void *pd);
 task *current_task();
 task *next_task();
 void set_current(uint32 id);

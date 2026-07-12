@@ -4,7 +4,9 @@
 #include <pmio.h>
 #include <registers.h>
 #include <task.h>
+#include <vmm.h>
 
+#include <tss.h>
 #define TIME_SLICE 1000
 
 static uint64 ticks = 0;
@@ -31,10 +33,12 @@ uint32 timer_handler(uint32 esp) {
 
     current->is_running = 0;
     current->esp = esp;
+    change_esp0(current->kernel_stack + 0x1000);
 
     next->is_running = 1;
     next->start_tick = ticks;
     set_current(next->id);
+    mmu_switch(next->pd);
 
     return next->esp;
   }

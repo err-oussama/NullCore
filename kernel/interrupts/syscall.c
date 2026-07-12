@@ -6,7 +6,10 @@ void sys_nothing(registers *regs) { kprint_str("syscall coming soon\n"); }
 void sys_read(registers *regs) { kprint_str("Read syscall coming soon\n"); }
 
 void sys_write(registers *regs) { kprint_str("Write syscall coming soon\n"); }
-syscall_handler syscall_table[] = {sys_read,    sys_write,   sys_nothing,
+
+void sys_exit(registers *regs) { kprintf("Exist Syscall"); }
+
+syscall_handler syscall_table[] = {sys_read,    sys_write,   sys_exit,
                                    sys_nothing, sys_nothing, sys_nothing,
                                    sys_nothing, sys_nothing, sys_nothing};
 

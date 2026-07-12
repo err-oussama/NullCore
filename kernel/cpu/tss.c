@@ -1,4 +1,5 @@
 #include "tss.h"
+#include "types.h"
 #include <control_registers.h>
 #include <kprint.h>
 #include <kstring.h>
@@ -26,6 +27,8 @@ __attribute__((section(".user_test"))) void user_procees_mock() {
   while (1)
     ;
 }
+
+void change_esp0(void *kernel_task) { tss.esp0 = (uint32)kernel_task; }
 
 void tss_test() {
   uint32 *pd = mmu_create_address_space();                   // 10D000

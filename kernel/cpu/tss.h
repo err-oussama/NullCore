@@ -49,4 +49,5 @@ void tss_load(uint32 tss_selector);
 void deascalate(void *addr, uint32 user_stack);
 void tss_test();
 
+void change_esp0(void *kernel_task);
 #endif

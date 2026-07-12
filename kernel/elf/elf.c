@@ -1,6 +1,7 @@
 #include "elf.h"
 #include "elf_header_macro.h"
 #include "types.h"
+#include <control_registers.h>
 #include <kprint.h>
 #include <kstring.h>
 #include <pmm.h>
@@ -102,6 +103,7 @@ void load_elf(void *buff) {
   uint32 stack = pmm_alloc();
   mmu_map_page(pd, stack, pmm_alloc(), MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
 
+  void *old_pd = (void *)read_cr3();
   mmu_switch(pd);
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type == PT_LOAD) {
@@ -114,5 +116,5 @@ void load_elf(void *buff) {
         memset(vaddr + filesz, 0, memsz - filesz);
     }
   }
-  deascalate((void *)elf->entry, stack + 0x1000);
+  create_user_task((void *)elf->entry, pd);
 }

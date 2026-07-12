@@ -67,6 +67,16 @@ isr_timer_handler:
 	call timer_handler
 	mov esp, eax
 	popa
+	mov eax, [esp + 4]
+	and eax, 0x3
+	cmp eax, 0x3
+	jne .kernel_return 
+	mov eax, 0x23
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+.kernel_return:
 	iret
 
 

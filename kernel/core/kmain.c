@@ -10,11 +10,10 @@
 #include <task.h>
 #include <tss.h>
 
-void task1() { syscall_enter(0, 0, 0, 0, 0, 0, 0); }
-
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprintf(
       "======== [Working on: Executable & Linkable Format (ELF)] ========\n\n");
+
   load_elf((void *)initrd_start);
 }
