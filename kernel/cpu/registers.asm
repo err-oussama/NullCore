@@ -1,14 +1,23 @@
 global switch_esp
+global get_esp
+
+global get_flags
 global enable_interrupt
 global disable_interrupt
 
-global get_esp
+
 
 enable_interrupt:
 	sti
 	ret
 disable_interrupt:
 	cli
+	ret
+
+
+get_flags:
+	pushf
+	pop eax 
 	ret
 
 

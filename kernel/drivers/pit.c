@@ -29,6 +29,7 @@ uint32 timer_handler(uint32 esp) {
 
   task *current = current_task();
   if (ticks - current->start_tick > TIME_SLICE) {
+
     task *next = next_task();
 
     current->is_running = 0;
@@ -38,6 +39,7 @@ uint32 timer_handler(uint32 esp) {
     next->start_tick = ticks;
     change_esp0(next->kernel_stack + 0x1000);
     set_current(next->id);
+    kprintf("next task: %u  ", next->id);
     mmu_switch(next->pd);
 
     return next->esp;

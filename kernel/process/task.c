@@ -52,8 +52,10 @@ void clean_task(uint32 id) {
   pmm_free_frame(kernel_stacks[id]);
   pmm_free_frame(user_stacks[id]);
   tasks[id].is_dead = 1;
-  while (1)
-    ;
+  kprintf("Flags: %u\n", get_flags());
+  enable_interrupt();
+  while (1) {
+  }
 }
 
 int create_user_task(void (*task)(), void *pd) {

@@ -19,10 +19,6 @@ void kmain(multiboot_info *boot_info) {
   kprintf(
       "======== [Working on: Executable & Linkable Format (ELF)] ========\n\n");
 
-  /* load_elf((void *)initrd_start); */
-  kprintf("first\n");
-  for (uint32 i = 0; i < 0x10000000; i++)
-    ;
-  kprintf("second\n");
+  load_elf((void *)initrd_start);
   load_elf((void *)initrd_start);
 }

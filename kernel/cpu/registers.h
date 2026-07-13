@@ -5,6 +5,7 @@
 void switch_esp(uint32 esp);
 uint32 get_esp();
 
+uint32 get_flags();
 void disable_interrupt();
 void enable_interrupt();
 
