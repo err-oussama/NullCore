@@ -19,6 +19,7 @@ struct task {
 void task_init();
 
 int create_task(void (*task)());
+void clean_task(uint32 id);
 
 int create_user_task(void (*task)(), void *pd);
 task *current_task();

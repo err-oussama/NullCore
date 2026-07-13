@@ -15,8 +15,3 @@ CompileFlags:
     - -I/home/void/Work/NullCore/kernel/core
     - -I/home/void/Work/NullCore/kernel/cpu
     - -I/home/void/Work/NullCore/kernel/elf
-    - -nobuiltininc
-    - -fno-builtin
-
-Index:
-  StandardLibrary: None

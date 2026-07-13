@@ -33,10 +33,10 @@ uint32 timer_handler(uint32 esp) {
 
     current->is_running = 0;
     current->esp = esp;
-    change_esp0(current->kernel_stack + 0x1000);
 
     next->is_running = 1;
     next->start_tick = ticks;
+    change_esp0(next->kernel_stack + 0x1000);
     set_current(next->id);
     mmu_switch(next->pd);
 

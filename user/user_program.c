@@ -5,12 +5,15 @@ int b;
 extern void elf_syscall();
 
 void _start() {
-  while (b <= 5) {
+  b = 0;
+  elf_syscall();
+  while (b <= 2) {
     if (!a++) {
       elf_syscall();
       b++;
     }
-    if (a == 10000000)
+    if (a == 10000)
       a = 0;
   }
+  elf_syscall();
 }

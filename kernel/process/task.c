@@ -1,5 +1,6 @@
 #include "task.h"
 #include "types.h"
+#include <syscall.h>
 
 #include <control_registers.h>
 #include <kprint.h>
@@ -47,7 +48,7 @@ void task_init() {
 
 void clean_task(uint32 id) {
 
-  kprintf("task cleaned\n");
+  kprintf("task %u cleaned\n", id);
   pmm_free_frame(kernel_stacks[id]);
   pmm_free_frame(user_stacks[id]);
   tasks[id].is_dead = 1;
@@ -76,23 +77,30 @@ int create_user_task(void (*task)(), void *pd) {
 
   mmu_map_page(tasks[id].pd, u_stack, u_stack,
                MMU_PTE_P | MMU_PTE_RW | MMU_PTE_U_MODE);
+  mmu_map_page(tasks[id].pd, (uint32)syscall_enter, (uint32)syscall_enter,
+               MMU_PTE_P | MMU_PTE_RW | MMU_PTE_U_MODE);
 
   tasks[id].user_stack = (void *)u_stack;
   tasks[id].kernel_stack = (void *)k_stack;
-  memset((void *)(u_stack + 0x800), 0, 0x300);
   uint32 *stack_frame = (uint32 *)(k_stack + 0x1000);
-  kprintf("k_stack : %p\n", k_stack);
-  kprintf("u_stack : %p\n", u_stack);
+  uint32 *user_stack_frame = (uint32 *)(u_stack + 0x1000);
+  kprintf("%p\n", id);
 
-  *--stack_frame = id;                 // ID of the task
-  *--stack_frame = 0x00;               // DUMMY return address
-  *--stack_frame = (uint32)clean_task; // EIP for clean_task
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = id;                    // DUMMY return address
+  *--user_stack_frame = 0x2;                   // DUMMY return address
+  *--user_stack_frame = 0x0;                   // DUMMY return address
+  *--user_stack_frame = (uint32)syscall_enter; // EIP for clean_task
   // ----------------------------------------------------
-  *--stack_frame = 0x23;             // SS
-  *--stack_frame = u_stack + 0x1000; // ESP // user_stack
-  *--stack_frame = 0x206;            // EFLAGS
-  *--stack_frame = 0x1B;             // CS
-  *--stack_frame = (uint32)task;     // EIP for iret
+  *--stack_frame = 0x23;                     // SS
+  *--stack_frame = (uint32)user_stack_frame; // ESP // user_stack
+  *--stack_frame = 0x206;                    // EFLAGS
+  *--stack_frame = 0x1B;                     // CS
+  *--stack_frame = (uint32)task;             // EIP for iret
   // ----------------------------------------------------
   *--stack_frame = 0x0; // EAX
   *--stack_frame = 0x0; // ECX
