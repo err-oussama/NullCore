@@ -77,7 +77,7 @@ on x86.
 * [x] Address space control
 * [x] TSS (ring -> 3 ring 0 stack switch) 
 * [x] ELF loader
-* [ ] First user process
+* [x] First user process
 
 ---
 
