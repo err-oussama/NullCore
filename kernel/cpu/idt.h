@@ -62,6 +62,5 @@ void set_idt_entry(gate_descriptor *gate, uint32 ISR_address, uint16 selector,
 
 void lidtr(idtr *idt_r);
 void sidtr(idtr *idt_r);
-void activate_interrupt();
 void setup_IDT();
 #endif

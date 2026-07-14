@@ -1,6 +1,13 @@
 global elf_syscall
+global get_flags
+
+
+get_flags:
+	pushf
+	pop eax
+	ret
 
 elf_syscall:
-	mov eax, 0x1
+	mov eax, [esp + 4]
 	int 0x80
 	ret 

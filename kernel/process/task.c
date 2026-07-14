@@ -48,13 +48,14 @@ void task_init() {
 
 void clean_task(uint32 id) {
 
-  kprintf("task %u cleaned\n", id);
   pmm_free_frame(kernel_stacks[id]);
   pmm_free_frame(user_stacks[id]);
+  kernel_stacks[id] = 0;
+  user_stacks[id] = 0;
   tasks[id].is_dead = 1;
-  kprintf("Flags: %u\n", get_flags());
   enable_interrupt();
   while (1) {
+    asm("hlt");
   }
 }
 
@@ -86,7 +87,6 @@ int create_user_task(void (*task)(), void *pd) {
   tasks[id].kernel_stack = (void *)k_stack;
   uint32 *stack_frame = (uint32 *)(k_stack + 0x1000);
   uint32 *user_stack_frame = (uint32 *)(u_stack + 0x1000);
-  kprintf("%p\n", id);
 
   *--user_stack_frame = 0x0;                   // DUMMY return address
   *--user_stack_frame = 0x0;                   // DUMMY return address
@@ -100,7 +100,7 @@ int create_user_task(void (*task)(), void *pd) {
   // ----------------------------------------------------
   *--stack_frame = 0x23;                     // SS
   *--stack_frame = (uint32)user_stack_frame; // ESP // user_stack
-  *--stack_frame = 0x206;                    // EFLAGS
+  *--stack_frame = 0x202;                    // EFLAGS
   *--stack_frame = 0x1B;                     // CS
   *--stack_frame = (uint32)task;             // EIP for iret
   // ----------------------------------------------------

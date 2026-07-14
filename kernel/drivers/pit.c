@@ -1,3 +1,4 @@
+#include "types.h"
 #include <kprint.h>
 #include <pic.h>
 #include <pit.h>
@@ -26,23 +27,23 @@ void pit_init(uint32 frequency) {
 uint32 timer_handler(uint32 esp) {
   ticks++;
   pic_send_eoi(0);
+  uint32 fall_back_esp = esp;
 
   task *current = current_task();
   if (ticks - current->start_tick > TIME_SLICE) {
 
-    task *next = next_task();
-
     current->is_running = 0;
     current->esp = esp;
 
+    task *next = next_task();
     next->is_running = 1;
     next->start_tick = ticks;
+
     change_esp0(next->kernel_stack + 0x1000);
     set_current(next->id);
-    kprintf("next task: %u  ", next->id);
     mmu_switch(next->pd);
 
-    return next->esp;
+    fall_back_esp = next->esp;
   }
-  return esp;
+  return fall_back_esp;
 }

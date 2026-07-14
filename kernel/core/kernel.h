@@ -1,13 +1,7 @@
 #ifndef KERNEL_H
 #define KERNEL_H
-#include "gdt.h"
-#include "idt.h"
-#include "kprint.h"
-#include "multiboot_metadata.h"
-#include "pic.h"
-#include "pmm.h"
-#include "vga_print.h"
-#include "vmm.h"
+#include <multiboot_metadata.h>
+#include <vmm.h>
 
 extern uint32 multiboot_header;
 extern uint32 kernel_text;
@@ -16,8 +10,6 @@ extern uint32 kernel_data;
 extern uint32 kernel_bss;
 extern uint32 kernel_end;
 
-int is64bit();
-void setup_hardware();
 void init_kernel(multiboot_info *boot_info);
 
 #endif

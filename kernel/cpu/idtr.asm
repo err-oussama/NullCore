@@ -1,6 +1,5 @@
 global lidtr
 global sidtr
-global activate_interrupt 
 
 
 section .text
@@ -16,6 +15,3 @@ sidtr:
 	sidt [eax]
 	ret
 
-activate_interrupt:
-	sti 
-	ret 

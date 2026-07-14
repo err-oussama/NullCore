@@ -8,10 +8,7 @@ void sys_read(registers *regs) { kprint_str("Read syscall coming soon\n"); }
 
 void sys_write(registers *regs) { kprint_str("Write syscall coming soon\n"); }
 
-void sys_exit(registers *regs) {
-  kprintf("Exist Syscall: Task id %d\n", regs->ebx);
-  clean_task(regs->ebx);
-}
+void sys_exit(registers *regs) { clean_task(regs->ebx); }
 
 syscall_handler syscall_table[] = {sys_read,    sys_write,   sys_exit,
                                    sys_nothing, sys_nothing, sys_nothing,
@@ -20,8 +17,10 @@ syscall_handler syscall_table[] = {sys_read,    sys_write,   sys_exit,
 void syscall_dispatch(uint32 edi, uint32 esi, uint32 ebp, uint32 ESP,
                       uint32 ebx, uint32 edx, uint32 ecx, uint32 eax) {
 
-  if (eax > 9)
+  if (eax > 9) {
+    kprintf("Syscall %p Not exist\n", eax);
     return;
+  }
   registers regs;
   regs.eax = eax;
   regs.ecx = ecx;

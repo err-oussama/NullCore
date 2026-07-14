@@ -16,9 +16,11 @@ void task_mock() { kprintf("t"); }
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprintf(
-      "======== [Working on: Executable & Linkable Format (ELF)] ========\n\n");
+  kprint_wrn("======== [Working on: User Process] ========\n");
+  void *elf = initrd_start;
 
-  load_elf((void *)initrd_start);
-  load_elf((void *)initrd_start);
+  load_elf(elf);
+  load_elf(elf);
+  load_elf(elf);
+  load_elf(elf);
 }
