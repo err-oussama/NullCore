@@ -48,7 +48,7 @@ void page_fault_handler(uint32 error) {
   }
   kprint_err("===========================================\n");
   while (1)
-    ;
+    asm("hlt");
 }
 void divide_error_handler() {
   kprint_err("Exception: Division Error ");

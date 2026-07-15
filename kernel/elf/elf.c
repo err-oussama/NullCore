@@ -97,8 +97,8 @@ void load_elf(void *buff) {
       mmu_map_page(pd, vadd_s, pmm_alloc(), flag);
       if ((vadd_s & -0xFFF) != (vadd_e & -0xFFF))
         mmu_map_page(pd, vadd_e, pmm_alloc(), flag);
+      flag = MMU_PTE_P | MMU_PTE_U_MODE;
     }
-    flag = MMU_PTE_P | MMU_PTE_U_MODE;
   }
   uint32 stack = pmm_alloc();
   mmu_map_page(pd, stack, pmm_alloc(), MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
@@ -108,7 +108,7 @@ void load_elf(void *buff) {
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type == PT_LOAD) {
       void *vaddr = (void *)ph[i].vaddr;
-      void *offset = (void *)((char *)(elf)) + ph[i].offset;
+      void *offset = (void *)((char *)(elf) + ph[i].offset);
       uint32 filesz = ph[i].filesz;
       uint32 memsz = ph[i].memsz;
       memcpy(vaddr, offset, filesz);

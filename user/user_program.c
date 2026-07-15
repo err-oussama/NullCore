@@ -4,12 +4,12 @@ int b;
 
 extern void elf_syscall(unsigned syscall_n);
 
+extern void write(char *str);
+
 extern unsigned get_flags();
 
 void _start() {
-  b = 0;
-  while (b <= 2) {
-    b++;
-  }
-  elf_syscall(1);
+  write("ZZZZZZZZZZZ\n");
+  write("ZZZZZZZZZZZ\n");
+  write("ZZZZZZZZZZZ\n");
 }

@@ -16,11 +16,8 @@ void task_mock() { kprintf("t"); }
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprint_wrn("======== [Working on: User Process] ========\n");
+  kprint_wrn("======== [ Working on: Syscall write ] ========\n");
   void *elf = initrd_start;
 
-  load_elf(elf);
-  load_elf(elf);
-  load_elf(elf);
   load_elf(elf);
 }

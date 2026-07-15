@@ -6,7 +6,7 @@ void sys_nothing(registers *regs) { kprint_str("syscall coming soon\n"); }
 
 void sys_read(registers *regs) { kprint_str("Read syscall coming soon\n"); }
 
-void sys_write(registers *regs) { kprint_str("Write syscall coming soon\n"); }
+void sys_write(registers *regs) { kprint_str((char *)regs->ebx); }
 
 void sys_exit(registers *regs) { clean_task(regs->ebx); }
 
