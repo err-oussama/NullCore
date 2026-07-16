@@ -34,7 +34,7 @@ user/user_program_asm.o: user/user_program_asm.asm
 	$(ASM) $(ASFLAGS) $< -o $@
 
 user_program: user/user_program_asm.o user/user_program.c 
-	$(CC) -m32 -nostdlib -nostartfiles -static -no-pie -Ttext=0x400000 -o $@ $^
+	$(CC) -m32 -nostdlib -nostartfiles -static -no-pie -T user/user.ld -o $@ $^
 
 
 

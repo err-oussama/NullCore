@@ -8,8 +8,10 @@ extern void write(char *str);
 
 extern unsigned get_flags();
 
+char *str = "0123456789ABCDEF\n";
 void _start() {
-  write("ZZZZZZZZZZZ\n");
-  write("ZZZZZZZZZZZ\n");
-  write("ZZZZZZZZZZZ\n");
+  elf_syscall(0);
+  write(str);
+  write("hellow");
+  write("heow");
 }

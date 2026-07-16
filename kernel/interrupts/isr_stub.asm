@@ -30,6 +30,9 @@ extern hypervisor_injection_exception_handler
 extern VMM_communication_exception_handler
 extern security_exception_handler
 
+extern kprint_hex
+extern kprint_cha
+
 ; TIME
 extern timer_handler
 

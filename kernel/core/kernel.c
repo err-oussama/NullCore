@@ -13,7 +13,6 @@ void setup_hardware() {
   pic_init();
   pit_init(1000);
   mmu_kernel_setup();
-  enable_interrupt();
 }
 
 void init_kernel(multiboot_info *boot_info) {
@@ -22,4 +21,5 @@ void init_kernel(multiboot_info *boot_info) {
   setup_hardware();
   init_heap();
   task_init();
+  /* enable_interrupt(); */
 }
