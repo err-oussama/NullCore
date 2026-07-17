@@ -87,7 +87,6 @@ void load_elf(void *buff) {
     return;
   uint32 flag = MMU_PTE_P | MMU_PTE_U_MODE;
   Elf32_Phdr *ph = (Elf32_Phdr *)(elf->phoff + ((char *)buff));
-  uint32 i = 0;
   for (int i = 0; i < elf->phnum; i++) {
     if (ph[i].type != PT_LOAD)
       continue;
@@ -95,8 +94,8 @@ void load_elf(void *buff) {
       flag |= MMU_PTE_RW;
     else
       flag = MMU_PTE_P | MMU_PTE_U_MODE;
-    uint32 end = ((ph[i].vaddr + ph[i].memsz) & ~0xFFF);
     uint32 vaddr = ph[i].vaddr & ~0xFFF;
+    uint32 end = ((ph[i].vaddr + ph[i].memsz) & ~0xFFF);
 
     for (vaddr; vaddr <= end; vaddr += 0x1000)
       mmu_map_page(pd, vaddr, vaddr, flag);
