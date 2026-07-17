@@ -1,4 +1,5 @@
 #include "vga_print.h"
+#include "types.h"
 
 /*
 
@@ -129,10 +130,9 @@ void vga_memory_dump_bin(void *ptr, uint32 size) {
 }
 
 void vga_memory_dump_hex(void *ptr, uint32 size) {
-  uint32 i = -1;
   uint8 *p = (uint8 *)ptr;
 
-  while (++i < size) {
+  for (uint32 i = 0; i < size; i++) {
     if (!(i % 16)) {
       if (i)
         vga_print("\n");
@@ -140,14 +140,10 @@ void vga_memory_dump_hex(void *ptr, uint32 size) {
       vga_print_hex((uint32)p + i);
       vga_print(": ");
     }
-    if (!(i % 8) && i != 0 && i != 0 && (i % 16))
-      vga_print("        ");
-    else if (!(i % 4) && i != 0 && (i % 16))
-      vga_print("    ");
-    else if (!(i % 2) && i != 0 && i != 0 && (i % 16))
+    if (!(i % 2) && i != 0 && i != 0 && (i % 16))
       vga_print(" ");
 
     vga_print_hex((uint32)(p[i] >> 0x4));
-    vga_print_hex((uint32)(p[i] & 0x0f));
+    vga_print_hex((uint32)(p[i] & 0x0F));
   }
 }

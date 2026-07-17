@@ -30,12 +30,16 @@ INCL   	:= 	-I./kernel/interrupts/ \
 
 TARGET  := kernel.bin
 
+# kernel/elf/initrd.o: kernel/elf/initrd.asm user_program
+# 	$(ASM) $(ASFLAGS) $< -o $@
+
 user/user_program_asm.o: user/user_program_asm.asm 
 	$(ASM) $(ASFLAGS) $< -o $@
 
-user_program: user/user_program_asm.o user/user_program.c 
-	$(CC) -m32 -nostdlib -nostartfiles -static -no-pie -T user/user.ld -o $@ $^
 
+user_program: user/user_program_asm.o user/user_program.c
+	$(CC) -m32 -nostdlib -nostartfiles -static -no-pie -fno-pic -fno-plt \
+	      -T user/user.ld -o $@ $^
 
 
 

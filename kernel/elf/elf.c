@@ -113,8 +113,9 @@ void load_elf(void *buff) {
       uint32 filesz = ph[i].filesz;
       uint32 memsz = ph[i].memsz;
       memcpy(vaddr, offset, filesz);
-      /* if (filesz < memsz) */
-      /*   memset(vaddr + filesz, 0, memsz - filesz); */
+      if (filesz < memsz) {
+        memset(vaddr + filesz, 0, memsz - filesz);
+      }
     }
   }
   create_user_task((void *)elf->entry, pd);
