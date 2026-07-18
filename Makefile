@@ -66,7 +66,7 @@ run: all
 
 # Clean
 clean:
-	rm -f $(ASM_OBJ) $(C_OBJ) 
+	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
 fclean: clean
 	rm -f $(TARGET) user_program
 
