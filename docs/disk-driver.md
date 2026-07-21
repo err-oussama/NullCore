@@ -68,16 +68,74 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
 
 
 
+### The ATA Registers (Command Block)
+
+#### `0x1F0` / `0x170`
+- **size** : 16-bit
+- **Name** : Data
+- **Read** : Reads 16 bits (2 bytes) of actual sector data from the drive's internal buffer. (must be done 256 times to read a full 512-byte sector).
+- **Write**: Writes 16 bits (2 bytes) of actual sector data to the dire's internal buffer. (must be done 256 times to write a full 512-byte sector).
+
+#### `0x1F1` / `0x171`
+- **size** : 8-bit
+- **Name** : Error / Features
+- **Read** : Returns a specific error code explaining why last command failed. (Only valid if the ERR bit in the Status register is set).
+- **Write**: Set optional drive features for the next command (e.g., enabling/disabling the drive's write cache, or setting DMA transfer modes). Mostly used in the basic PIO.
+
+#### `0x1F2` / `0x172`
+- **size** : 8-bit
+- **Name** : Sector Count 
+- **Read** : Returns the number of sectors remaining to be transferred. (Useful if you are doing muli-sector reads and need to track progress).
+- **Write**: Specifies how many sectors (1 to 255) the upcoming Read/Write command should process. (Note: Writing a value of 0 tells the drive to process 256 sectors).
+
+#### `0x1F3` / `0x173`
+- **size** : 8-bit
+- **Name** : LBA Low
+- **Read** : Returns bits 0-7 of the current Logical Block Address.
+- **Write**: Sets bits 0-7 of the target Logical Block Address (the sector number for the next command).
+
+#### `0x1F4` / `0x174`
+- **size** : 8-bit
+- **Name** : LBA Mid
+- **Read** : Returns bits 8-15 of the current Logical Block Address.
+- **Write**: Set bits 8-15 of the target Logical Block Address.
+
+#### `0x1F5` / `0x175`
+- **size** : 8-bit
+- **Name** : LBA High
+- **Read** : Returns bits 16-23 of the current Logical Block Address.
+- **Write**: Sets bits 16-23 of the target Logical Block Address.
+
+#### `0x1F6` / `0x176`
+- **size** : 8-bit
+- **Name** : Drive / Head
+- **Read** : Returns the currently selected drive/head and LBA bits 24-27.
+- **Write**: Selects the target dirve and addressing mode.
+    - Bit *4*   : 0 = Master, 1 = Slave.
+    - Bit *6*   : 0 = CHS mode, 1 = LBA mode.
+    - Bit *0-3* : LBA bits 24-27.
+
+####  `0x1F7` / `0x177`
+- **size** : 8-bit
+- **Name** : Status / Command
+- **Read** : Returns the current state of the drive (Status). Key bits to check:
+    - *BSY* (Busy)
+    - *DRQ* (Data Request - ready to transfer data).
+    - *ERR* 
+    reading this port acknowledges and clears the pending hardware interrupt.
+- **Write**: Sends the actual command to the drive to execute.
+    - *0x20*: Read Sectors
+    - *0x30*: Write Sectors
+    - *0xEC*: Identify
 
 
-
-
-
-
-
-
-
-
+#### `0x3F6` / `0x376`
+- **size** : 8-bit
+- **Name** : Alt Status / Control
+- **Read** : Returns the exact same Status information as port `0x1F7`/`0x177`, *BUT* reading it *does not* acknoloedge or clear the pending hardware interrupt. (Useful for pooling the drive's status without messing up your interrupt handling).
+- **Write**: Controls the hardware bus.
+    - *Bit 2 (SRST)*: Triggers a software reset of the entire ATA channel.
+    - *Bit 1 (nIEN)*: Masks/disables hardware interrupts from the drive (forces you to use polling).
 
 
 
