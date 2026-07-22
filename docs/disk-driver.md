@@ -63,8 +63,12 @@ The legacy ATA architecture supports a maximum of **4 dirve**. They are organize
 ### I/O Port Mapping 
 To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedicated range of 8 ports for commands/data, pluse 1 extra port for control/reset.
 
-- **Primary channel**   : Command Block `0x1F0` - `0x1F7`, Control Block `0x3F6`
-- **Secondary Channel** : Command Block `0x170` - `0x177`, Control Block `0x376`
+- **Primary channel**:
+    - Command Block `0x1F0` - `0x1F7` 
+    - Control Block `0x3F6`
+- **Secondary Channel**:
+    - Command Block `0x170` - `0x177`
+    - Control Block `0x376`
 
 
 
@@ -137,5 +141,129 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
     - *Bit 2 (SRST)*: Triggers a software reset of the entire ATA channel.
     - *Bit 1 (nIEN)*: Masks/disables hardware interrupts from the drive (forces you to use polling).
 
+
+
+
+
+
+### Bit-Field Ports
+
+
+#### Drive / Head Register (`0x1f6` / `0x176`)
+
+- **Bit 7 (Always 1)**: 
+    - *0*: Invalid must never be written as 0
+    - *1*: Must always be written as `1`. (Legacy CHS head bit).
+
+- **Bit 6 (LBA Mode)**:
+    - *0*: Use legacy CHS (Cylinder/Head/Sector).
+    - *1*: Use 28-bit addressing.
+
+- **Bit 5 (Always 1)**:
+    - *0*: Invalid must never be written as 0
+    - *1*: Must always be written as `1`. (Legacy CHS head bit).
+
+- **Bit 4 (Drive Select)**:
+    - *0*: Select Master drive.
+    - *1*: Select Slave drive.
+
+- **Bit 0-3**: The highest 4 bits of 28-bit LBA address. (bits 24-27)
+
+
+
+#### Status Register (`0x1F7` / `0x177` - Read Only)
+
+- **Bit 7 (BSY - Busy)**:
+    - *0*: Drive is idle and usable, other bits are valid.
+    - *1*: The drive is busy procesing a command, all other bits are meaningless until BSY clears.
+
+- **Bit 6 (DRDY - Drive Ready)**:
+    - *0*: Drive is not ready (still spinning up, or no drive present). 
+    - *1*: The drive is powered up and initialized, and ready to accecpt commands.
+
+- **Bit 5 (DF - Drive Fault)**:
+    - *0*: No drive fault.
+    - *1*: A drive fault occurred (hardware error, not a command error).
+
+- **Bit 4 (SRV - Overlapped Mode Service Request)**:
+    - *0*: No service request.
+    - *1*: Used in overlapped/queued commands.
+
+- **Bit 3 (DRQ - Data Request)**:
+    - *0*: No data ready to transfer.
+    - *1*: Drive is ready to transfer data, safe to read from or write to the data register.
+
+- **Bit 2 (CORR - Corrected Data)**:
+    - *0*: No correction needed.
+    - *1*: Data was corrected by the drive's ECC, data is valid but the sector may be degrading.
+
+- **Bit 1 (IDX - Index)**:
+    - *0*: Normal.
+    - *1*: Legacy bit from CHS era, always 0 in modern drives, can be ignored.
+
+- **Bit 0 (ERR - Error)**:
+    - *0*: No Error.
+    - *1*: An error occured during the last command, check the Error Register (`0x1F1` / `0x171`) for details.
+
+
+
+#### Error Register (`0x1F1` / `0x171` - Read Only)
+
+
+- **Bit 7 (BBK - Bad Block)**:
+    - *0*: No bad block detected.
+    - *1*: A bad block mark was detected in the sector.
+
+- **Bit 6 (UNC - Uncorrectable Data Error)**:
+    - *0*: No uncorrectable error.
+    - *1*: Data could not be recoverd even with ECC, sector is unreadable.
+
+- **Bit 5 (MC - Media Changed)**:
+    - *0*: Media has not changed.
+    - *1*: The media was changed (relevent for removable dirves like CD-ROM).
+
+- **Bit 4 (IDNF - ID Not Found)**:
+    - *0*: Sector found successfully.
+    - *1*: The requestd sector ID could not be found on the disk.
+
+- **Bit 3 (MCR - Media Change Requested)**:
+    - *0*: No media change requested.
+    - *1*: Drive is requesting a media change (removable direves only).
+
+- **Bit 2 (ABRT - Command Aborted)**:
+    - *0*: Command completed normally.
+    - *1*: command was aborted - usually means the command is unsupported or invalid parameters were given.
+
+- **Bit 1 (TK0NF - Track 0 Not Found)**:
+    - *0*: Track 0 found successfully.
+    - *1*: Legacy CHS bit, track 0 could not be found during recalibration. Irrelevent with LBA.
+
+- **Bit 0 (AMNF - Address Mark Not Found)**:
+    - *0*: Address mark found.
+    - *1*: Legacy CHS, data addres mark not found. Irrelevent with LBA.
+
+
+#### Device Control Register (`0x3F6` / `0x376` - Write Only)
+
+- **Bit 7-3 (Reserved)**:
+    - Always write as `0`.
+
+- **Bit 2 (SRST - Software Reset)**:
+    - *0*: Normal operation.
+    - *1*: Assert a software reset on all drives on the channel. Must be cleared after reset.
+
+- **Bit 1 (IEN - Interrupt Enable)**:
+    - *0*: Interrupts enabled, drive will fire an IRQ when a command completes.
+    - *1*: Interrupts disabled, drive will not fire IRQs, polling must be used instead.
+
+- **Bit 0 (Reserved)**:
+    - Always write as `0`.
+
+#### Alternate Status Register (`0x3F7`/`0x376` - Read Only).
+- Same bit layout as the Status Register (`0x1F7`/`0x177`): BSY, DRDY, DF, SRV, DRQ, CORR, IDX, ERR.
+
+- The key difference: reading `0x3F6`/`0x376` does **not** clear a pending interrupt, while reading  `0x1F7`/`0x177` does.
+
+- Used during the 400ns delay after drive select, reading `0x3F6`/`0x376` 4 times give the required delay without accidentally clearing an interrupt.
 
 
