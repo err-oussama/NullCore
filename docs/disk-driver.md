@@ -208,7 +208,6 @@ Common uses:
 - **Bit 0-3**: The highest 4 bits of 28-bit LBA address. (bits 24-27)
 
 
-
 ### Status Register (`0x1F7` / `0x177`) - Read Only
 - **Bit 7 (BSY - Busy)**:
     - *0*: Drive is idle and usable, other bits are valid.
@@ -257,7 +256,7 @@ Triggers the drive to execute a command using whatever parameters were already w
 - *0x08* (DEVICE RESET): Reset the drive 
 - *0x90* (EXECUTE DIAGNOSTIC): Run built-in self test
 - *0xEF* (SET FEATURES) Configure drive feature (uses Feature Register)
-there is more but all i need is these one.
+there is more but these all i need.
 
 
 ### Alternate Status Register (`0x3F7`/`0x376`) - Read Only
@@ -276,14 +275,9 @@ there is more but all i need is these one.
     - *0*: Normal operation.
     - *1*: Assert a software reset on all drives on the channel. Must be cleared after reset.
 
-- **Bit 1 (IEN - Interrupt Enable)**:
+- **Bit 1 (nIEN - Not Interrupt Enable)**:
     - *0*: Interrupts enabled, drive will fire an IRQ when a command completes.
     - *1*: Interrupts disabled, drive will not fire IRQs, polling must be used instead.
 
 - **Bit 0 (Reserved)**:
     - Always write as `0`.
-
-
-
-
-
