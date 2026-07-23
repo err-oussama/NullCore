@@ -26,10 +26,7 @@ IDE was essentially the consumer name for the same thing ATA described technical
 
 
 
-## ATA / IDE Architecture Reference
-
-
-### The Core Definitions
+## The Core Definitions
 
 - **IDE**: the *physical hardware standard*. it refers to the fact that drive controller is integrated directly onto the hard drive itself, and defines the physical connectors and the 40/80-pin ribbon cables used to connect them.
 
@@ -37,7 +34,7 @@ IDE was essentially the consumer name for the same thing ATA described technical
 
 
 
-### Physical Topology: the 4-Drive Limit
+## Physical Topology: the 4-Drive Limit
 The legacy ATA architecture supports a maximum of **4 dirve**. They are organized into **2 Channels** (*Primary* and *Secondary*).
 
 
@@ -60,7 +57,7 @@ The legacy ATA architecture supports a maximum of **4 dirve**. They are organize
 
 
 
-### I/O Port Mapping 
+## I/O Port Mapping 
 To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedicated range of 8 ports for commands/data, pluse 1 extra port for control/reset.
 
 - **Primary channel**:
@@ -72,56 +69,48 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
 
 
 
-### The ATA Registers (Command Block)
+## The ATA Registers (Command Block)
 
-#### `0x1F0` / `0x170`
+### Data (`0x1F0`/`0x170`)
 - **size** : 16-bit
-- **Name** : Data
 - **Read** : Reads 16 bits (2 bytes) of actual sector data from the drive's internal buffer. (must be done 256 times to read a full 512-byte sector).
 - **Write**: Writes 16 bits (2 bytes) of actual sector data to the dire's internal buffer. (must be done 256 times to write a full 512-byte sector).
 
-#### `0x1F1` / `0x171`
+### Error / Features (`0x1F1`/`0x171`)
 - **size** : 8-bit
-- **Name** : Error / Features
 - **Read** : Returns a specific error code explaining why last command failed. (Only valid if the ERR bit in the Status register is set).
 - **Write**: Set optional drive features for the next command (e.g., enabling/disabling the drive's write cache, or setting DMA transfer modes). Mostly used in the basic PIO.
 
-#### `0x1F2` / `0x172`
+### Sector Count  (`0x1F2`/`0x172`)
 - **size** : 8-bit
-- **Name** : Sector Count 
 - **Read** : Returns the number of sectors remaining to be transferred. (Useful if you are doing muli-sector reads and need to track progress).
 - **Write**: Specifies how many sectors (1 to 255) the upcoming Read/Write command should process. (Note: Writing a value of 0 tells the drive to process 256 sectors).
 
-#### `0x1F3` / `0x173`
+### LBA Low (`0x1F3`/`0x173`)
 - **size** : 8-bit
-- **Name** : LBA Low
 - **Read** : Returns bits 0-7 of the current Logical Block Address.
 - **Write**: Sets bits 0-7 of the target Logical Block Address (the sector number for the next command).
 
-#### `0x1F4` / `0x174`
+### LBA Mid (`0x1F4`/`0x174`)
 - **size** : 8-bit
-- **Name** : LBA Mid
 - **Read** : Returns bits 8-15 of the current Logical Block Address.
 - **Write**: Set bits 8-15 of the target Logical Block Address.
 
-#### `0x1F5` / `0x175`
+### LBA High (`0x1F5`/`0x175`)
 - **size** : 8-bit
-- **Name** : LBA High
 - **Read** : Returns bits 16-23 of the current Logical Block Address.
 - **Write**: Sets bits 16-23 of the target Logical Block Address.
 
-#### `0x1F6` / `0x176`
+### Drive / Head (`0x1F6`/`0x176`)
 - **size** : 8-bit
-- **Name** : Drive / Head
 - **Read** : Returns the currently selected drive/head and LBA bits 24-27.
 - **Write**: Selects the target dirve and addressing mode.
     - Bit *4*   : 0 = Master, 1 = Slave.
     - Bit *6*   : 0 = CHS mode, 1 = LBA mode.
     - Bit *0-3* : LBA bits 24-27.
 
-####  `0x1F7` / `0x177`
+### Status / Command (`0x1F7` / `0x177`)
 - **size** : 8-bit
-- **Name** : Status / Command
 - **Read** : Returns the current state of the drive (Status). Key bits to check:
     - *BSY* (Busy)
     - *DRQ* (Data Request - ready to transfer data).
@@ -133,10 +122,11 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
     - *0xEC*: Identify
 
 
-#### `0x3F6` / `0x376`
+### Alt Status / Control (`0x3F6` / `0x376`)
 - **size** : 8-bit
-- **Name** : Alt Status / Control
-- **Read** : Returns the exact same Status information as port `0x1F7`/`0x177`, *BUT* reading it *does not* acknoloedge or clear the pending hardware interrupt. (Useful for pooling the drive's status without messing up your interrupt handling).
+- **Read** : Returns the exact same Status information as port `0x1F7`/`0x177`
+    *BUT* reading it *does not* acknoloedge or clear the pending hardware interrupt. 
+    (Useful for pooling the drive's status without messing up your interrupt handling).
 - **Write**: Controls the hardware bus.
     - *Bit 2 (SRST)*: Triggers a software reset of the entire ATA channel.
     - *Bit 1 (nIEN)*: Masks/disables hardware interrupts from the drive (forces you to use polling).
@@ -146,70 +136,9 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
 
 
 
-### Bit-Field Ports
+## Register Values
 
-
-#### Drive / Head Register (`0x1f6` / `0x176`)
-
-- **Bit 7 (Always 1)**: 
-    - *0*: Invalid must never be written as 0
-    - *1*: Must always be written as `1`. (Legacy CHS head bit).
-
-- **Bit 6 (LBA Mode)**:
-    - *0*: Use legacy CHS (Cylinder/Head/Sector).
-    - *1*: Use 28-bit addressing.
-
-- **Bit 5 (Always 1)**:
-    - *0*: Invalid must never be written as 0
-    - *1*: Must always be written as `1`. (Legacy CHS head bit).
-
-- **Bit 4 (Drive Select)**:
-    - *0*: Select Master drive.
-    - *1*: Select Slave drive.
-
-- **Bit 0-3**: The highest 4 bits of 28-bit LBA address. (bits 24-27)
-
-
-
-#### Status Register (`0x1F7` / `0x177` - Read Only)
-
-- **Bit 7 (BSY - Busy)**:
-    - *0*: Drive is idle and usable, other bits are valid.
-    - *1*: The drive is busy procesing a command, all other bits are meaningless until BSY clears.
-
-- **Bit 6 (DRDY - Drive Ready)**:
-    - *0*: Drive is not ready (still spinning up, or no drive present). 
-    - *1*: The drive is powered up and initialized, and ready to accecpt commands.
-
-- **Bit 5 (DF - Drive Fault)**:
-    - *0*: No drive fault.
-    - *1*: A drive fault occurred (hardware error, not a command error).
-
-- **Bit 4 (SRV - Overlapped Mode Service Request)**:
-    - *0*: No service request.
-    - *1*: Used in overlapped/queued commands.
-
-- **Bit 3 (DRQ - Data Request)**:
-    - *0*: No data ready to transfer.
-    - *1*: Drive is ready to transfer data, safe to read from or write to the data register.
-
-- **Bit 2 (CORR - Corrected Data)**:
-    - *0*: No correction needed.
-    - *1*: Data was corrected by the drive's ECC, data is valid but the sector may be degrading.
-
-- **Bit 1 (IDX - Index)**:
-    - *0*: Normal.
-    - *1*: Legacy bit from CHS era, always 0 in modern drives, can be ignored.
-
-- **Bit 0 (ERR - Error)**:
-    - *0*: No Error.
-    - *1*: An error occured during the last command, check the Error Register (`0x1F1` / `0x171`) for details.
-
-
-
-#### Error Register (`0x1F1` / `0x171` - Read Only)
-
-
+### Error Register (`0x1F1` / `0x171`) - Read Only
 - **Bit 7 (BBK - Bad Block)**:
     - *0*: No bad block detected.
     - *1*: A bad block mark was detected in the sector.
@@ -243,8 +172,103 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
     - *1*: Legacy CHS, data addres mark not found. Irrelevent with LBA.
 
 
-#### Device Control Register (`0x3F6` / `0x376` - Write Only)
+### Feature Register (`0x1F1` / `0x171`) - write only
 
+This register sends feature paramaters to the drive before issuing certian commands.
+Most basi PIO operation (READ, WRITE, IDENTIFY) do not require anything written here; it is only needed for advanced commands.
+
+- **Bit 7-0 (Feature Code)**:
+    - A raw 8-bit value whose meaning depends entirely on the command being send. There are no fixed bit definitions, each command that uses this register defines its own feature byte format.
+Common uses:
+
+- *0x00*: Disable write cache (used with SET FEATURES command `0xEF`)
+- *0x02*: Enable write cache.
+- *0x03*: Set transfer mode (PIO, DMA speed selection)
+- *0x55*: Disable read look-ahead.
+- *0xAA*: Enable read look-ahead.
+
+
+### Drive / Head Register (`0x1f6` / `0x176`)
+- **Bit 7 (Always 1)**: 
+    - *0*: Invalid must never be written as 0
+    - *1*: Must always be written as `1`. (Legacy CHS head bit).
+
+- **Bit 6 (LBA Mode)**:
+    - *0*: Use legacy CHS (Cylinder/Head/Sector).
+    - *1*: Use 28-bit addressing.
+
+- **Bit 5 (Always 1)**:
+    - *0*: Invalid must never be written as 0
+    - *1*: Must always be written as `1`. (Legacy CHS head bit).
+
+- **Bit 4 (Drive Select)**:
+    - *0*: Select Master drive.
+    - *1*: Select Slave drive.
+
+- **Bit 0-3**: The highest 4 bits of 28-bit LBA address. (bits 24-27)
+
+
+
+### Status Register (`0x1F7` / `0x177`) - Read Only
+- **Bit 7 (BSY - Busy)**:
+    - *0*: Drive is idle and usable, other bits are valid.
+    - *1*: The drive is busy procesing a command, all other bits are meaningless until BSY clears.
+
+- **Bit 6 (DRDY - Drive Ready)**:
+    - *0*: Drive is not ready (still spinning up, or no drive present). 
+    - *1*: The drive is powered up and initialized, and ready to accecpt commands.
+
+- **Bit 5 (DF - Drive Fault)**:
+    - *0*: No drive fault.
+    - *1*: A drive fault occurred (hardware error, not a command error).
+
+- **Bit 4 (SRV - Overlapped Mode Service Request)**:
+    - *0*: No service request.
+    - *1*: Used in overlapped/queued commands.
+
+- **Bit 3 (DRQ - Data Request)**:
+    - *0*: No data ready to transfer.
+    - *1*: Drive is ready to transfer data, safe to read from or write to the data register.
+
+- **Bit 2 (CORR - Corrected Data)**:
+    - *0*: No correction needed.
+    - *1*: Data was corrected by the drive's ECC, data is valid but the sector may be degrading.
+
+- **Bit 1 (IDX - Index)**:
+    - *0*: Normal.
+    - *1*: Legacy bit from CHS era, always 0 in modern drives, can be ignored.
+
+- **Bit 0 (ERR - Error)**:
+    - *0*: No Error.
+    - *1*: An error occured during the last command, check the Error Register (`0x1F1` / `0x171`) for details.
+
+### Command Register (`0x1F7` / `0x177`)
+
+
+Triggers the drive to execute a command using whatever parameters were already written to other registers (LBA, sector count, drive select, feature). The drive immediately starts processing the moment this register written.
+
+- **Bit 7-0 (Command Code)**:
+    - A row 8-bit command code. No fixed bit definitions, each value is distinct command.
+
+- *0x20* (READ SECTORS): Read sectors using 28-bit LBA, PIO transfer.
+- *0x30* (WRITE SECTORS): Write sectors using 28-bit LBA, PIO transfer.
+- *0xEC* (IDENTIFY DEVICE): Get drive info (model, size, capabilities).
+- *0xE7* (FLUSH CACHE): Commit write buffer to dist.
+- *0x08* (DEVICE RESET): Reset the drive 
+- *0x90* (EXECUTE DIAGNOSTIC): Run built-in self test
+- *0xEF* (SET FEATURES) Configure drive feature (uses Feature Register)
+there is more but all i need is these one.
+
+
+### Alternate Status Register (`0x3F7`/`0x376`) - Read Only
+- Same bit layout as the Status Register (`0x1F7`/`0x177`): BSY, DRDY, DF, SRV, DRQ, CORR, IDX, ERR.
+
+- The key difference: reading `0x3F6`/`0x376` does **not** clear a pending interrupt, while reading  `0x1F7`/`0x177` does.
+
+- Used during the 400ns delay after drive select, reading `0x3F6`/`0x376` 4 times give the required delay without accidentally clearing an interrupt.
+
+
+### Device Control Register (`0x3F6` / `0x376`) - Write Only
 - **Bit 7-3 (Reserved)**:
     - Always write as `0`.
 
@@ -259,11 +283,7 @@ To talk to the drives, the CPU uses *Port-Mapped I/O*. Each channel has a dedica
 - **Bit 0 (Reserved)**:
     - Always write as `0`.
 
-#### Alternate Status Register (`0x3F7`/`0x376` - Read Only).
-- Same bit layout as the Status Register (`0x1F7`/`0x177`): BSY, DRDY, DF, SRV, DRQ, CORR, IDX, ERR.
 
-- The key difference: reading `0x3F6`/`0x376` does **not** clear a pending interrupt, while reading  `0x1F7`/`0x177` does.
 
-- Used during the 400ns delay after drive select, reading `0x3F6`/`0x376` 4 times give the required delay without accidentally clearing an interrupt.
 
 
