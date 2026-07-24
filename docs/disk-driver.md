@@ -281,3 +281,58 @@ there is more but these all i need.
 
 - **Bit 0 (Reserved)**:
     - Always write as `0`.
+
+
+
+## Drive Setup
+
+
+Before using the drive it must be configured once at boot:
+
+- Write to the **Device Control Register** (`0x3F6`/`0x376`) to configure channel behavior:
+    - *0x00* → interrupts enabled (interrupt-driven mode)
+    - *0x02* → interrupts disabled (polling mode)
+
+- Select the target drive by writing to the **Drive/Head Register** (`0x1F6`/`0x176`):
+    - *0xA0* → Master drive
+    - *0xB0* → Slave drive
+    
+- Wait 400ns then read the **Status Register** (`0x1F7`/`0x177`):
+    - *0xFF*  → No drive present, stop
+    - *BSY=1* → Wait until it clears 
+    - *BSY=0* → Drive is present and ready
+
+- Send the `IDENTIFY` command (`0xEC`) to the **Command Register** (`0x1F7`/`0x177`) to retrieve drive information.
+
+- Wait for `BSY=0` and `DRQ=1` then read 256 words from the **Data Register** (`0x1F0`/`0x170`) to get drive metadata
+    - *words 27-46* → model name
+    - *words 10-19* → serial number 
+    - *words 60-61* → total sector count (28-bit LBA) 
+    - *words 100-103* → total sector count (48-bit LBA) 
+   
+
+## Read / Write
+To perform any read or write operation on any drive follow these steps in order:
+
+- Read the **Status Register** (`0x1F7`/`0x177`) and wait until `BSY=0`
+- Select the target drive and provide LBA bits 24-27 by writing to the **Drive/Head Register** (`0x1F6`/`0x176`)
+- Wait 400ns then read the **Status Register** (`0x1F7`/`0x177`) and wait until `BSY=0` and `DRDY=1` and if `ERR=1` stop and read the **Error Register** (`0x1F1`/`0x171`)
+
+- Write the parameters in any order:
+    - Sector count   → **Sector Count Register** (`0x1F2`/`0x172`)
+    - LBA bits 0-7   → **LBA Low Register** (`0x1F3`/`0x173`)
+    - LBA bits 8-15  → **LBA Mid Register** (`0x1F4`/`0x174`)
+    - LBA Bits 16-23 → **LBA High Register** (`0x1F5`/`0x175`) 
+
+- Write the command to the **Command Register** (`0x1F7`/`0x177`) last:
+    - *0x20* → READ 
+    - *0x30* → WRITE
+
+- For each requested sector repeat:
+    - Read the **Status Register** (`0x1F7`/`0x77`) and wait until `BSY=0` and `DRQ=1`
+    - If `ERR=1` stop and read the **Error Register** (`0x1F1`/`0x171`)
+    - Transfer 256 x 16-bit through the **Data Register** (`0x1F0`/`0x170`)
+        - *READ* : Read 256 x 2byte from `0x1F0`/`0x170`
+        - *WRITE*: Write 256 x 2byte to `0x1F0`/`0x170`
+
+- If writing: Send *FLUSH CACHE (0xE7)* to the **Command Register** (`0x1F7`/`0x177`) and wait for `BSY=0` to confirm all data is commited to disk.
