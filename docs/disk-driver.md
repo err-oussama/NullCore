@@ -188,7 +188,7 @@ Common uses:
 - *0xAA*: Enable read look-ahead.
 
 
-### Drive / Head Register (`0x1f6` / `0x176`)
+### Drive / Head Register (`0x1F6` / `0x176`)
 - **Bit 7 (Always 1)**: 
     - *0*: Invalid must never be written as 0
     - *1*: Must always be written as `1`. (Legacy CHS head bit).
