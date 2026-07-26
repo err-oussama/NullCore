@@ -59,16 +59,18 @@ kernel/%.o: kernel/%.asm
 	$(ASM) $(ASFLAGS) $< -o $@
 
 
+disk.img:
+	qemu-img create -f raw disk.img 32M
 
 # Running
 run: all
-	qemu-system-x86_64 -kernel $(TARGET)
+	qemu-system-x86_64 -kernel $(TARGET) -drive file=disk.img,format=raw,index=0,media=disk
 
 # Clean
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
 fclean: clean
-	rm -f $(TARGET) user_program
+	rm -f $(TARGET) user_program disk.img
 
 
 .PHONY: clean fclean all run 
