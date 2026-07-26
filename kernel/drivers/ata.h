@@ -1,6 +1,6 @@
 #ifndef ATA_H
 #define ATA_H
-
+#include <types.h>
 // Primary Channel (0x1F0 - 0x1F7, 0x3F6)
 #define ATA_PRIMARY_ALT_STATUS 0x3F6
 #define ATA_PRIMARY_CONTROL 0x3F6
@@ -49,9 +49,11 @@
 #define ATA_STATUS_IDX 0x02  // Index
 #define ATA_STATUS_ERR 0x01  // Error
 
+#define ATA_NO_DRIVE 0xFF
+
 // Drive/Head Register (0x1F6/0x176)
 #define ATA_DRIVE_MASTER 0xA0
-#define ATA_DRIVE_SLAVE 0xB
+#define ATA_DRIVE_SLAVE 0xB0
 #define ATA_DRIVE_LBA 0x40
 
 // Device Control Register (0x3F6/0x376)
@@ -61,14 +63,15 @@
 // Command Register (0x1F7/0x177)
 #define ATA_CMD_READ 0x20
 #define ATA_CMD_WRITE 0x30
-#define ATA_CMD_IDETIFY 0xE0
+#define ATA_CMD_IDENTIFY 0xEC
 #define ATA_CMD_FLUSH_CACHE 0xE7
 
 #define ATA_SECTOR_SIZE 0x200  // 512 byte
 #define ATA_SECTOR_WORDS 0x100 // 16-bit * 256
 
 void ata_drive_setup();
-void ata_read_sector(void *buffer);
-void ata_write_sector(void *buffer);
+void ata_identify(uint16 *buffer);
+void ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
+void ata_write_sector(uint32 lba, uint8 sector_count, void *buffer);
 
 #endif
