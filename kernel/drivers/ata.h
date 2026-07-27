@@ -69,9 +69,9 @@
 #define ATA_SECTOR_SIZE 0x200  // 512 byte
 #define ATA_SECTOR_WORDS 0x100 // 16-bit * 256
 
-void ata_drive_setup();
-void ata_identify(uint16 *buffer);
-void ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
-void ata_write_sector(uint32 lba, uint8 sector_count, void *buffer);
+int ata_drive_setup();
+int ata_identify(uint16 *buffer);
+int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
+int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer);
 
 #endif
