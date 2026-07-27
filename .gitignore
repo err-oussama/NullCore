@@ -1,6 +1,7 @@
 
 # kernel binray file
 kernel.bin
+user_program
 
 # Prerequisites
 *.d
