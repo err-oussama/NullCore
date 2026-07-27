@@ -1,4 +1,3 @@
-#include "sys/types.h"
 #include "types.h"
 #include <kstring.h>
 
@@ -20,7 +19,7 @@ void memcpy(void *src, void *dest, uint32 size) {
   if (!size)
     return;
 
-  if (src > dest) {
+  if (src < dest) {
     i = -1;
     while (++i < size)
       d[i] = s[i];
