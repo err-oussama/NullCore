@@ -69,5 +69,63 @@ int ata_identify(uint16 *buffer) {
   kprintf("Disk size: %uM\n", (total_sectors * 512) / (1024 * 1024));
   return 0;
 }
-int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
-int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer);
+
+int ata_setup_transfer(uint32 lba, uint8 sector_count, uint8 CMD) {
+
+  while (inb(ATA_PRIMARY_STATUS) & ATA_STATUS_BSY)
+    ;
+  outb(ATA_PRIMARY_DRIVE_HEAD, ATA_DRIVE_LBA | ATA_DRIVE_MASTER | lba >> 24);
+  while (inb(ATA_PRIMARY_STATUS) & ATA_STATUS_BSY)
+    ;
+  uint8 status = inb(ATA_PRIMARY_STATUS);
+  if (status & ATA_STATUS_ERR) {
+    kprintf("[Drive Error]: error code %u\n", inb(ATA_PRIMARY_ERROR));
+    return 1;
+  }
+  if (!(status & ATA_STATUS_DRDY))
+    return kprintf("[Error]: Drive not ready"), 1;
+  outb(ATA_PRIMARY_SECTOR_COUNT, sector_count);
+  outb(ATA_PRIMARY_LBA_LOW, lba & 0xFF);
+  outb(ATA_PRIMARY_LBA_MID, (lba >> 8) & 0xFF);
+  outb(ATA_PRIMARY_LBA_HIGH, (lba >> 16) & 0xFF);
+
+  outb(ATA_PRIMARY_COMMAND, CMD);
+  ata_wait();
+  while (inb(ATA_PRIMARY_STATUS) & ATA_STATUS_BSY)
+    ;
+  status = inb(ATA_PRIMARY_STATUS);
+  if (status & ATA_STATUS_ERR) {
+    kprintf("[Drive Error]: error code %u\n", inb(ATA_PRIMARY_ERROR));
+    return 1;
+  }
+  if (!(status & ATA_STATUS_DRQ))
+    return kprintf("[Error]: Drive not ready"), 1;
+  return 0;
+}
+
+int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer) {
+  uint16 *buff = buffer;
+
+  if (ata_setup_transfer(lba, sector_count, ATA_CMD_READ)) {
+    kprintf("[Error]: Read sector faild\n");
+    return 1;
+  }
+  for (int i = 0; i < ATA_SECTOR_WORDS; i++) {
+    buff[i] = inw(ATA_PRIMARY_DATA);
+  }
+
+  return 0;
+}
+
+int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer) {
+  uint16 *buff = buffer;
+  if (ata_setup_transfer(lba, sector_count, ATA_CMD_WRITE)) {
+    kprintf("[Error]: Write sector faild\n");
+    return 1;
+  }
+  for (int i = 0; i < ATA_SECTOR_WORDS; i++) {
+    outw(ATA_PRIMARY_DATA, buff[i]);
+  }
+
+  return 0;
+}
