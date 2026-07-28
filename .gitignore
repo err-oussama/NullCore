@@ -2,6 +2,7 @@
 # kernel binray file
 kernel.bin
 user_program
+disk.img
 
 # Prerequisites
 *.d
