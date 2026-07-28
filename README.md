@@ -41,7 +41,7 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] First user process
 
 ### Filesystem
-- [ ] ATA/IDE disk driver
+- [x] ATA/IDE disk driver
 - [ ] Filesystem implementation
 - [ ] sys_read, sys_write (file-backed)
 
