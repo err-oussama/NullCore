@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include <ata.h>
 #include <gdt.h>
 #include <idt.h>
 #include <kheap.h>
@@ -21,5 +22,6 @@ void init_kernel(multiboot_info *boot_info) {
   setup_hardware();
   init_heap();
   task_init();
+  ata_drive_setup();
   /* enable_interrupt(); */
 }
