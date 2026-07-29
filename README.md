@@ -40,6 +40,12 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] ELF loader
 - [x] First user process
 
+### Networking
+- [ ] PCI enumeration
+- [ ] NIC driver
+- [ ] TCP/IP stack
+
+
 ### Filesystem
 - [x] ATA/IDE disk driver
 - [ ] Filesystem implementation
@@ -48,11 +54,6 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 ### Shell
 - [ ] fork / exec
 - [ ] Basic shell (load and run programs from disk)
-
-### Networking
-- [ ] PCI enumeration
-- [ ] NIC driver
-- [ ] TCP/IP stack
 
 ---
 
