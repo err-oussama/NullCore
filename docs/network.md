@@ -13,3 +13,23 @@
 It provides a standardized way for the OS to discover, configure, and talk to any connected device through a unified configuration space, regardless of what the device actually does.
 Each device on the PCI bus exposes a set of configuration registers (Vendor ID, Device ID, Memory regions) that the OS reads to identify and initialize it, making it possible to write a single enumeration routine that works for any PCI device rather that needing device-specific discovery code for each one.
 
+
+## The Bus Hierarchy
+
+### The Bus
+
+A **bus** is a shared communication pathway that connects multiple PCI devices to the CPU.
+The PCI standard supports up to 256 buses (numbered 0-255), organized in a hierarchy:
+```
+Bus 0 → the primary bus, directly connected to the CPU
+Bus 1 → a secondary bus, created by a PCI bridge connected to bus 0
+Bus 2 → another secondary bus, created by another PCI bridge
+...
+Bus 255 → maximum 256 buses total
+```
+*Bus 0* always exists and is where all directly connected devices sit.
+Additional buses only appear when a **PCI bridge** device is present, a bridge extens the hierarchy by creating a new bus behind it, allowing more devices to be connected than a single bus could support.
+
+
+
+
