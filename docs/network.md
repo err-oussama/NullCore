@@ -38,4 +38,19 @@ Every memory access, I/O port access, and configuration space read that CPU make
 
 
 
+## Configuration Space
+
+The **configuration space** is a standardized 256-byte block of registers that every PCI device exposes, allowing the OS to idenfiy, configure, and manage it without any device-specific knowledge.
+The first 64-bytes follow a fixed layout identical across all PCI devices, containinig the vendor ID, device ID, class code, BAR addresses, and interrupt line, so a single enumeration routine can discover and read basic information from any PCI device regardless of what it actually does.
+The remaining bytes are device-specific and vary per device type.
+The OS accesses configuration space not through memory or regular I/O ports, but through a dedicated mechanism using two special I/O ports (`0xCF8` and `0xCFC`), writing the target device address to `0xCF8` and reading the result from `0xCFC`.
+
+
+
+
+
+
+
+
+
 
