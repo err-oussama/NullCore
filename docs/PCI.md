@@ -46,11 +46,25 @@ The remaining bytes are device-specific and vary per device type.
 The OS accesses configuration space not through memory or regular I/O ports, but through a dedicated mechanism using two special I/O ports (`0xCF8` and `0xCFC`), writing the target device address to `0xCF8` and reading the result from `0xCFC`.
 
 
+## The Two Configuration Ports
+
+### `0xCF8`: CONFIG_ADDRESS
+
+The address port, you write a 32-bit value here to specify **which device and which register** you want to access.
+The value is structured as:
+
+```
+bit 31     :    Enable bit, must always be 1
+bits 30-24 :    Reserved, always 0
+bits 23-16 :    Bus number (0-255)
+bits 15-11 :    Device number (0-31)
+bits 10-08 :    Function number (0-7)
+bits 07-02 :    Register offset, which 4-byte register to read
+bits 01-00 :    Always 0, registers are 4-byte aligned
+```
 
 
+### `0xCFC`: CONFIG_DATA
 
-
-
-
-
-
+The data port, after writing the address to `0xCF8`, you read ot write here to actually access the register you specified.
+Reading returns the 32-bit value of that configuration register, writing modifies it.
