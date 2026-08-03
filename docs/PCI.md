@@ -68,3 +68,29 @@ bits 01-00 :    Always 0, registers are 4-byte aligned
 
 The data port, after writing the address to `0xCF8`, you read ot write here to actually access the register you specified.
 Reading returns the 32-bit value of that configuration register, writing modifies it.
+
+
+## Base Address Registers (BARs)
+
+**BARs** are the configuration registers (starting at offset `0x10`) that define where a device's memory or I/O space lives in the system address map.
+To configure a BAR, the OS must first discover the size the devie needs by writing all 1s (`0xFFFFFFFF`) to the register and reading it back; the device clears the lower bits, revealing its, required size and alignment.
+The OS then writes the actual base address back into the BAR.
+If a device needs to map memory above 4GB limit, it requests a 64-bit BAR, which consumes two consecutive 4-byte registers to hold the upper and lower halves of the address.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
