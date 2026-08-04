@@ -46,6 +46,26 @@ The remaining bytes are device-specific and vary per device type.
 The OS accesses configuration space not through memory or regular I/O ports, but through a dedicated mechanism using two special I/O ports (`0xCF8` and `0xCFC`), writing the target device address to `0xCF8` and reading the result from `0xCFC`.
 
 
+### Registers 
+| Offset | Size  |     Name              |                               Role                                    |
+|--------|-------|-----------------------|-----------------------------------------------------------------------|
+| 0x00   | 16bit | Vendor ID             | Identifies the manufacturer (`0x8086=Inter`, `0x10EC=Realtek`)        |
+| 0x02   | 16bit | Device ID             | Identifies the specific device, meaningful only with the Vendor ID    |
+| 0x09   | 8bit  | Class Code            | Category of device (`0x01=storage`, `0x02=network`, `0x03=display`)   |
+| 0x0E   | 8bit  | Header Type           | Determines config space layout (`0x00=normal`, `0x01`=bridge)         |
+| 0x04   | 16bit | Command               | Controls what the device is allowed to do (I/O, memory, bus master)   |
+| 0x10   | 32bit | BAR0                  | Base Address Register 0 : device register location in memory or I/O   |
+| 0x14   | 32bit | BAR1                  | Base Address Register 1                                               |
+| 0x18   | 32bit | BAR2                  | Base Address Register 2                                               |
+| 0x1C   | 32bit | BAR3                  | Base Address Register 3                                               |
+| 0x20   | 32bit | BAR4                  | Base Address Register 4                                               |
+| 0x24   | 32bit | BAR5                  | Base Address Register 5                                               |
+
+
+
+
+
+
 ## The Two Configuration Ports
 
 ### `0xCF8`: CONFIG_ADDRESS
@@ -76,21 +96,5 @@ Reading returns the 32-bit value of that configuration register, writing modifie
 To configure a BAR, the OS must first discover the size the devie needs by writing all 1s (`0xFFFFFFFF`) to the register and reading it back; the device clears the lower bits, revealing its, required size and alignment.
 The OS then writes the actual base address back into the BAR.
 If a device needs to map memory above 4GB limit, it requests a 64-bit BAR, which consumes two consecutive 4-byte registers to hold the upper and lower halves of the address.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
