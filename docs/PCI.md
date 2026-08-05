@@ -3,10 +3,9 @@
 
 ## Peripheral Component Interconnect (PCI)
 
-- **Peripheral**:   Device that connect to the CPU indirectly
-                    (not built into the CPU)
-- **Component**:    Hardware component/cards
-- **Interconnect**: The bus/interface that connects them together
+- **Peripheral**    : Device that connect to the CPU indirectly (not built into the CPU)
+- **Component**     : Hardware component/cards
+- **Interconnect**  : The bus/interface that connects them together
 
         
 **Peripheral component Interconnect (PCI)** is a *standard bus interface* that allows hardware device such as `network cards`, `sound cards` and `storage controllers` to connect to and communicate with the CPU and memory.
@@ -47,23 +46,36 @@ The OS accesses configuration space not through memory or regular I/O ports, but
 
 
 ### Registers 
-| Offset | Size  |     Name              |                               Role                                    |
-|--------|-------|-----------------------|-----------------------------------------------------------------------|
-| 0x00   | 16bit | Vendor ID             | Identifies the manufacturer (`0x8086=Inter`, `0x10EC=Realtek`)        |
-| 0x02   | 16bit | Device ID             | Identifies the specific device, meaningful only with the Vendor ID    |
-| 0x09   | 8bit  | Class Code            | Category of device (`0x01=storage`, `0x02=network`, `0x03=display`)   |
-| 0x0E   | 8bit  | Header Type           | Determines config space layout (`0x00=normal`, `0x01`=bridge)         |
-| 0x04   | 16bit | Command               | Controls what the device is allowed to do (I/O, memory, bus master)   |
-| 0x10   | 32bit | BAR0                  | Base Address Register 0 : device register location in memory or I/O   |
-| 0x14   | 32bit | BAR1                  | Base Address Register 1                                               |
-| 0x18   | 32bit | BAR2                  | Base Address Register 2                                               |
-| 0x1C   | 32bit | BAR3                  | Base Address Register 3                                               |
-| 0x20   | 32bit | BAR4                  | Base Address Register 4                                               |
-| 0x24   | 32bit | BAR5                  | Base Address Register 5                                               |
+
+#### Identification
+
+| Offset | Size  |     Name     |                               Role                                                            |
+|--------|-------|--------------|-----------------------------------------------------------------------------------------------|
+| 0x00   | 16bit | Vendor ID    | Idenfifies the manufacture. Returns `0xFFFF` if the slot is empty                             |
+| 0x02   | 16bit | Device ID    | Identifies the specific chip model. Meaningful only when paried with Vendor ID                |
+| 0x09   | 8bit  | Prog IF      | Defines the register-level programming interface withing a subclass (e.g., AHCI vs IDE)       |
+| 0x0A   | 8bit  | Subclass     | Specifies the exact device category within a class (e.g., Ethernet vs Token Ring)             |
+| 0x0B   | 8bit  | Class code   | Defines the broad device category (e.g., Network, Storage, Display).                          |
+| 0x0E   | 8bit  | Header Type  | Determines the layout of the rest of the config space (`0x00=normal device`, `0x01=bridge`)   | 
+
+#### Communication
+
+| Offset | Size  |     Name     |                               Role                                                            |
+|--------|-------|--------------|-----------------------------------------------------------------------------------------------|
+| 0x10   | 32bit | BAR0         | Either maps a window of the device's internal registers into the CPU's physical memory address space (`bit 0=0`) or provides a base I/O port number through which the device's registers are accessed via *in/out* instructions (`bit 0=1`). | 
+#### Activation
+
+| Offset | Size  |  Name    |                               Role                                    |
+|--------|-------|----------|-----------------------------------------------------------------------|
+| 0x04   | 16bit | Command  | Controls device operation. Must set I/O Space Enable (Bit 0), Memory Space Enable (Bit 1) and Bus Master Enable (Bit 2) to allow the device to respond to memory and perform DMA. |
 
 
+#### Interrupts
 
-
+| Offset | Size  |     Name         |                               Role                                                                                                             |
+|--------|-------|------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| 0x3D   | 8bit  | Interrupt Pin    | Identifies which physical PCI interrupt pin the device uses to signal the CPU (`1=INTA`, `2=INTB`, `3=INTC`, `4=INTD`). `0` mean no interrupts. |
+| 0x3C   | 8bit  | Interrupt Line   | Routes the device's interrupt pin to a specific system IRQ number (e.g., IRQ 20) for CPU handling.                                             |
 
 
 ## The Two Configuration Ports
