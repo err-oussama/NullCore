@@ -1,8 +1,7 @@
-# Network
 
+# Peripheral Component Interconnect (PCI)
 
-## Peripheral Component Interconnect (PCI)
-
+## Overview
 - **Peripheral**    : Device that connect to the CPU indirectly (not built into the CPU)
 - **Component**     : Hardware component/cards
 - **Interconnect**  : The bus/interface that connects them together
@@ -11,6 +10,14 @@
 **Peripheral component Interconnect (PCI)** is a *standard bus interface* that allows hardware device such as `network cards`, `sound cards` and `storage controllers` to connect to and communicate with the CPU and memory.
 It provides a standardized way for the OS to discover, configure, and talk to any connected device through a unified configuration space, regardless of what the device actually does.
 Each device on the PCI bus exposes a set of configuration registers (Vendor ID, Device ID, Memory regions) that the OS reads to identify and initialize it, making it possible to write a single enumeration routine that works for any PCI device rather that needing device-specific discovery code for each one.
+
+
+
+
+## What is PCI
+
+**Peripheral Component Interconnect** is a *standard* that defines how the CPU, memory, and peripheral devices(Network cards, Disk Controllers, Graphics Cards, etc.) talk to each other on a computer's motherboard.
+It's both a physical bus (the electrical wiring/slots) and a protocol(the rules for addressing and communicating with devices on that bus).
 
 
 ## The Bus Hierarchy
