@@ -12,10 +12,10 @@
 It is both a:
 - *physical bus*: the electrical wiring/slots.
 - *protocol*: the rules for addressing and communicating with devices on that bus.
+
 It provides a standardized way for the OS to discover, configure, and talk to any connected device through a unified **configuration space**, regardless of what the device actually does.
 Each device on the PCI bus exposes a set of configuration registers(Vendor ID, Device ID, Class Code, Memory I/O regions, etc.) that the OS reads to identify and initialize it.
 This makes it possible to write a single enumeration routine that works for any PCI device, rather than needing device-specific discovery code for each.
-
 
 
 ## The Bus Hierarchy
