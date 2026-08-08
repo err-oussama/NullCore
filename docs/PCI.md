@@ -18,6 +18,22 @@ Each device on the PCI bus exposes a set of configuration registers(Vendor ID, D
 This makes it possible to write a single enumeration routine that works for any PCI device, rather than needing device-specific discovery code for each.
 
 
+
+## How PCI Generally Works
+
+*PCI* operates in three distinct stages, moving from genric discovery to fully device-specific behavior.
+
+
+### Phase 1: Discovery / Enumeration (Unified)
+The Os walks the entire possible PCI address space  (every bus, device and function combination) using the two I/O ports *CONFIG_ADDRESS* `0xCF8` and *CONFIG_DATA* `0xCFC`.
+For each combination, it reads the first register for the Configuration Space (Vendor ID)
+If the response is `0xFFFFFFFF`, no device exists at that slot so the OS skips it and moves on.
+If a valid Vendor ID comes back, a device is present, and the OS reads further fields(Device ID, Class Code, Header Type) to identify what it is and whether it's a multi-function device.
+This phase is exactly the same regardless of what kind of device is found.
+
+
+
+
 ## The Bus Hierarchy
 
 ### The Bus
