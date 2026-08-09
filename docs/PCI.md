@@ -32,6 +32,25 @@ If a valid Vendor ID comes back, a device is present, and the OS reads further f
 This phase is exactly the same regardless of what kind of device is found.
 
 
+### Phase 2: Configuration & Allocation (Unified)
+
+Every discovered device needs an address range the CPU can use to talk to it, but this range doesn't correspond to physical RAM; it's a separete address window that the device claims for itself.
+When the CPU writes to that range, RAM stays silent and the device answers instead.
+This is setup the same way for every divece:
+
+- **Sizing**: The OS writes `0xFFFFFFFF` to a BAR (starting at offset `0x10`) and reads back the result. The device responds by masking of the bits it controls, and the pattern of zero bits tells the OS how mush address space it's requested and how it's aligned. 
+
+
+- **Allocation**: The OS finds a free, correctly aligned chunk of address space (e.g., `0xF7C00000`)big enough to satisfy that request.
+
+- **Mapping**: The OS writes that base address into the BAR. The device now knows which address range belongs to it, and will respond whenever it sees an access land inside that range.
+
+- **Enabling**: The OS write to the *Command Register* (offset `0x04`) to set the *Memory Space Enable* and *Bus Master Enable* bits. Until this happens, the device ignores all bus traffic and cannot perform DMA, even through it has a valid address now.
+
+This entire phase is identical in procedure for any PCI device (a NIC, a Disk Controller, a Sound Card) because it only concerns claiming address space and switching the device on, not what the device actually does with that space.
+
+
+
 
 
 ## The Bus Hierarchy
