@@ -50,8 +50,18 @@ This is setup the same way for every divece:
 This entire phase is identical in procedure for any PCI device (a NIC, a Disk Controller, a Sound Card) because it only concerns claiming address space and switching the device on, not what the device actually does with that space.
 
 
+### Phase 3: Operation (Unique per device)
+Once addressing and enabling are done, the generic OS logic steps back and device-specific driver takes over.
+From here, everything deponds on the device:
+
+- **Control path (MMIO)**: The CPU reads and writes to the address it placed in the BAR to issue commands, ring doorbells, or check status registers. The meaning of every offset withing that window is entirely device-defined.
+
+- **Data path (DMA)**: The CPU hands the device pointers to buffers in RAM. Using Bus Mastring (enabled check in Phase 2), the device reads or writes that RAM directly on its own, without CPU involvement for each byte, and raises an interrupt when the transfer completes.
 
 
+
+
+The key idea tying all three phases together: Phase 1 and 2 are why it is possible to write *one enumeration routine* that works for any PCI device, they only deal with the standardized Configuration Space. Phase 3 is where that genric code hands off to something device-specific, because nothing about how NIC sends a packed is defined by PCI itself.
 
 ## The Bus Hierarchy
 
