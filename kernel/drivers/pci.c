@@ -28,16 +28,24 @@ uint8 pci_read_offset(uint8 bus, uint8 device, uint8 function, uint8 offset) {
 void pci_enumeration() {
   for (uint32 bus = 0; bus <= 255; bus++) {
     for (uint32 device = 0; device <= 31; device++) {
+      uint32 ids = pci_read_register(bus, device, 0, 0);
+      if (ids == 0xFFFFFFFF)
+        continue;
       for (uint32 function = 0; function <= 7; function++) {
-        uint32 ids = pci_read_register(bus, device, function, 0);
-        uint8 class_code = pci_read_offset(bus, device, function, 0xB);
+        if (function)
+          ids = pci_read_register(bus, device, function, 0);
         if (ids != 0xFFFFFFFF) {
+          uint8 class_code = pci_read_offset(bus, device, function, 0xB);
+          uint8 header_type = pci_read_offset(bus, device, function, 0xE);
           kprintf("Bus: 0x%x, ", bus);
-          kprintf("Device : 0x%x, ", device);
-          kprintf("Function : 0x%x, ", function);
-          kprintf("Register 0: 0x%x, ", ids);
+          kprintf("Dev: 0x%x, ", device);
+          kprintf("Func: 0x%x, ", function);
+          kprintf("VendID: 0x%x, ", ids & 0xFFFF);
+          kprintf("DevID: 0x%x, ", ids >> 0x10);
           kprintf("Class Code: 0x%x", class_code);
           kprintf("\n");
+          if (!function && !(header_type & 0x80))
+            break;
         }
       }
     }
