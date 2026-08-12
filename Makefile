@@ -64,7 +64,11 @@ disk.img:
 
 # Running
 run: all
-	qemu-system-x86_64 -kernel $(TARGET) -drive file=disk.img,format=raw,index=0,media=disk
+	qemu-system-i386 -kernel $(TARGET) \
+		-drive file=disk.img,format=raw,index=0,media=disk \
+		-netdev user,id=net0 \
+		-device rtl8139,netdev=net0,mac=52:54:00:12:34:56
+
 
 # Clean
 clean:
