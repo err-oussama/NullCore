@@ -10,5 +10,5 @@
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprint_wrn("========[ Working on: Network (PCI) ]========\n");
-  pci_enumeration();
+  pci_setup();
 }

@@ -16,6 +16,19 @@ uint32 pci_read_register(uint8 bus, uint8 device, uint8 function, uint8 reg) {
 
   return indw(PCI_CONFIG_DATA);
 };
+void pci_write_register(uint8 bus, uint8 device, uint8 function, uint8 reg,
+                        uint32 value) {
+
+  uint32 address = 0x80000000;
+  address |= (bus << 16);
+  address |= (device << 11);
+  address |= (function << 8);
+  address |= (reg << 2);
+
+  outdw(PCI_CONFIG_ADDRESS, address);
+
+  outdw(PCI_CONFIG_DATA, value);
+};
 
 uint8 pci_read_offset(uint8 bus, uint8 device, uint8 function, uint8 offset) {
 
@@ -51,3 +64,5 @@ void pci_enumeration() {
     }
   }
 }
+
+void pci_setup() { kprintf("pci setup: soon"); }

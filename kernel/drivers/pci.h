@@ -5,4 +5,6 @@
 #define PCI_CONFIG_DATA 0xCFC
 
 void pci_enumeration();
+void pci_setup();
+
 #endif
