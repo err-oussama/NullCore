@@ -159,4 +159,38 @@ To configure a BAR, the OS must first discover the size the devie needs by writi
 The OS then writes the actual base address back into the BAR.
 If a device needs to map memory above 4GB limit, it requests a 64-bit BAR, which consumes two consecutive 4-byte registers to hold the upper and lower halves of the address.
 
+**Base Address Registers (BARs)** are split into two primary components:
+1. *The Control/Flag Bits*: The lower bits that dictate how the BAR operates.
+2. *The Base Address*: The remaining upper bits that specify the actual starting address/port assigned to the device.
 
+The internal structure of those flags bits changes completely depending no how the device communicate. This determined entirely by *Bit 0*:
+- *Bit 0 = 0 (Memory Space)*: The device maps its register into a reserved region of the CPU's physical address space (separate from RAM), allowing the CPU to interact with it via standard memory pointers (MMIO). 
+- *Bit 0 = 1 (I/O Space)*: The device relies on legacy port-based communication, meaning it is accessed using dedicated hardware `in` and `out` instructions.
+
+
+### Memory Space Bit fiels
+
+- *Bit 0    : Space type*:
+    `0` = Memory space
+    `1` = I/O space 
+- *Bit 1-2  : Address width*: 
+    `00` = 32bit(locatable anywhere), 
+    `10` = 64bit (this BAR and the next combine to hold the full address).
+- *Bit 3    : Prefetchable*:
+    `0` = reads may have side effects and must not be cached.
+    `1` = reads have no side effects and may be cached.
+
+- *Bit 4-31 : Base Address*:
+    the actual memory address, with alignment-dependent low bits implicitly zero.
+
+
+### I/O Space Bit fiels
+
+- *Bit 0    : Space type*:
+    `0` = Memory Space
+    `1` = I/O space
+- *Bit 1    : Reserved*:
+    always 0 
+
+- *Bit 2-31 : Base Address*:
+    The actual I/O port number, though real devices typically only decode the lower 16 bits.
