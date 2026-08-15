@@ -44,7 +44,7 @@ user_program: user/user_program_asm.o user/user_program.c
 
 
 # Default target
-all: user_program $(TARGET)
+all: disk.img user_program $(TARGET)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
