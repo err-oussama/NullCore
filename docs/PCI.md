@@ -194,3 +194,16 @@ The internal structure of those flags bits changes completely depending no how t
 
 - *Bit 2-31 : Base Address*:
     The actual I/O port number, though real devices typically only decode the lower 16 bits.
+
+### BAR size mask
+
+**BAR Size Mask**: The value returned when reading a BAR immediately after writing `0xFFFFFFFF` to it. Its pattern of hardwired `0` bits (which the device ignores) versus writable `1` bits, reveals both the amount of address space the device needs and the alignment required for its base address. 
+
+This works because of how the device is wired: the low address bits it doesn't use (its internal 'don't care' region) are hardwired and stay `0` no matter what's written.
+Every other bit accepts the write and becomes `1`.
+
+The position of the first `1` bit, counting from bit 0 upward, reveals both facts at once:
+
+- **Size**= 2 power the bit's position.
+- **Alignment**= The base address must be a multiple of that same size.
+
