@@ -34,7 +34,7 @@ typedef struct __attribute__((packed)) {
   pci_bar_t bars[6];
 } pci_device_t;
 
-void pci_enumeration();
+void pci_print_device(int32 dev);
 void pci_setup();
 
 #endif

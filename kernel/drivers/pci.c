@@ -105,6 +105,19 @@ void pci_enumeration() {
   }
 }
 
+void pci_print_device(int32 n) {
+  uint32 start = n == -1 ? 0 : n;
+  uint32 end = n == -1 ? pci_device_index : n + 1;
+  for (uint32 i = start; i < end; i++) {
+    pci_device_t *dev = &pci_devices[i];
+    kprintf("Bus: 0x%x, Dev: 0x%x, Fun: 0x%x :: ", dev->bus, dev->device,
+            dev->function);
+    kprintf("Ven ID: 0x%x, Dev ID: 0x%x :: ", dev->vendor_id, dev->device_id);
+    kprintf("Class Code: 0x%x, Int Line: 0x%x, Int Pin 0x%x\n", dev->class_code,
+            dev->interrupt_line, dev->interrupt_pin);
+  }
+}
+
 void pci_setup() {
   memset(pci_devices, 0, sizeof(pci_device_t) * PCI_MAX_DEVICE);
   pci_enumeration();
