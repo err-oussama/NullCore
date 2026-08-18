@@ -207,3 +207,32 @@ The position of the first `1` bit, counting from bit 0 upward, reveals both fact
 - **Size**= 2 power the bit's position.
 - **Alignment**= The base address must be a multiple of that same size.
 
+## Interrupt Line
+
+***Interrupt Line***: is a register in the PCI device's Configuration Space, at offset `0x3C`(register index `0xF`). It tells the kernel which system IRQ this device will fire on.
+
+It value is written by the BIOS, not the device, the device has no say in what IRQ number ends up here. BIOS resolves it by looking it up in the **Differentiated System Description Table (BSDT)**:
+- It uses **bus** to navigate the correct `_PRI(PCI Routing Table)`, each bus has its own `_PRI`, defined under that bus's corresponding bridge node in the DSDT.
+
+- It then uses **device** and **Interrupt Pin** together as the lookup key withing that `_PRT`, which returns the one correct IRQ number for that device's physical wiring.
+
+BIOS writes that resolved value into the Interrupt Line, so by the time the kernel reads it no lookup is needed, it's already the final answer.
+
+
+
+## Interrupt Pin
+
+***Interrupt Pin***: (offset `0x3D`) is a read-only, hardwired register, it tells which of the 4 physical PCI interrupt wires the device is electrically connected to: `1=INTA#`, `2=INTB`, `3=INC`, `4=IND`, or `0=none`.
+
+Interrupt pin identifies which physical wire the device usese, a fixed hardware fact, set by the chip's design, not something the kernel acts on directly. It's only used by BIOS as an input for looking up the actual IRQ number (via the BSDT `_RPT`), which then gets written into the separate Interrupt Line register; the value the kernel actuall reads and uses.
+
+
+
+
+
+
+
+
+
+
+
