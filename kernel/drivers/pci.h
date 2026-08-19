@@ -36,5 +36,6 @@ typedef struct __attribute__((packed)) {
 
 void pci_print_device(int32 dev);
 void pci_setup();
+void nic_handler();
 
 #endif

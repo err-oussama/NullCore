@@ -32,9 +32,9 @@ void isr_security_exception_handler();
 // pic
 void isr_timer_handler();
 void isr_keyboard_handler();
+void isr_nic_handler();
 
 // interrupts
-//
 void isr_syscall_handler();
 
 void isr_dummy();

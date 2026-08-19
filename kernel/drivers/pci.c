@@ -2,6 +2,7 @@
 #include <kprint.h>
 #include <kstring.h>
 #include <pci.h>
+#include <pic.h>
 #include <pmio.h>
 
 #define PCI_MAX_DEVICE 20
@@ -122,3 +123,8 @@ void pci_setup() {
   memset(pci_devices, 0, sizeof(pci_device_t) * PCI_MAX_DEVICE);
   pci_enumeration();
 }
+
+void nic_handler() {
+  pic_send_eoi(0xB);
+  return;
+};

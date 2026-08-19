@@ -29,36 +29,29 @@ void setup_IDT() {
 
   set_idt_entry(&gate_descriptors[0], (uint32)isr_divide_error_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x21], (uint32)isr_keyboard_handler, 0x08,
                 kernel_attr_gate);
   set_idt_entry(&gate_descriptors[0x20], (uint32)isr_timer_handler, 0x08,
                 kernel_attr_gate);
-
+  set_idt_entry(&gate_descriptors[0x2B], (uint32)isr_nic_handler, 0x08,
+                kernel_attr_gate);
   set_idt_entry(&gate_descriptors[0x0E], (uint32)isr_page_fault_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x08], (uint32)isr_double_fault_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x0D],
                 (uint32)isr_general_protection_fault_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x0A], (uint32)isr_invalid_TSS_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x0B],
                 (uint32)isr_segment_not_present_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x0C],
                 (uint32)isr_stack_segment_fault_handler, 0x08,
                 kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x11], (uint32)isr_alignment_check_handler,
                 0x08, kernel_attr_gate);
-
   set_idt_entry(&gate_descriptors[0x80], (uint32)isr_syscall_handler, 0x08,
                 0xEE);
   lidtr(&idt_reg);
