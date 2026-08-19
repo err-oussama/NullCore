@@ -41,7 +41,7 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] First user process
 
 ### Networking
-- [ ] PCI enumeration
+- [x] PCI enumeration
 - [ ] NIC driver
 - [ ] TCP/IP stack
 
