@@ -26,7 +26,6 @@ void pit_init(uint32 frequency) {
 
 uint32 timer_handler(uint32 esp) {
   ticks++;
-  pic_send_eoi(0);
   uint32 fall_back_esp = esp;
 
   task *current = current_task();
@@ -45,5 +44,6 @@ uint32 timer_handler(uint32 esp) {
 
     fall_back_esp = next->esp;
   }
+  pic_send_eoi(0);
   return fall_back_esp;
 }
