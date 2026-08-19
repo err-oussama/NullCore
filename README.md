@@ -45,7 +45,6 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [ ] NIC driver
 - [ ] TCP/IP stack
 
-
 ### Filesystem
 - [x] ATA/IDE disk driver
 - [ ] Filesystem implementation
