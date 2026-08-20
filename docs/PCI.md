@@ -226,13 +226,86 @@ BIOS writes that resolved value into the Interrupt Line, so by the time the kern
 
 Interrupt pin identifies which physical wire the device usese, a fixed hardware fact, set by the chip's design, not something the kernel acts on directly. It's only used by BIOS as an input for looking up the actual IRQ number (via the BSDT `_RPT`), which then gets written into the separate Interrupt Line register; the value the kernel actuall reads and uses.
 
+## Command Register
+
+***Command Register***: a 16-bit register at offset `0x4` that controls how the device participates on the PCI bus, which address spaces it responds to, whether it can act as a bus master, and how it reports certain error conditions. Each bit is an independent on/off switch, set by the OS to enable the specific behaviors the devices needs.
+
+- **Bit 0**: *I/O Space* ~ `RW`
+    - `0`: Device does not respond to I/O space accesses.
+    - `1`: Device responds to accesses targeting its I/O-space BAR(s).
+- **Bit 1**: *Memory Space* ~ `RW`
+    - `0`: Device does not respond to memory space accesses.
+    - `1`: Device responds to accesses targeting its memory-space BAR(s).
+- **Bit 2**: *Bus Master* ~ `RW`
+    - `0`: Device cannot initiate bus transactions (no DMA).
+    - `1`: Device is allowed to act as a bus master and initiate its own transactions (DMA).
+- **Bit 3**: *Special Cycles* ~ `RO`
+    - `0`: Device ignores special cycle broadcasts
+    - `1`: Device monitors special cycle broadcasts on the bus.
+- **Bit 4**: *Memory Write and Invalidate Enable* ~ `RO`
+    - `0`: Device uses plain memory write commands.
+    - `1`: Device may use the Memory Write and Invalidate command for burst writes.
+- **Bit 5**: *VGA Palette Snoop* ~ `RO`
+    - `0`: Device does not snoop VGA paletter writes.
+    - `1`: Device snoops VGA palette register writes on the bus.
+- **Bit 6**: *Parity Error Response* ~ `RW`
+    - `0`: Device detects parity errors but does not report them.
+    - `1`: Device reports detected parity errors.
+- **Bit 7**: *Reserved* ~ `RO`
+    - `0`: No Function.
+    - `1`: No Function.
+- **Bit 8**: *SERR# Enable* ~ `RW`
+    - `0`: Device cannot assert SERR#.
+    - `1`: Device is allowed to assert SERR# to report a system error.
+- **Bit 9**: *Fast Back-to-Back Enable* ~ `RO`
+    - `0`: Device may not perform fast back-to-back transactions to different targets.
+    - `1`: Device may perform fast back-to-back transactions to different targets.
+- **Bit 10**: *Interrupt Disable* ~ `RW`
+    - `0`: Device's legacy INTx# interrupt line is enabled.
+    - `1`: Device's legacy INTx# interrupt line is disabled, regardless of internal state.
+- **Bits 11-15**: *Reserved*
+    - No Function; always read as `0`, writes ignored
 
 
+## Status Register
 
 
+***Status Register***: a 16-bit register at offset `0x6` that reports the devic's current status and any error conditions it has encountered. Most bits are read-only flags describing fixed capabilites or current state, but several are **write-1-to-clear**: writing a `1` to one of these bits clears it, while writing `0` leaves it unchange. These bits never clear themselves, the kernel must explicitly write `1` to acknowledge and clear them. 
 
-
-
-
-
+- **Bit 0-2**: *Reserved* ~ `RO`
+    - No Function; Always read as `0`.
+- **Bit 3**: *Interrupt Status* ~ `RO`
+    - `0`: Device has no INTx# interrupt currently pending
+    - `1`: Device currently has an INTx interrupt pending
+- **Bit 4**: *Capabilites List* ~ `RO`
+    - `0`: Device does not implement an extended capabilities list.
+    - `1`: Device implements a capabilities list, reachable via Capabilities Pointer(offset `0x34`). 
+- **Bit 5**: *66 MH Capable* ~ `RO`
+    - `0`: Device only support 33MHz PCI bus operation
+    - `1`: Device supports 66MHz PCI bus operation
+- **Bit 6**: *Reserved* ~ `RO`
+    - No Function; Always read as `0`
+- **Bit 7**: *Fast Back-to-Back Capable* ~ `RO`
+    - `0`: Device cannot accept fast back-to-back transactions from different masters
+    - `1`: Device can accept fast back-to-back transactions from different masters
+- **Bit 8**: *Master Data Parity Error* ~ `RW1C`
+    - `0`: No parity error detected while acting as a bus master (or not yet acknowledged)
+    - `1`: A parity error was detected while this device was acting as bus master
+- **Bit 9-10**: *DEVSEL Timing* ~ `RO`
+    - A 2-bit field indicating how quickly the device aserts DEVSEL# (fast/medium/slow) when acting as a target
+- **Bit 11**: *Signaled Target Abort* ~ `RW1C`
+    - `0`: This device has not, while acting as a target, terminated a transactions with a Target-Abort
+    - `1`: This device, acting as a target, terminated a transaction with a Target-Abort; write `1` to clear
+- **Bit 12**: *Received Target Abrot* ~ `RW1C`
+    - `0`: No Target-Abort has been received while this device was acting as a master
+    - `1`: This device, acting as a master, had a transaction terminated by a Target-Abort from the addressed target; write `1` to clear
+- **Bit 13**: *Received Master Abrot* ~ `RW1C`
+    - `0`: No Master-Abort has been received while this device was acting as a master
+    - `1`: This device, acting as master, had a transaction terminated because no target responded; write `1` to clear
+- **Bit 14**: *Signaled System Error* ~ `RW1C`
+    - `0`: This device has not asserted SERR#
+    - `1`: This device asserted SERR# to report a system error; write `1` to clear.
+- **Bit 15**: *Detected Parity Error* ~ `RW1C`
+    - `0`: No parity error detected on the bus
+    - `1`: This device detected a parity error on the bus; write `1` to clear.
 
