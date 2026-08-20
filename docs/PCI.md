@@ -257,7 +257,7 @@ Interrupt pin identifies which physical wire the device usese, a fixed hardware 
 - **Bit 8**: *SERR# Enable* ~ `RW`
     - `0`: Device cannot assert SERR#.
     - `1`: Device is allowed to assert SERR# to report a system error.
-- **Bit 9**: *Fast Back-to-Back Enable* ~ `RO`
+- **Bit 9**: *Fast Back-to-Back Enable* ~ `RW`
     - `0`: Device may not perform fast back-to-back transactions to different targets.
     - `1`: Device may perform fast back-to-back transactions to different targets.
 - **Bit 10**: *Interrupt Disable* ~ `RW`
