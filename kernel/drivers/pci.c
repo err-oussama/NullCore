@@ -122,9 +122,15 @@ void pci_print_device(int32 n) {
 void pci_setup() {
   memset(pci_devices, 0, sizeof(pci_device_t) * PCI_MAX_DEVICE);
   pci_enumeration();
+  uint32 status_command = pci_read_register(0x0, 0x3, 0x0, 0x1);
+  status_command &= 0xFFFF;
+  status_command |= 0x1;
+  status_command |= 0x4;
+  pci_write_register(0x0, 0x3, 0x0, 0x1, status_command);
 }
 
 void nic_handler() {
+  kprintf("NIC fired interrupt.");
   pic_send_eoi(0xB);
   return;
 };
