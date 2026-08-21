@@ -2,10 +2,10 @@
 #include <ata.h>
 #include <kernel.h>
 #include <kstring.h>
+#include <pci.h>
+#include <pmio.h>
 #include <pmm.h>
 #include <types.h>
-
-#include <pci.h>
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
@@ -20,6 +20,13 @@ void kmain(multiboot_info *boot_info) {
     kprintf("BAR%i: %i, 0x%x, size: 0x%x\n", i, rtl8139->bars[i].is_io_space,
             rtl8139->bars[i].address, rtl8139->bars[i].size);
   }
-  uint8 port = rtl8139->bars[0].address;
-  kprintf("0x%x\n", port);
+  uint32 port = rtl8139->bars[0].address;
+  kprintf("port: 0x%x\n", port);
+  kprintf("MAC: ");
+  outb(port, 0xAA);
+  for (int i = 0; i < 6; i++) {
+    kprintf("%x", inb(port + i));
+    if (i != 5)
+      kprintf(":");
+  }
 }
