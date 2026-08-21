@@ -34,8 +34,9 @@ typedef struct __attribute__((packed)) {
   pci_bar_t bars[6];
 } pci_device_t;
 
-void pci_print_device(int32 dev);
 void pci_setup();
+void pci_print_device(int32 dev);
+pci_device_t *pci_find_device(uint16 vendor_id, uint16 device_id);
 void nic_handler();
 
 #endif

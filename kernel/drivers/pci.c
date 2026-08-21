@@ -106,15 +106,23 @@ void pci_enumeration() {
   }
 }
 
+pci_device_t *pci_find_device(uint16 vendor_id, uint16 device_id) {
+  for (uint32 i = 0; i < pci_device_index; i++) {
+    if (vendor_id == pci_devices[i].vendor_id &&
+        device_id == pci_devices[i].device_id)
+      return &pci_devices[i];
+  }
+  return NULL;
+};
+
 void pci_print_device(int32 n) {
   uint32 start = n == -1 ? 0 : n;
   uint32 end = n == -1 ? pci_device_index : n + 1;
   for (uint32 i = start; i < end; i++) {
     pci_device_t *dev = &pci_devices[i];
-    kprintf("Bus: 0x%x, Dev: 0x%x, Fun: 0x%x :: ", dev->bus, dev->device,
-            dev->function);
-    kprintf("Ven ID: 0x%x, Dev ID: 0x%x :: ", dev->vendor_id, dev->device_id);
-    kprintf("Class Code: 0x%x, Int Line: 0x%x, Int Pin 0x%x\n", dev->class_code,
+    kprintf("B/D/F: 0x%x/0x%x/0x%x, ", dev->bus, dev->device, dev->function);
+    kprintf("V_ID: 0x%x, D_ID: 0x%x, ", dev->vendor_id, dev->device_id);
+    kprintf("CC: 0x%x, IntL: 0x%x, IntP 0x%x\n", dev->class_code,
             dev->interrupt_line, dev->interrupt_pin);
   }
 }
