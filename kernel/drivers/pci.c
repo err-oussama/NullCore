@@ -44,13 +44,13 @@ void pci_setup_bars(uint8 bus, uint8 device, uint8 function,
                     pci_device_t *pci_dev) {
 
   for (uint8 i = 0; i < 6; i++) {
-    uint32 bar = pci_read_register(bus, device, function, 0x10 + (i * 4));
+    uint8 reg = 0x4 + i;
+    uint32 bar = pci_read_register(bus, device, function, reg);
 
-    pci_write_register(bus, device, function, 0x10 + (i * 4), 0xFFFFFFFF);
+    pci_write_register(bus, device, function, reg, 0xFFFFFFFF);
 
-    uint32 bar_size_mask =
-        pci_read_register(bus, device, function, 0x10 + (i * 4));
-    pci_write_register(bus, device, function, 0x10 + (i * 4), bar);
+    uint32 bar_size_mask = pci_read_register(bus, device, function, reg);
+    pci_write_register(bus, device, function, reg, bar);
 
     pci_dev->bars[i].size = (~bar_size_mask) + 1;
     pci_dev->bars[i].is_io_space = bar & 0x1;
