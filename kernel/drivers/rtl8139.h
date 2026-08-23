@@ -1,25 +1,23 @@
 #ifndef RTL8139_H
 #define RTL8139_H
 
-#define RTL8139_COMMAND_OFFSET 0x37 // size: 1byte
-// Bit 0:Buffer Empty (BUFE) - RO: flag
-// 		0= There is data waiting to be read,
-// 		1= RX buffer currently has no unread packets;
-//
-// Bit 1: Reserved; No Function
-//
-// Bit 2: Transmitter Enable (TE) - RW: function
-// 		0= Transmitter is Disabled and cannot send packets
-// 		1= Transmitter is Enabled and can send packets
-//
-// Bit 3: Receiver Enable (RE) - RW: function
-// 		0= Receiver is Disabled and cannot receive packets
-// 		1= Receiver is enabled and will accept incoming packets
-//
-// Bit 4: Reset (RST) - RW, self-clearing: function
-//		write 1 triggers a software reset; hardware automatically clears
-//    this bit back to 0 once the reset completes
-//
-// Bit 5-7: Reserved; No function
+// Any bit not explicity defined below is reserved and has no function.
+
+// ############### COMMAND ########################
+
+#define RTL8139_CMD_OFFSET 0x37 // COMMAND register, size: 1 byte
+
+#define RTL8139_CMD_BUFE 0x1 // Buffer Empty - RO
+// Flag: is the RX buffer currently empty (no unread packets waiting)
+
+#define RTL8139_CMD_TE 0x4 // Transmitter Enable - RW
+// Enables transimitter to send packets
+
+#define RTL8139_CMD_RE 0x8 // Receiver Enabled - RW
+// Enables receiver to accept incoming packets
+
+#define RTL8139_CMD_RST 0x10 // Reset - RW - self-clearing
+// write 1 triggers a software reset
+// hardware automatically clears this bit back to 0 once the reset completes
 
 #endif
