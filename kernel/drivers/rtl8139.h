@@ -119,4 +119,73 @@
 #define RTL8139_RCR_ERTH_14 0xE000000    // 14/16
 #define RTL8139_RCR_ERTH_15 0xF000000    // 15/16
 
+// ############### TCR ########################
+
+// Name: TRANSMIT CONFIG REGISTER
+// Size: 4 byte
+// Role: Register to config the behavior of the transmitting mechaanism of the
+// 			 RTL8139
+
+#define RTL8139_TCR_OFFSET 0x40
+
+#define RTL8139_TCR_CLRABT 0x1 // Clear Abort - W
+// Write 1 to retry the last transmitted (aborted) packet;
+// only valid while the device is in the transmit abort state
+
+// Bits 4-7: TXRR (TX Retry Count) - RW
+// Number of retransmit attempts after a collision, in multiples of 16
+// Total retries = 16 + (TXRR * 16); if TXRR = 0, retries 16 times before
+// aborting with excessive collisions. TER (in ISR) is set once this limit is
+// reached
+#define RTL8139_TCR_TXRR0 0x00  // 16 Retry
+#define RTL8139_TCR_TXRR1 0x10  // 32 Retry
+#define RTL8139_TCR_TXRR2 0x20  // 48 Retry
+#define RTL8139_TCR_TXRR3 0x30  // 64 Retry
+#define RTL8139_TCR_TXRR4 0x40  // 80 Retry
+#define RTL8139_TCR_TXRR5 0x50  // 96 Retry
+#define RTL8139_TCR_TXRR6 0x60  // 112 Retry
+#define RTL8139_TCR_TXRR7 0x70  // 128 Retry
+#define RTL8139_TCR_TXRR8 0x80  // 144 Retry
+#define RTL8139_TCR_TXRR9 0x90  // 160 Retry
+#define RTL8139_TCR_TXRR10 0xA0 // 176 Retry
+#define RTL8139_TCR_TXRR11 0xB0 // 192 Retry
+#define RTL8139_TCR_TXRR12 0xC0 // 208 Retry
+#define RTL8139_TCR_TXRR13 0xD0 // 224 Retry
+#define RTL8139_TCR_TXRR14 0xE0 // 240 Retry
+#define RTL8139_TCR_TXRR15 0xF0 // 256 Retry
+
+// Bits 8-10: MXDMA (Max DMA Burst Size per TX DMA Burst) - RW
+// Maximum size of a single transmit DMA burst transfer
+#define RTL8139_TCR_MXDMA16 0x000   // 16 Bytes
+#define RTL8139_TCR_MXDMA32 0x100   // 32 Bytes
+#define RTL8139_TCR_MXDMA64 0x200   // 64 Bytes
+#define RTL8139_TCR_MXDMA128 0x300  // 128 Bytes
+#define RTL8139_TCR_MXDMA256 0x400  // 256 Bytes
+#define RTL8139_TCR_MXDMA512 0x500  // 512 Bytes
+#define RTL8139_TCR_MXDMA1024 0x600 // 1024 Bytes
+#define RTL8139_TCR_MXDMA2048 0x700 // 2048 Bytes
+
+#define RTL8139_TCR_CRC 0x10000 // Append CRC - RW
+// 0: CRC is appended to the end of the packet
+// 1: No CRC is appended
+
+// Bits 17-18: LBK (LoopBack Test) - RW
+// 00: Normal operation
+// 01: Reserved
+// 11: Loopback mode (no packets appear on TX+/-)
+#define RTL8139_TCR_LBK_NORMAL 0x00000
+#define RTL8139_TCR_LBK_LOOPBACK 0x60000
+
+// Bits 22-23: HWVERID_B (Hardware Version ID) - RO
+
+// Bits 24-25: IFG (InterFrame Gap Time) - RW
+// Adjust the gap between frames below the IEEE 802.3 standard
+// 10 Mbps : 8.4us + 0.4 * IFG us
+// 100 Mbps: 840ns + 40 * IFG us
+// Only (1,1) is IEEE 802.3 compliant; any other value violates the standard
+#define RTL8139_TCR_IFG 0x3000000 // (1,1) - complaint
+
+// Bits 26-30: HWVERID_A (Hardware Version ID) - RO
+// Identifies the specific RTL8139/8100 chip varient; see datasheet table
+
 #endif
