@@ -119,6 +119,9 @@
 #define RTL8139_RCR_ERTH_14 0xE000000    // 14/16
 #define RTL8139_RCR_ERTH_15 0xF000000    // 15/16
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // ############### TCR ########################
 
 // Name: TRANSMIT CONFIG REGISTER
@@ -187,5 +190,82 @@
 
 // Bits 26-30: HWVERID_A (Hardware Version ID) - RO
 // Identifies the specific RTL8139/8100 chip varient; see datasheet table
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### ISR ########################
+
+// Name: Interrupt Status Register
+// Size: 2 byte
+// Role: Reports which interrupt condition(s) triggered.
+// 			 Reading it clears every set bit (clear-on-read).
+// 			 Write has no effect.
+// 			 Bits still get set here even if masked in IMR -
+// 			 the mask only controls whether a set bit actually raise
+// 			 a hardware interrupt.
+
+#define RTL8139_ISR_OFFSET 0x3E
+
+#define RTL8139_ISR_ROK 0x1 // Receive (RX) OK - RO
+// A packet was received successfully (normal mode), or the arriving
+// packet's byte count exceeded the early Rx threshold (early mode)
+
+#define RTL8139_ISR_RER 0x2 // Receive (RX) Error - RO
+// The received packet had a CRC error or frame alignment error
+// (collided frames shorter then 16 bytes are not flagged as CRC errors)
+
+#define RTL8139_ISR_TOK 0x4 // Transmit (TX) OK - RO
+// A packet transmission completed successfully
+
+#define RTL8139_ISR_TER 0x8 // Transmit (TX) Error - RO
+// A packet transmission was aborted due to excessive collisions,
+// per the TXRR retry-count setting
+
+#define RTL8139_ISR_RXOVW 0x10 // RX Buffer Overflow - RO
+// RX buffer ring storage has been exhausted
+
+#define RTL8139_ISR_PUN_LINKCHG 0x20 // Packet Underran / Link Change - RO
+// Set when CAPR is written while the RX buffer is empty,
+// or when the link status changes
+
+#define RTL8139_ISR_FOVW 0x40 // RX FIFO Overflow - RO
+// An overflow occurred on the Rx status FIFO
+
+#define RTL8139_ISR_LENCHG 0x2000 // Cable Length Change - RO
+// Cable length changed after the receiver was enbaled
+
+#define RTL8139_ISR_TIMEOUT 0x4000 // Time Out - RO
+// TCTR register reached the value in the TimerInt register
+
+#define RTL8139_ISR_SERR 0x8000 // System Error - RO
+// The device signaled a system error on the PCI bus
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### IMR ########################
+
+// Name: Interrupt Mask Register
+// Size: 2 byte
+// Role: Select which ISR conditions are allowed to raise a hardware
+// 			 interrupt (INTA#).
+//       A bit set here does not affect whether ISR's corresponding bit
+//       get set - only whether it triggers an interrupt.
+//       Cleared entirely by a hardware reset, so must be explicitly
+//       configured during init.
+//       1: that condition will trigger an interrupt, 0: it will not
+
+#define RTL8139_IMR_OFFSET 0x3C
+#define RTL8139_IMR_ROK 0x1          // Receive (RX) OK - RW
+#define RTL8139_IMR_RER 0x2          // Receive (RX) Error - RW
+#define RTL8139_IMR_TOK 0x4          // Transmit (TX) OK - RW
+#define RTL8139_IMR_TER 0x8          // Transmit (TX) Error - RW
+#define RTL8139_IMR_RXOVW 0x10       // RX Buffer Overflow - RW
+#define RTL8139_IMR_PUN_LINKCHG 0x20 // Packet Underrun / Link  Change - RW
+#define RTL8139_IMR_FOVW 0x40        // RX FIFO Overflow - RW
+#define RTL8139_IMR_LENCHG 0x2000    // Cable Length Change - RW
+#define RTL8139_IMR_TIMEOUT 0x4000   // Time Out - RW
+#define RTL8139_IMR_SERR 0x8000      // System Error - RW
 
 #endif
