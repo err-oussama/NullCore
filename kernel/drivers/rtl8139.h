@@ -268,4 +268,131 @@
 #define RTL8139_IMR_TIMEOUT 0x4000   // Time Out - RW
 #define RTL8139_IMR_SERR 0x8000      // System Error - RW
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### CONFIG1 ########################
+
+// Name: Configuration Register 1
+// Size: 1 byte
+// Role: Miscellaneous device configuration - LED pins, wake pin behavior,
+//       power management capabilty, and driver-load flag.
+
+#define RTL8139_CFG1_OFFSET 0x52
+
+#define RTL8139_CFG1_PMEn 0x1 // Power Management Enable - WR
+// Only writable when 93C46CR EEM1=EEM0=1; exposese/hides the PCI power
+// management capability structure at config space offset 0x50-0x57
+//
+#define RTL8139_CFG1_VPD 0x2 // Vital Product Data - WR
+// Enable VPD data stored in the 93C46 EEPROM at offset 0x40-0x7F
+//
+#define RTL8139_CFG1_IOMAP 0x4 // I/O Mapping - RO
+// 1 = operational registers are mapped into PCI I/O space (BAR0)
+//
+#define RTL8139_CFG1_MEMMAP 0x8 // Memory Mapping - RO
+// 1 = operational registers are mapped into memory space (BAR1)
+//
+#define RTL8139_CFG1_LWACT 0x10 // LWAKE active mode - RW
+// Selects the LWAKE pin's output signal polarity/pulse type, combined with
+// CONIFG4's LWPIN bit; irrelevent without real wake-on-LAN hardware
+
+#define RTL8139_CFG1_DVRLOAD 0x20 // Driver Load - RW
+// Software sets this to mark that a driver has loaded. automatically
+// cleared by hardware once Command register IOEN/MEMEN/BMEN are written
+
+// Bits 6-7: LEDS1-0 - RW
+// Controls physical LET pin behavior; initial value comes from 93C46
+#define RTL8139_CFG1_LEDS1_00 0x00
+#define RTL8139_CFG1_LEDS1_01 0x40
+#define RTL8139_CFG1_LEDS1_10 0x80
+#define RTL8139_CFG1_LEDS1_11 0xC0
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### RBSTART ########################
+
+// Name: Receive (RX) Buffer Address Start
+// Size: 4 byte
+// Role: Physical address of the RX ring buffer.
+//
+#define RTL8139_RBSTART_OFFSET 0x30
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### TSAD ########################
+
+// Name: Transmit Start Address of Descriptor 0-3
+// Size: 4 byte
+// Role: Physical address of the buffer holding the packet to transmit for
+//       the corresponding TX slot.
+//       Write this before triggering send via the matching TSD register.
+#define RTL8139_TSAD0_OFFSET 0x20
+#define RTL8139_TSAD1_OFFSET 0x24
+#define RTL8139_TSAD2_OFFSET 0x28
+#define RTL8139_TSAD3_OFFSET 0x2C
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### TSD ########################
+
+// Name: Transmit Status Descriptor 0-3
+// Size: 4 byte
+// Role: Triggers transmission and reports status for the corresponding
+//       TX slot.
+//       Writting the SIZE field (bits 0-12) clears all read-only status
+//       bits and begins transmission.
+//       After a software reset, every bit except OWN is cleared.
+//       OWN defaults to 1.
+#define RTL8139_TSD0_OFFSET 0x10
+#define RTL8139_TSD1_OFFSET 0x14
+#define RTL8139_TSD2_OFFSET 0x18
+#define RTL8139_TSD3_OFFSET 0x1C
+
+// Bits 0-12: SIZE - RW
+// Total size in bytes of this descriptor's packet data.
+// Writing this field triggers transmission.
+// Max 1792 byte (0x700) per descriptor - exceeding this invalidates the
+// TX queue until OWN is set again
+
+#define RTL8139_TSD_OWN 0x2000 // OWN - RW
+// 1: (default) TX DMA for this descriptor completed / slot is free
+// 0: descriptor is in use; software must clear this when writing SIZE
+//    to hand the descriptor to the device
+
+#define RTL8139_TSD_TUN 0x4000 // Transmit FIFO Underrun - RO
+// Set if the TX FIFO was exhusted during transmission.
+// The packet may still have been send successfully despite this
+// (check TOK/ISR<TER>)
+//
+//
+#define RTL8139_TSD_TOK 0x8000 // Transmit OK - RO
+// Set when the packet transmitted successfully with no FIFO underrun
+
+// Bits 16-21: ERTXTH (Early TX Threshold) - RW
+// TX FIFO fill level (in 32-bit units, except 0 = 8 byte) that triggers
+// transmission to begin, similar to RXFTH on the receive side.
+// Must no exceed 2K bytes.
+// value N (1-63) = N * 32 byte
+
+// Bits 24-27: NCC (Number of Collision Count) - RO
+// Number of collisions encountered while transmitting this packet
+
+#define RTL8139_TSD_CDH 0x10000000 // CD Heard Beat - RO
+// Set if the transceiver faild to send the CD Heartbeat signal during
+// the interframe gap.
+// Always 0 in 100 Mbps mode.
+
+#define RTL8139_TSD_OWC 0x20000000 // Out of Window Collision - RO
+// Set if an `out of window` collision occurred during transmission
+
+#define RTL8139_TSD_TABT 0x40000000 // Transmit Abort - RO
+// Set if transmission of the packet was aborted
+
+#define RTL8139_TSD_CRS 0x80000000 // Carrier Sense Lost - RO
+// Set if carrier was lost during transmission
+
 #endif
