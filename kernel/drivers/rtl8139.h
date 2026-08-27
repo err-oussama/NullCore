@@ -283,16 +283,16 @@
 #define RTL8139_CFG1_PMEn 0x1 // Power Management Enable - WR
 // Only writable when 93C46CR EEM1=EEM0=1; exposese/hides the PCI power
 // management capability structure at config space offset 0x50-0x57
-//
+
 #define RTL8139_CFG1_VPD 0x2 // Vital Product Data - WR
 // Enable VPD data stored in the 93C46 EEPROM at offset 0x40-0x7F
-//
+
 #define RTL8139_CFG1_IOMAP 0x4 // I/O Mapping - RO
 // 1 = operational registers are mapped into PCI I/O space (BAR0)
-//
+
 #define RTL8139_CFG1_MEMMAP 0x8 // Memory Mapping - RO
 // 1 = operational registers are mapped into memory space (BAR1)
-//
+
 #define RTL8139_CFG1_LWACT 0x10 // LWAKE active mode - RW
 // Selects the LWAKE pin's output signal polarity/pulse type, combined with
 // CONIFG4's LWPIN bit; irrelevent without real wake-on-LAN hardware
@@ -303,6 +303,7 @@
 
 // Bits 6-7: LEDS1-0 - RW
 // Controls physical LET pin behavior; initial value comes from 93C46
+
 #define RTL8139_CFG1_LEDS1_00 0x00
 #define RTL8139_CFG1_LEDS1_01 0x40
 #define RTL8139_CFG1_LEDS1_10 0x80
@@ -316,7 +317,7 @@
 // Name: Receive (RX) Buffer Address Start
 // Size: 4 byte
 // Role: Physical address of the RX ring buffer.
-//
+
 #define RTL8139_RBSTART_OFFSET 0x30
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -329,6 +330,7 @@
 // Role: Physical address of the buffer holding the packet to transmit for
 //       the corresponding TX slot.
 //       Write this before triggering send via the matching TSD register.
+
 #define RTL8139_TSAD0_OFFSET 0x20
 #define RTL8139_TSAD1_OFFSET 0x24
 #define RTL8139_TSAD2_OFFSET 0x28
@@ -347,6 +349,7 @@
 //       bits and begins transmission.
 //       After a software reset, every bit except OWN is cleared.
 //       OWN defaults to 1.
+
 #define RTL8139_TSD0_OFFSET 0x10
 #define RTL8139_TSD1_OFFSET 0x14
 #define RTL8139_TSD2_OFFSET 0x18
@@ -367,8 +370,7 @@
 // Set if the TX FIFO was exhusted during transmission.
 // The packet may still have been send successfully despite this
 // (check TOK/ISR<TER>)
-//
-//
+
 #define RTL8139_TSD_TOK 0x8000 // Transmit OK - RO
 // Set when the packet transmitted successfully with no FIFO underrun
 
