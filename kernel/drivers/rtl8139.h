@@ -397,4 +397,30 @@
 #define RTL8139_TSD_CRS 0x80000000 // Carrier Sense Lost - RO
 // Set if carrier was lost during transmission
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### CAPR ########################
+
+// Name: Current Address of Packet Read
+// Size: 2 byte
+// Role: Driver-owned. Tells the device how far into the RX ring buffer
+//       the driver has consumed data, freeing that space for reuse.
+//       Update this after processing each received packet.
+
+#define RTL8139_CAPR_OFFSET 0x38
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+// ############### CBR ########################
+
+// Name: Current Buffer Address
+// Size: 2 byte
+// Role: Device-owned, RO. Reflects the device's current write position in
+//       the RX ring buffer - how far it has written incoming packet data
+//       so far.
+
+#define RTL8139_CBR_OFFSET 0x3A
+
 #endif
