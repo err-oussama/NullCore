@@ -1,5 +1,7 @@
 #ifndef RTL8139_H
 #define RTL8139_H
+#include <pci.h>
+#include <types.h>
 
 // Any bit not explicity defined below is reserved and has no function.
 
@@ -422,5 +424,15 @@
 //       so far.
 
 #define RTL8139_CBR_OFFSET 0x3A
+
+void pci_rtl8139_init();
+
+uint8 pci_rtl8139_inb(uint32 regis);
+uint16 pci_rtl8139_inw(uint32 regis);
+uint32 pci_rtl8139_indw(uint32 regis);
+
+void pci_rtl8139_outb(uint32 regis, uint8 value);
+void pci_rtl8139_outw(uint32 regis, uint16 value);
+void pci_rtl8139_outdw(uint32 regis, uint32 value);
 
 #endif
