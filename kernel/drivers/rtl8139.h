@@ -425,6 +425,12 @@
 
 #define RTL8139_CBR_OFFSET 0x3A
 
+typedef struct __attribute__((packed)) {
+  uint8 dest_MAC[6];
+  uint8 src_MAC[6];
+  uint16 type;
+} ethernet_frame_t;
+
 void pci_rtl8139_init();
 
 uint8 pci_rtl8139_inb(uint32 regis);
@@ -435,4 +441,6 @@ void pci_rtl8139_outb(uint32 regis, uint8 value);
 void pci_rtl8139_outw(uint32 regis, uint16 value);
 void pci_rtl8139_outdw(uint32 regis, uint32 value);
 
+void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
+                                 uint32 TSD_N);
 #endif
