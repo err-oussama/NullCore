@@ -55,20 +55,13 @@ void pci_rtl8139_outdw(uint32 regis, uint32 value) {
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
                                  uint32 TSD_N) {
 
-  if (TSD_N == 0) {
-    pci_rtl8139_outdw(RTL8139_TSAD0_OFFSET, (uint32)packet);
-    pci_rtl8139_outdw(RTL8139_TSD0_OFFSET, len);
+  if (TSD_N > 3) {
+    kprintf("[PCI_RTL8139 Error]: TSD_N must be 0 <= TSD_N <= 3, not %i",
+            TSD_N);
+    return;
   }
-  if (TSD_N == 1) {
-    pci_rtl8139_outdw(RTL8139_TSAD1_OFFSET, (uint32)packet);
-    pci_rtl8139_outdw(RTL8139_TSD1_OFFSET, len);
-  }
-  if (TSD_N == 2) {
-    pci_rtl8139_outdw(RTL8139_TSAD2_OFFSET, (uint32)packet);
-    pci_rtl8139_outdw(RTL8139_TSD2_OFFSET, len);
-  }
-  if (TSD_N == 3) {
-    pci_rtl8139_outdw(RTL8139_TSAD3_OFFSET, (uint32)packet);
-    pci_rtl8139_outdw(RTL8139_TSD3_OFFSET, len);
-  }
+  uint32 TSAD_offset = RTL8139_TSAD0_OFFSET + (TSD_N * 0x4);
+  uint32 TSD_offset = RTL8139_TSD0_OFFSET + (TSD_N * 0x4);
+  pci_rtl8139_outdw(TSAD_offset, (uint32)packet);
+  pci_rtl8139_outdw(TSD_offset, len);
 }

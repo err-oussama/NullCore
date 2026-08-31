@@ -429,6 +429,7 @@ typedef struct __attribute__((packed)) {
   uint8 dest_MAC[6];
   uint8 src_MAC[6];
   uint16 type;
+  uint8 payload[];
 } ethernet_frame_t;
 
 void pci_rtl8139_init();
