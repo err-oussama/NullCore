@@ -8,6 +8,10 @@
 
 pci_device_t *rtl8139 = NULL;
 
+uint8 *rx_buffer = NULL;
+
+uint8 *pci_rtl8139_get_rx_buffer() { return rx_buffer; }
+
 void pci_rtl8139_init() {
   void *RX_first_4KB = (void *)pmm_alloc();
   void *RX_second_4KB = (void *)pmm_alloc();
@@ -18,7 +22,7 @@ void pci_rtl8139_init() {
     kprintf("RTL_8139 Error: faild to allocate RX ring buffer\n");
     return;
   }
-
+  rx_buffer = RX_first_4KB;
   rtl8139 = pci_find_device(0x10EC, 0x8139);
   if (!rtl8139) {
     kprintf("RTL8139 Error: Faild to find the device\n");

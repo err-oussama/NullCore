@@ -21,9 +21,8 @@ void kmain(multiboot_info *boot_info) {
     packet->src_MAC[i] = 0x18;
   packet->type = 0x800;
 
-  uint8 *payload = (void *)(((uint8 *)packet) + sizeof(ethernet_frame_t));
   for (int i = 0; i < len - 14; i++) {
-    payload[i] = 0xAB;
+    packet->payload[i] = 0xAB;
   }
 
   pci_rtl8139_transmit_packet(packet, len, 0);

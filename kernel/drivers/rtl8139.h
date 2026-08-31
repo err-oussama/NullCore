@@ -3,6 +3,11 @@
 #include <pci.h>
 #include <types.h>
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 // Any bit not explicity defined below is reserved and has no function.
 
 // ############### COMMAND ########################
@@ -425,6 +430,32 @@
 
 #define RTL8139_CBR_OFFSET 0x3A
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#define RTL8139_RXHDR_ROK 0x1    // Receive OK
+#define RTL8139_RXHDR_FAE 0x2    // Frame Alignment Error
+#define RTL8139_RXHDR_CRC 0x4    // CRC Error
+#define RTL8139_RXHDR_LONG 0x8   // Long Packet (>4KB)
+#define RTL8139_RXHDR_RUNT 0x10  // Runt Packet (<64B)
+#define RTL8139_RXHDR_ISE 0x20   // Invalid Symbol Error (100BASE-TX only)
+#define RTL8139_RXHDR_BAR 0x2000 // Broadcast Address Received
+#define RTL8139_RXHDR_PAM 0x4000 // Physical Address Matched
+#define RTL8139_RXHDR_MAR 0x8000 // Multicast Address Received
+
+// RX pacjet header - Not a device register. This is a 4-byte structure
+// the rtl8139 writes directly into the RX ring buffer, immediately preceding
+// each received packet's data (MAC addresses + EtherType + payload
+// only - Preamble, SFD, and CRC are stripped before this point)
+typedef struct __attribute__((packed)) {
+  // RXHDR status bits (ROK, FAE, CRC, LONG, RUNT, ISE, BAR, PAM, MAR)
+  uint16 status;
+  // Length of the packet that follows (MAC+type+payload)
+  uint16 length;
+} rtl8139_rx_header_t;
+
 typedef struct __attribute__((packed)) {
   uint8 dest_MAC[6];
   uint8 src_MAC[6];
@@ -444,4 +475,5 @@ void pci_rtl8139_outdw(uint32 regis, uint32 value);
 
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
                                  uint32 TSD_N);
+uint8 *pci_rtl8139_get_rx_buffer();
 #endif
