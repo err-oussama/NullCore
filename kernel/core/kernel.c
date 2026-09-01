@@ -23,5 +23,5 @@ void init_kernel(multiboot_info *boot_info) {
   init_heap();
   task_init();
   ata_drive_setup();
-  /* enable_interrupt(); */
+  enable_interrupt();
 }

@@ -124,7 +124,7 @@ ISR_STUB security_exception_handler
 ;
 ;ISR_STUB timer_handler
 ISR_STUB keyboard_handler
-ISR_STUB nic_handler; 
+ISR_STUB nic_handler 
 
 
 isr_dummy:

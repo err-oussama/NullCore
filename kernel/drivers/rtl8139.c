@@ -9,6 +9,7 @@
 pci_device_t *rtl8139 = NULL;
 
 uint8 *rx_buffer = NULL;
+uint32 off = 0;
 
 uint8 *pci_rtl8139_get_rx_buffer() { return rx_buffer; }
 
@@ -31,10 +32,13 @@ void pci_rtl8139_init() {
   pci_rtl8139_outb(RTL8139_CMD_OFFSET, RTL8139_CMD_RST);
   while (pci_rtl8139_inb(RTL8139_CMD_OFFSET) & RTL8139_CMD_RST)
     ;
-  // pci_rtl8139_outb(RTL8139_CMD_OFFSET, RTL8139_CMD_TE | RTL8139_CMD_RE);
-  // pci_rtl8139_outdw(RTL8139_RBSTART_OFFSET, (uint32)RX_first_4KB);
-  pci_rtl8139_outb(RTL8139_CMD_OFFSET, RTL8139_CMD_TE);
-  kprintf("RTL8139 init done\n");
+  pci_rtl8139_outdw(RTL8139_RBSTART_OFFSET, (uint32)RX_first_4KB);
+  pci_rtl8139_outdw(RTL8139_TCR_OFFSET, RTL8139_TCR_LBK_LOOPBACK);
+  pci_rtl8139_outdw(RTL8139_RCR_OFFSET, RTL8139_RCR_AAP);
+  pci_rtl8139_outw(RTL8139_IMR_OFFSET,
+                   pci_rtl8139_inw(RTL8139_IMR_OFFSET) | RTL8139_IMR_ROK);
+  pci_rtl8139_outb(RTL8139_CMD_OFFSET, RTL8139_CMD_TE | RTL8139_CMD_RE);
+  kprintf("RTL8139 init success\n");
 }
 
 uint8 pci_rtl8139_inb(uint32 regis) {
@@ -68,4 +72,11 @@ void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
   uint32 TSD_offset = RTL8139_TSD0_OFFSET + (TSD_N * 0x4);
   pci_rtl8139_outdw(TSAD_offset, (uint32)packet);
   pci_rtl8139_outdw(TSD_offset, len);
+}
+
+void pci_rtl8139_receive_packet() {
+  uint16 status = pci_rtl8139_inw(RTL8139_ISR_OFFSET);
+  if (status & RTL8139_ISR_ROK) {
+    kprintf("packet received");
+  }
 }

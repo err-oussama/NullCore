@@ -223,7 +223,6 @@
 // (collided frames shorter then 16 bytes are not flagged as CRC errors)
 
 #define RTL8139_ISR_TOK 0x4 // Transmit (TX) OK - RO
-// A packet transmission completed successfully
 
 #define RTL8139_ISR_TER 0x8 // Transmit (TX) Error - RO
 // A packet transmission was aborted due to excessive collisions,
@@ -476,4 +475,5 @@ void pci_rtl8139_outdw(uint32 regis, uint32 value);
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
                                  uint32 TSD_N);
 uint8 *pci_rtl8139_get_rx_buffer();
+void pci_rtl8139_receive_packet();
 #endif

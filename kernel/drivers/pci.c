@@ -4,6 +4,7 @@
 #include <pci.h>
 #include <pic.h>
 #include <pmio.h>
+#include <rtl8139.h>
 
 #define PCI_MAX_DEVICE 20
 
@@ -138,7 +139,8 @@ void pci_setup() {
 }
 
 void nic_handler() {
-  kprintf("NIC fired interrupt.");
+  kprintf("NIC fired interrupt.\n");
+  pci_rtl8139_receive_packet();
   pic_send_eoi(0xB);
   return;
 };
