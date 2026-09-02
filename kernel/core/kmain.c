@@ -28,6 +28,14 @@ void kmain(multiboot_info *boot_info) {
     packet->payload[i] = 0xAB;
   }
 
+  uint32 TCR = pci_rtl8139_indw(RTL8139_TCR_OFFSET);
+  uint8 CMD = pci_rtl8139_inb(RTL8139_CMD_OFFSET);
+  uint16 IMR = pci_rtl8139_inw(RTL8139_IMR_OFFSET);
+  kprintf("TCR: 0x%x\n", TCR);
+  kprintf("CMD: 0x%x\n", CMD);
+  kprintf("IMR: 0x%x\n", IMR);
+
   pci_rtl8139_transmit_packet(packet, len, 0);
-  kprintf("Packet sent\n");
+  uint16 TSD0 = pci_rtl8139_indw(RTL8139_TSD0_OFFSET);
+  kprintf("TSD0: 0x%x\n", TSD0);
 }

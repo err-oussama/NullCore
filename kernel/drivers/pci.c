@@ -139,7 +139,7 @@ void pci_setup() {
 }
 
 void nic_handler() {
-  kprintf("NIC fired interrupt.\n");
+  /* kprintf("NIC fired interrupt.\n"); */
   pci_rtl8139_receive_packet();
   pic_send_eoi(0xB);
   return;
