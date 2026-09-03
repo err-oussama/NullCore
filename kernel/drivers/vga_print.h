@@ -3,6 +3,9 @@
 
 #include <types.h>
 
+#define VGA_MAX_ROW 25
+#define VGA_MAX_COL 80
+
 #define VGA_BLACK 0x0
 #define VGA_BLUE 0x1
 #define VGA_GREEN 0x2

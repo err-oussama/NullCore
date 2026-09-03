@@ -83,6 +83,7 @@ void pci_rtl8139_init() {
   }
 
   kprintf("RTL8139 init success\n");
+  kprintf("RTL8139 init success\n");
 }
 
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,

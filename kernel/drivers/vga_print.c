@@ -21,34 +21,34 @@ int g_col = 0;
 volatile uint16 *vga = (uint16 *)0xB8000;
 
 void vga_clear_screen() {
-  for (uint32 i = 0; i < 25 * (80); i++)
+  for (uint32 i = 0; i < VGA_MAX_ROW * (VGA_MAX_COL); i++)
     vga[i] = ((VGA_BLACK << 4 | VGA_BLACK) << 8) | ' ';
 }
 void vg_put_char(char c, int fg, int bg, int row, int col) {
-  vga[row * 80 + col] = ((bg << 4 | fg) << 8) | c;
+  vga[row * VGA_MAX_COL + col] = ((bg << 4 | fg) << 8) | c;
 }
 
 void vga_print_str(char *str, int fg, int bg) {
   while (*str) {
-    if (g_col >= 80 || *str == '\n') {
-      g_row = g_row == 25 ? 0 : (g_row + 1) % 25;
+    if (g_col >= VGA_MAX_COL || *str == '\n') {
+      g_row = g_row == VGA_MAX_ROW ? 0 : (g_row + 1) % VGA_MAX_ROW;
       g_col = 0;
     }
 
     if (*str != '\n')
-      vga[g_row * 80 + g_col] = ((bg << 4 | fg) << 8) | *str;
+      vga[g_row * VGA_MAX_COL + g_col] = ((bg << 4 | fg) << 8) | *str;
 
-    g_col = g_col == 80 ? 0 : (g_col + 1) % 80;
+    g_col = g_col == VGA_MAX_COL ? 0 : (g_col + 1) % VGA_MAX_COL;
     str++;
   }
 }
 
 void vga_print_cha(uint8 c) {
-  if (g_col >= 80) {
+  if (g_col >= VGA_MAX_COL) {
     g_col = 0;
     g_row++;
   }
-  if (g_row >= 25)
+  if (g_row >= VGA_MAX_ROW)
     g_row = 0;
 
   if (c == '\b') {
@@ -60,16 +60,17 @@ void vga_print_cha(uint8 c) {
     } else
       g_col--;
 
-    vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | ' ';
+    vga[g_row * VGA_MAX_COL + g_col] =
+        ((VGA_BLACK << 4 | VGA_WHITE) << 8) | ' ';
   }
 
   else if (c == '\n') {
     g_col = 0;
     g_row++;
-    if (g_row >= 25)
+    if (g_row >= VGA_MAX_ROW)
       g_row = 0;
   } else {
-    vga[g_row * 80 + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | c;
+    vga[g_row * VGA_MAX_COL + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | c;
     g_col++;
   }
 }
