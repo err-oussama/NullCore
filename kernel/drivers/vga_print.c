@@ -29,26 +29,17 @@ void vg_put_char(char c, int fg, int bg, int row, int col) {
 }
 
 void vga_print_str(char *str, int fg, int bg) {
-  uint32 i = 0;
-
-  while (str[i])
-    i++;
-
-  while (i--) {
-    if (g_row >= 25)
-      break;
-    if (*str == '\n') {
+  while (*str) {
+    if (g_col >= 80 || *str == '\n') {
+      g_row = g_row == 25 ? 0 : (g_row + 1) % 25;
       g_col = 0;
-      g_row++;
-      str++;
-      continue;
-    } else if (g_col >= 80) {
-      g_col = 0;
-      g_row++;
     }
 
-    vga[g_row * 80 + g_col] = ((bg << 4 | fg) << 8) | *str++;
-    g_col++;
+    if (*str != '\n')
+      vga[g_row * 80 + g_col] = ((bg << 4 | fg) << 8) | *str;
+
+    g_col = g_col == 80 ? 0 : (g_col + 1) % 80;
+    str++;
   }
 }
 

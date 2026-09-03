@@ -13,6 +13,7 @@ void kmain(multiboot_info *boot_info) {
   kprint_wrn("========[ Working on: Network (PCI) ]========\n");
   pci_setup();
   pci_rtl8139_init();
+
   ethernet_frame_t *packet = (void *)pmm_alloc();
   uint16 len = 64;
   uint8 dest_MAC[] = {0x52, 0x54, 0x00, 0x12, 0x34, 0x56};

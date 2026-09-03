@@ -70,7 +70,6 @@ run: all
 		-device rtl8139,netdev=net0,mac=52:54:00:12:34:56 \
 		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
 
-
 # Clean
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
