@@ -101,11 +101,11 @@ void pci_rtl8139_receive_packet() {
   uint16 status = pci_rtl8139_inw(RTL8139_ISR_OFFSET);
   if (status & RTL8139_ISR_ROK) {
     while (!(pci_rtl8139_inb(RTL8139_CMD_OFFSET) & RTL8139_CMD_BUFE)) {
-      kprintf("CBR: 0x%x, CAPR: 0x%x\n", pci_rtl8139_inw(RTL8139_CBR_OFFSET),
-              pci_rtl8139_inw(RTL8139_CBR_OFFSET));
       rtl8139_rx_header_t *packet_header = (void *)&rx_buffer[offset];
       offset += (packet_header->length + 4 + 3) & ~3;
       pci_rtl8139_outw(RTL8139_CAPR_OFFSET, offset - 16);
+      kprintf("CBR: 0x%x, CAPR: 0x%x\n", pci_rtl8139_inw(RTL8139_CBR_OFFSET),
+              pci_rtl8139_inw(RTL8139_CAPR_OFFSET));
     }
   }
   pci_rtl8139_outw(RTL8139_ISR_OFFSET, 0x1);
