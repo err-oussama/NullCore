@@ -35,10 +35,10 @@ void vga_print_str(char *str, int fg, int bg) {
       g_col = 0;
     }
 
-    if (*str != '\n')
+    if (*str != '\n') {
       vga[g_row * VGA_MAX_COL + g_col] = ((bg << 4 | fg) << 8) | *str;
-
-    g_col = g_col == VGA_MAX_COL ? 0 : (g_col + 1) % VGA_MAX_COL;
+      g_col = g_col == VGA_MAX_COL ? 0 : (g_col + 1) % VGA_MAX_COL;
+    }
     str++;
   }
 }
