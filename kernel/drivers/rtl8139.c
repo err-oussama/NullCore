@@ -5,11 +5,14 @@
 #include <rtl8139.h>
 
 #include <pmm.h>
+#define RX_BUFFER_SIZE 8192
 
 pci_device_t *rtl8139 = NULL;
 
 uint8 *rx_buffer = NULL;
-uint32 off = 0;
+uint32 offset = 0;
+
+uint8 tsd_n = 0;
 
 uint8 *pci_rtl8139_get_rx_buffer() { return rx_buffer; }
 
@@ -83,19 +86,13 @@ void pci_rtl8139_init() {
   }
 
   kprintf("RTL8139 init success\n");
-  kprintf("RTL8139 init success\n");
 }
 
-void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
-                                 uint32 TSD_N) {
+void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len) {
 
-  if (TSD_N > 3) {
-    kprintf("[PCI_RTL8139 Error]: TSD_N must be 0 <= TSD_N <= 3, not %i",
-            TSD_N);
-    return;
-  }
-  uint32 TSAD_offset = RTL8139_TSAD0_OFFSET + (TSD_N * 0x4);
-  uint32 TSD_offset = RTL8139_TSD0_OFFSET + (TSD_N * 0x4);
+  uint32 TSAD_offset = RTL8139_TSAD0_OFFSET + (tsd_n * 0x4);
+  uint32 TSD_offset = RTL8139_TSD0_OFFSET + (tsd_n * 0x4);
+  tsd_n = tsd_n == 3 ? 0 : tsd_n + 1;
   pci_rtl8139_outdw(TSAD_offset, (uint32)packet);
   pci_rtl8139_outdw(TSD_offset, len);
 }
@@ -103,10 +100,13 @@ void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
 void pci_rtl8139_receive_packet() {
   uint16 status = pci_rtl8139_inw(RTL8139_ISR_OFFSET);
   if (status & RTL8139_ISR_ROK) {
-    kprintf("packet received\n");
-    rtl8139_rx_header_t *packet_header = (void *)rx_buffer[0];
-    /* uint16 new_offset = (packet_header->length + 4 + 3) & ~3; */
-    /* pci_rtl8139_outw(RTL8139_CAPR_OFFSET, new_offset - 16); */
-    pci_rtl8139_outw(RTL8139_ISR_OFFSET, RTL8139_ISR_ROK);
+    while (!(pci_rtl8139_inb(RTL8139_CMD_OFFSET) & RTL8139_CMD_BUFE)) {
+      kprintf("CBR: 0x%x, CAPR: 0x%x\n", pci_rtl8139_inw(RTL8139_CBR_OFFSET),
+              pci_rtl8139_inw(RTL8139_CBR_OFFSET));
+      rtl8139_rx_header_t *packet_header = (void *)&rx_buffer[offset];
+      offset += (packet_header->length + 4 + 3) & ~3;
+      pci_rtl8139_outw(RTL8139_CAPR_OFFSET, offset - 16);
+    }
   }
+  pci_rtl8139_outw(RTL8139_ISR_OFFSET, 0x1);
 }

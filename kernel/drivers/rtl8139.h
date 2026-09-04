@@ -472,8 +472,9 @@ void pci_rtl8139_outb(uint32 regis, uint8 value);
 void pci_rtl8139_outw(uint32 regis, uint16 value);
 void pci_rtl8139_outdw(uint32 regis, uint32 value);
 
-void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len,
-                                 uint32 TSD_N);
 uint8 *pci_rtl8139_get_rx_buffer();
+
 void pci_rtl8139_receive_packet();
+void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len);
+
 #endif
