@@ -45,5 +45,5 @@ void init_pmp(multiboot_info *boot_info) {
     ptr += entry->size + 4;
   }
 
-  pmm_init(aligned_frame, end_pmp - aligned_frame);
+  pmm_init((void *)aligned_frame, end_pmp - aligned_frame);
 }

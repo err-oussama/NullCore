@@ -11,8 +11,8 @@
 #include <vmm.h>
 
 task tasks[10];
-uint32 user_stacks[10];
-uint32 kernel_stacks[10];
+uint32 *user_stacks[10];
+uint32 *kernel_stacks[10];
 
 static uint32 id_vault = 1;
 
@@ -48,8 +48,8 @@ void task_init() {
 
 void clean_task(uint32 id) {
 
-  pmm_free_frame(kernel_stacks[id]);
-  pmm_free_frame(user_stacks[id]);
+  pmm_free(kernel_stacks[id]);
+  pmm_free(user_stacks[id]);
   kernel_stacks[id] = 0;
   user_stacks[id] = 0;
   tasks[id].is_dead = 1;
@@ -67,8 +67,8 @@ int create_user_task(void (*task)(), void *pd) {
   tasks[id].is_running = 0;
   tasks[id].start_tick = 0;
 
-  uint32 k_stack = pmm_alloc();
-  uint32 u_stack = pmm_alloc();
+  void *k_stack = pmm_alloc();
+  void *u_stack = pmm_alloc();
   if (!k_stack || !u_stack)
     return 1;
 
@@ -80,7 +80,7 @@ int create_user_task(void (*task)(), void *pd) {
 
   mmu_map_page(tasks[id].pd, u_stack, u_stack,
                MMU_PTE_P | MMU_PTE_RW | MMU_PTE_U_MODE);
-  mmu_map_page(tasks[id].pd, (uint32)syscall_enter, (uint32)syscall_enter,
+  mmu_map_page(tasks[id].pd, syscall_enter, syscall_enter,
                MMU_PTE_P | MMU_PTE_RW | MMU_PTE_U_MODE);
 
   tasks[id].user_stack = (void *)u_stack;

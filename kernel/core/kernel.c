@@ -3,6 +3,7 @@
 #include <gdt.h>
 #include <idt.h>
 #include <kheap.h>
+#include <pci.h>
 #include <pic.h>
 #include <pit.h>
 #include <registers.h>
@@ -23,5 +24,6 @@ void init_kernel(multiboot_info *boot_info) {
   init_heap();
   task_init();
   ata_drive_setup();
+  pci_setup();
   enable_interrupt();
 }

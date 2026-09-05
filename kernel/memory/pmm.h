@@ -11,7 +11,7 @@
 
 typedef struct s_pmp {
 
-  uint32 start;
+  void *start;
   uint32 size;
 } PMP;
 
@@ -27,22 +27,22 @@ typedef struct s_pmp {
 #####################################################
 */
 
-void pmm_init(uint32 pmp_start, uint32 pmp_size);
-uint32 pmm_get_pool_start();
+void pmm_init(void *pmp_start, uint32 pmp_size);
+void *pmm_get_pool_start();
 uint32 pmm_get_pool_size();
 void show_bitmap();
 
-uint32 pmm_addre_to_frame(uint32 addre);
-uint32 pmm_frame_to_addre(uint32 frame);
+uint32 pmm_addre_to_frame(void *addre);
+void *pmm_frame_to_addre(uint32 frame);
 uint8 pmm_is_frame_free(uint32 frame);
-uint8 pmm_is_addre_free(uint32 addre);
+uint8 pmm_is_addre_free(void *addre);
 
 void pmm_use_frame(uint32 frame_number);
 void pmm_free_frame(uint32 frame_number);
 
-uint32 pmm_alloc();
+void *pmm_alloc();
 
-void pmm_free(uint32 addre);
+void pmm_free(void *addre);
 
 void pmm_info();
 

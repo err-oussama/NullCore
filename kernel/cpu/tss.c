@@ -30,18 +30,19 @@ __attribute__((section(".user_test"))) void user_procees_mock() {
 
 void change_esp0(void *kernel_task) { tss.esp0 = (uint32)kernel_task; }
 
-void tss_test() {
-  uint32 *pd = mmu_create_address_space();                   // 10D000
-  uint32 user_stack = (uint32)pmm_alloc();                   // 10E000
-  uint32 user_code = (uint32)user_procees_mock & 0xFFFFF000; // 0x102000
-  if (!user_stack)
-    return;
-  mmu_map_page(pd, user_stack, user_stack,
-               MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
-  mmu_map_page(pd, 0x100000, 0x100000, MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
-  mmu_map_page(pd, user_code, user_code,
-               MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
-  mmu_switch(pd);
-  kprint_str("Ring 0 -> Ring 3\n");
-  deascalate(user_procees_mock, user_stack + 0x1000);
-}
+/* void tss_test() { */
+/*   uint32 *pd = mmu_create_address_space(); */
+/*   void *user_stack = pmm_alloc(); */
+/*   void *user_code = (void *)((uint32)user_procees_mock & 0xFFFFF000); */
+/*   if (!user_stack) */
+/*     return; */
+/*   mmu_map_page(pd, user_stack, user_stack, */
+/*                MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW); */
+/*   mmu_map_page(pd, 0x100000, 0x100000, MMU_PTE_P | MMU_PTE_U_MODE |
+ * MMU_PTE_RW); */
+/*   mmu_map_page(pd, user_code, user_code, */
+/*                MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW); */
+/*   mmu_switch(pd); */
+/*   kprint_str("Ring 0 -> Ring 3\n"); */
+/*   deascalate(user_procees_mock, user_stack + 0x1000); */
+/* } */
