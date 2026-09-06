@@ -1,5 +1,20 @@
 #include "multiboot_metadata.h"
+#include "types.h"
 #include <pmm.h>
+
+char *type_meaning(uint8 type) {
+  if (type == 1)
+    return "Available       ";
+  if (type == 2)
+    return "Reserved        ";
+  if (type == 3)
+    return "ACPI Reclaimable";
+  if (type == 4)
+    return "ACPI NVS        ";
+  if (type == 5)
+    return "Bad RAM         ";
+  return "Unknown         ";
+}
 
 void show_multiboot_data(multiboot_info *boot_info) {
   kprint_str("\n------------MULTIBOOT METADATA------------\n");
@@ -10,14 +25,9 @@ void show_multiboot_data(multiboot_info *boot_info) {
   while (ptr < end) {
 
     entry = (mmap_entry *)ptr;
-    kprint_str("type: ");
-    kprint_hex(entry->type);
-    kprint_str(", address: 0x");
-    kprint_hex(entry->addr_low);
-    kprint_str(", size: 0x");
-    kprint_hex(entry->len_low);
-
-    kprint_str("\n");
+    kprintf("type: 0x%x %s", entry->type, type_meaning(entry->type));
+    kprintf(", address: 0x%x", entry->addr_low);
+    kprintf(", size: 0x%x\n", entry->len_low);
     ptr += entry->size + 4;
   }
   kprint_str("------------------------------------------\n");

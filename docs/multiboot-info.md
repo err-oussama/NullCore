@@ -22,12 +22,3 @@ Without it the kernel would have to query the BIOS itself, which requires switch
 **In one line**
 
 Multiboot info is a struct GRUB fills in at boot time and passes to the kernel containing everything it needs to know about the system -- most importantly the physcial memory map.
-
-
-
-
-
-
-
-
-

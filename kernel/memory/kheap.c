@@ -1,4 +1,5 @@
 #include "kheap.h"
+#include "types.h"
 #include <kernel.h>
 #include <kprint.h>
 #include <kstring.h>
@@ -101,22 +102,20 @@ uint8 is_block_free(heap_block block) { return !(block & 1); }
 
 void show_physical_memory() {
 
+  uint32 multiboot_header_size =
+      (uint32)&kernel_text - (uint32)&multiboot_header;
+  uint32 rodata_size = (uint32)&kernel_data - (uint32)&kernel_rodata;
+  uint32 text_size = (uint32)&kernel_rodata - (uint32)&kernel_text;
+  uint32 data_size = (uint32)&kernel_bss - (uint32)&kernel_data;
+  uint32 bss_size = (uint32)&kernel_end - (uint32)&kernel_bss;
+
   kprint_str("\n------------------KERNEL------------------\n");
   kprintf("multiboot header: %p, size: 0x%x\n", &multiboot_header,
-          (uint32)&kernel_text - (uint32)&multiboot_header);
-
-  kprintf("   .text        : %p, size: 0x\n", &kernel_text,
-          (uint32)&kernel_rodata - (uint32)&kernel_text);
-
-  kprintf("   .rodata      : %p, size: 0x\n", &kernel_rodata,
-          (uint32)&kernel_data - (uint32)&kernel_rodata);
-
-  kprintf("   .data        : %p, size: %x\n", &kernel_data,
-          (uint32)&kernel_bss - (uint32)&kernel_data);
-
-  kprintf("   .bss         : %p, size: 0x%x\n", &kernel_bss,
-          (uint32)&kernel_end - (uint32)&kernel_bss);
-
+          multiboot_header_size);
+  kprintf("   .text        : %p, size: 0x%x\n", &kernel_text, text_size);
+  kprintf("   .rodata      : %p, size: 0x%x\n", &kernel_rodata, rodata_size);
+  kprintf("   .data        : %p, size: 0x%x\n", &kernel_data, data_size);
+  kprintf("   .bss         : %p, size: 0x%x\n", &kernel_bss, bss_size);
   kprintf("   end of kernel: %p\n", &kernel_end);
   kprint_str("------------------------------------------\n");
 }
