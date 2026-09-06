@@ -49,11 +49,12 @@ void kprintf(char *format, ...) {
         kprint_str("0x");
         kprint_hex(*(uint32 *)(ptr));
         ptr += sizeof(void *);
+      } else {
+        break;
       }
-      format++;
-      continue;
+    } else {
+      kprint_cha(*format);
     }
-    kprint_cha(*format);
     format++;
   }
 }

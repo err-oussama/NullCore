@@ -73,17 +73,17 @@ isr_timer_handler:
 	push esp 
 	call timer_handler
 	mov esp, eax
-	popa
 	mov eax, [esp + 4]
 	and eax, 0x3
-	cmp eax, 0x3
-	jne .kernel_return 
-	mov eax, 0x23
+	cmp eax, 0x3       ; does interrupt fired in ring 3?
+	jne .kernel_return ; no  - keep kernel data segments 
+	mov eax, 0x23      ; yes - switch to user data segment  
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 .kernel_return:
+	popa
 	iret
 
 
