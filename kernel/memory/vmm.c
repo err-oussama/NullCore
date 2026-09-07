@@ -11,7 +11,7 @@ uint32 mmu_make_entry(void *frame_address, uint16 flags) {
 }
 
 void mmu_kernel_setup() {
-  uint32 *pd = (uint32 *)pmm_alloc();
+  uint32 *pd = pmm_alloc(1);
   memset((void *)pd, 0, 0x1000);
 
   mmu_map_pt(pd, MMU_PDE_P | MMU_PDE_RW);
@@ -21,7 +21,7 @@ void mmu_kernel_setup() {
 }
 
 void mmu_map_pt(uint32 *pd, uint16 flags) {
-  uint32 *pt = (uint32 *)pmm_alloc();
+  uint32 *pt = pmm_alloc(1);
   memset((void *)pt, 0, 0x1000);
   for (uint32 i = 0; i < 1024; i++) {
     pt[i] = mmu_make_entry((void *)(i << 12), MMU_PTE_P | MMU_PTE_RW);
@@ -30,7 +30,7 @@ void mmu_map_pt(uint32 *pd, uint16 flags) {
 }
 
 uint32 *mmu_create_address_space() {
-  uint32 *pd = (uint32 *)pmm_alloc();
+  uint32 *pd = pmm_alloc(1);
   memcpy(pd, get_kernel_vmm(), 0x1000);
   for (int i = 0; i < 1024; i++) {
     pd[i] = pd[i] | 0x4;
@@ -51,7 +51,7 @@ void mmu_map_page(uint32 *pd, void *vaddr, void *paddr, uint16 flags) {
   uint32 ptv = pd[pti];
   uint32 *ptp;
   if (!(ptv & MMU_PDE_P)) {
-    ptp = (uint32 *)pmm_alloc();
+    ptp = pmm_alloc(1);
     memset(ptp, 0, 0x1000);
     pd[pti] =
         ((uint32)ptp & 0xFFFFF000) | MMU_PDE_P | MMU_PDE_RW | MMU_PDE_U_MODE;

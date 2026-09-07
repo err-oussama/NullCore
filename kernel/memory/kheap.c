@@ -11,7 +11,7 @@ static heap_page *heap_memory = NULL; // the first page of the heap
 heap_page *get_heap_start() { return heap_memory; }
 
 void init_heap() {
-  heap_memory = (void *)pmm_alloc();
+  heap_memory = pmm_alloc(1);
   if (heap_memory) {
     memset(heap_memory, 0, 0x1000);
     heap_memory->free_space = 0x1000 - sizeof(heap_page);
@@ -26,7 +26,7 @@ int add_page() {
   while (current->next)
     current = current->next;
 
-  heap_page *new_page = (heap_page *)pmm_alloc();
+  heap_page *new_page = pmm_alloc(1);
   if (new_page) {
     current->next = new_page;
     new_page->free_space = PAGE_SIZE - sizeof(heap_page) - sizeof(heap_block);

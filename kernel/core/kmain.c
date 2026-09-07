@@ -14,8 +14,9 @@ void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprint_wrn("========[ Working on: Refactoring ]========\n");
   pmm_info();
-
-  show_multiboot_data(boot_info);
-  show_physical_memory();
-  /* show_bitmap(); */
+  kprintf("#########\n");
+  uint32 size = 40;
+  void *add = pmm_alloc(size);
+  /* pmm_free(add, size); */
+  pmm_info();
 }

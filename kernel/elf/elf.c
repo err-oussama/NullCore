@@ -100,8 +100,9 @@ void load_elf(void *buff) {
     for (vaddr; vaddr <= end; vaddr += 0x1000)
       mmu_map_page(pd, vaddr, vaddr, flag);
   }
-  void *stack = pmm_alloc();
-  mmu_map_page(pd, stack, pmm_alloc(), MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
+  void *stack = pmm_alloc(1);
+  mmu_map_page(pd, stack, pmm_alloc(1),
+               MMU_PTE_P | MMU_PTE_U_MODE | MMU_PTE_RW);
 
   void *old_pd = (void *)read_cr3();
   mmu_switch(pd);

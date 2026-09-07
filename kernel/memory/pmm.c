@@ -28,7 +28,8 @@ void pmm_info() {
   kprint_hex(pmp.size / 0x1000);
   kprint_str(" Frame, 0x");
   kprint_hex(pmp.size / 1024 / 1024);
-  kprint_str(" MB");
+  kprint_str(" MB\n");
+  kmemory_dump_bin(bitmap, 0x10);
   kprint_str("\n------------------------------------------\n");
 }
 
@@ -48,7 +49,7 @@ uint8 pmm_is_addre_free(void *addre) {
   return pmm_is_frame_free(pmm_addre_to_frame(addre));
 }
 
-void show_bitmap() { kmemory_dump_bin(bitmap, bitmap_size); }
+void pmm_show_bitmap() { kmemory_dump_bin(bitmap, bitmap_size); }
 
 void pmm_use_frame(uint32 frame_number) {
   uint32 frame_offset = frame_number / 8;
@@ -59,12 +60,26 @@ void pmm_free_frame(uint32 frame_number) {
   bitmap[frame_offset] = bitmap[frame_offset] & ~(1 << (frame_number % 8));
 }
 
-void *pmm_alloc() {
+void *pmm_alloc(uint32 n_frames) {
+  uint32 count = 0;
   for (uint32 i = 0; i < pmp.size / 0x1000; i++) {
     if (pmm_is_frame_free(i))
-      return (pmm_use_frame(i), pmm_frame_to_addre(i));
+      count++;
+    else
+      count = 0;
+
+    if (count == n_frames) {
+      for (uint32 j = 0; j < count; j++) {
+        pmm_use_frame(i - j);
+      }
+      return pmm_frame_to_addre(i - count + 1);
+    }
   }
-  return 0;
+  return NULL;
 }
 
-void pmm_free(void *addre) { pmm_free_frame(pmm_addre_to_frame(addre)); }
+void pmm_free(void *addre, uint32 n_frames) {
+  uint32 frame_n = pmm_addre_to_frame(addre);
+  for (uint32 i = 0; i < n_frames; i++)
+    pmm_free_frame(frame_n++);
+}

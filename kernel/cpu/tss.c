@@ -11,7 +11,7 @@ tss_t tss;
 void tss_init() {
   memset(&tss, 0, sizeof(tss_t));
   tss.ss0 = 0x10;
-  tss.esp0 = (uint32)pmm_alloc() + 0x1000;
+  tss.esp0 = (uint32)pmm_alloc(1) + 0x1000;
   tss.iobp_offset = sizeof(tss_t);
 }
 

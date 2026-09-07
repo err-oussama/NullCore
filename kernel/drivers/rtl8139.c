@@ -36,16 +36,11 @@ void pci_rtl8139_outdw(uint32 regis, uint32 value) {
 }
 
 void pci_rtl8139_init() {
-  void *RX_first_4KB = (void *)pmm_alloc();
-  void *RX_second_4KB = (void *)pmm_alloc();
-  void *RX_third_4KB = (void *)pmm_alloc();
-
-  if (RX_first_4KB + 0x1000 != RX_second_4KB ||
-      RX_second_4KB + 0x1000 != RX_third_4KB) {
+  rx_buffer = pmm_alloc(3);
+  if (!rx_buffer) {
     kprint_err("RTL_8139 Error: faild to allocate RX ring buffer\n");
     return;
   }
-  rx_buffer = RX_first_4KB;
   rtl8139 = pci_find_device(0x10EC, 0x8139);
   if (!rtl8139) {
     kprint_err("RTL8139 Error: Faild to find the device\n");

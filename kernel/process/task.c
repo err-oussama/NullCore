@@ -48,8 +48,8 @@ void task_init() {
 
 void clean_task(uint32 id) {
 
-  pmm_free(kernel_stacks[id]);
-  pmm_free(user_stacks[id]);
+  pmm_free(kernel_stacks[id], 1);
+  pmm_free(user_stacks[id], 1);
   kernel_stacks[id] = 0;
   user_stacks[id] = 0;
   tasks[id].is_dead = 1;
@@ -67,8 +67,8 @@ int create_user_task(void (*task)(), void *pd) {
   tasks[id].is_running = 0;
   tasks[id].start_tick = 0;
 
-  void *k_stack = pmm_alloc();
-  void *u_stack = pmm_alloc();
+  void *k_stack = pmm_alloc(1);
+  void *u_stack = pmm_alloc(1);
   if (!k_stack || !u_stack)
     return 1;
 
@@ -126,7 +126,7 @@ int create_task(void (*task)()) {
   tasks[id].start_tick = 0;
   tasks[id].pd = tasks[0].pd;
 
-  kernel_stacks[id] = pmm_alloc();
+  kernel_stacks[id] = pmm_alloc(1);
   if (kernel_stacks[id] == 0)
     return 1;
   uint32 *stack_frame = (uint32 *)(kernel_stacks[id] + 0x1000);
