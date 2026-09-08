@@ -30,7 +30,7 @@ typedef struct s_pmp {
 void pmm_init(void *pmp_start, uint32 pmp_size);
 void *pmm_get_pool_start();
 uint32 pmm_get_pool_size();
-void pmm_show_bitmap();
+void pmm_show_bitmap(uint32 size);
 
 uint32 pmm_addre_to_frame(void *addre);
 void *pmm_frame_to_addre(uint32 frame);

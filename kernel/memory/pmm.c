@@ -49,7 +49,9 @@ uint8 pmm_is_addre_free(void *addre) {
   return pmm_is_frame_free(pmm_addre_to_frame(addre));
 }
 
-void pmm_show_bitmap() { kmemory_dump_bin(bitmap, bitmap_size); }
+void pmm_show_bitmap(uint32 size) {
+  kmemory_dump_bin(bitmap, size ? size : bitmap_size);
+}
 
 void pmm_use_frame(uint32 frame_number) {
   uint32 frame_offset = frame_number / 8;
