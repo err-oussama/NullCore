@@ -12,5 +12,6 @@
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprint_wrn("========[ Working on: Refactoring ]========\n");
+  kprint_wrn("========[ Working on: Network ]========\n");
+  pci_rtl8139_init();
 }
