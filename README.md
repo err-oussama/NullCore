@@ -40,15 +40,25 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] ELF loader
 - [x] First user process
 
+
 ### Networking
 - [x] PCI enumeration
-- [ ] NIC driver
-- [ ] TCP/IP stack
+- [ ] NIC driver (RTL8139: TX, RX, interrupts)
+- [ ] Ethernet layer (frame dispatch by EtherType)
+- [ ] ARP (address resolution)
+- [ ] IPv4 (header parsing, routing decision)
+- [ ] ICMP (ping)
+- [ ] UDP
+- [ ] TCP
+
 
 ### Filesystem
 - [x] ATA/IDE disk driver
-- [ ] Filesystem implementation
+- [ ] Filesystem format (on-disk layout, superblock)
+- [ ] Directory structure / path resolution
+- [ ] File allocation & free space tracking
 - [ ] sys_read, sys_write (file-backed)
+
 
 ### Shell
 - [ ] fork / exec
