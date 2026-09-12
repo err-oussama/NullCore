@@ -1,5 +1,6 @@
 #ifndef RTL8139_H
 #define RTL8139_H
+#include <ethernet.h>
 #include <pci.h>
 #include <types.h>
 
@@ -454,13 +455,6 @@ typedef struct __attribute__((packed)) {
   // Length of the packet that follows (MAC+type+payload)
   uint16 length;
 } rtl8139_rx_header_t;
-
-typedef struct __attribute__((packed)) {
-  uint8 dest_MAC[6];
-  uint8 src_MAC[6];
-  uint16 type;
-  uint8 payload[];
-} ethernet_frame_t;
 
 void pci_rtl8139_init();
 
