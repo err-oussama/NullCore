@@ -14,4 +14,10 @@ void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprint_wrn("========[ Working on: Network ]========\n");
   pci_rtl8139_init();
+  uint8 mac[6];
+  pci_rtl8139_get_mac(mac);
+
+  kprintf("Machine MAC address: [");
+  for (uint8 i = 0; i < 6; i++)
+    kprintf("%x%c", mac[i], i == 5 ? ']' : ':');
 }

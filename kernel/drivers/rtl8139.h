@@ -11,6 +11,18 @@
 
 // Any bit not explicity defined below is reserved and has no function.
 
+// ############### IDENTIFICATION ########################
+// Name: IDENTIFICATION register
+// Size: 1 byte each - total 6 byte
+// Role: Hold the MAC address of the NIC
+
+#define RTL8139_IDR0_OFFSET 0x0
+#define RTL8139_IDR1_OFFSET 0x1
+#define RTL8139_IDR2_OFFSET 0x2
+#define RTL8139_IDR3_OFFSET 0x3
+#define RTL8139_IDR4_OFFSET 0x4
+#define RTL8139_IDR5_OFFSET 0x5
+
 // ############### COMMAND ########################
 
 // Name: COMMAND register
@@ -457,17 +469,8 @@ typedef struct __attribute__((packed)) {
 } rtl8139_rx_header_t;
 
 void pci_rtl8139_init();
-
-uint8 pci_rtl8139_inb(uint32 regis);
-uint16 pci_rtl8139_inw(uint32 regis);
-uint32 pci_rtl8139_indw(uint32 regis);
-
-void pci_rtl8139_outb(uint32 regis, uint8 value);
-void pci_rtl8139_outw(uint32 regis, uint16 value);
-void pci_rtl8139_outdw(uint32 regis, uint32 value);
-
+void pci_rtl8139_get_mac(uint8 *mac_out);
 uint8 *pci_rtl8139_get_rx_buffer();
-
 void pci_rtl8139_receive_packet();
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len);
 

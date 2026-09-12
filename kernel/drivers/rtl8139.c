@@ -12,6 +12,8 @@ pci_device_t *rtl8139 = NULL;
 uint8 *rx_buffer = NULL;
 uint32 offset = 0;
 
+uint8 MAC_address[6];
+
 uint8 tsd_n = 0;
 
 uint8 *pci_rtl8139_get_rx_buffer() { return rx_buffer; }
@@ -80,7 +82,20 @@ void pci_rtl8139_init() {
     return;
   }
 
+  MAC_address[0] = pci_rtl8139_inb(RTL8139_IDR0_OFFSET);
+  MAC_address[1] = pci_rtl8139_inb(RTL8139_IDR1_OFFSET);
+  MAC_address[2] = pci_rtl8139_inb(RTL8139_IDR2_OFFSET);
+  MAC_address[3] = pci_rtl8139_inb(RTL8139_IDR3_OFFSET);
+  MAC_address[4] = pci_rtl8139_inb(RTL8139_IDR4_OFFSET);
+  MAC_address[5] = pci_rtl8139_inb(RTL8139_IDR5_OFFSET);
+
   kprintf("RTL8139 init success\n");
+}
+
+void pci_rtl8139_get_mac(uint8 *mac_out) {
+  for (uint8 i = 0; i < 6; i++) {
+    mac_out[i] = MAC_address[i];
+  }
 }
 
 void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len) {
