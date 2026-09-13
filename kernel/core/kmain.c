@@ -1,3 +1,4 @@
+#include "ethernet.h"
 #include "kprint.h"
 #include <ata.h>
 #include <kernel.h>
@@ -14,10 +15,14 @@ void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprint_wrn("========[ Working on: Network ]========\n");
   pci_rtl8139_init();
-  uint8 mac[6];
-  pci_rtl8139_get_mac(mac);
+  uint8 mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-  kprintf("Machine MAC address: [");
-  for (uint8 i = 0; i < 6; i++)
-    kprintf("%x%c", mac[i], i == 5 ? ']' : ':');
+  uint8 *payload = pmm_alloc(1);
+  uint16 payload_len = 82;
+  for (uint8 i = 0; i < 10; i++) {
+    for (uint8 j = 0; j < payload_len; j++) {
+      payload[j] = 'A' + i;
+    }
+    eth_send(mac, ETH_TYPE_ARP, payload, payload_len);
+  }
 }

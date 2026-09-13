@@ -472,6 +472,6 @@ void pci_rtl8139_init();
 void pci_rtl8139_get_mac(uint8 *mac_out);
 uint8 *pci_rtl8139_get_rx_buffer();
 void pci_rtl8139_receive_packet();
-void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len);
+void pci_rtl8139_transmit_packet(eth_frame_t *frame, uint16 len);
 
 #endif

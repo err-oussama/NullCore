@@ -55,21 +55,21 @@ void pci_rtl8139_init() {
   uint32 RBSTART = (uint32)rx_buffer;
   uint32 RCR = RTL8139_RCR_AAP;
   uint16 IMR = RTL8139_IMR_ROK;
-  uint32 TCR = RTL8139_TCR_LBK_LOOPBACK;
+  /* uint32 TCR = RTL8139_TCR_LBK_LOOPBACK; */
   uint8 CMD = RTL8139_CMD_TE | RTL8139_CMD_RE;
 
   pci_rtl8139_outdw(RTL8139_RBSTART_OFFSET, RBSTART);
   pci_rtl8139_outdw(RTL8139_RCR_OFFSET, RCR);
   pci_rtl8139_outb(RTL8139_CMD_OFFSET, CMD);
-  pci_rtl8139_outdw(RTL8139_TCR_OFFSET, TCR);
+  /* pci_rtl8139_outdw(RTL8139_TCR_OFFSET, TCR); */
   pci_rtl8139_outw(RTL8139_IMR_OFFSET, IMR);
 
   uint32 TCR_after = pci_rtl8139_indw(RTL8139_TCR_OFFSET);
-  if (!(TCR_after & TCR)) {
-    kprint_err("Faild init TCR: ");
-    kprintf("0x%x\n", TCR_after & (~0x7FC00000));
-    return;
-  }
+  /* if (!(TCR_after & TCR)) { */
+  /*   kprint_err("Faild init TCR: "); */
+  /*   kprintf("0x%x\n", TCR_after & (~0x7FC00000)); */
+  /*   return; */
+  /* } */
 
   uint16 IMR_after = pci_rtl8139_inw(RTL8139_IMR_OFFSET);
   if (!(IMR_after & IMR)) {
@@ -98,12 +98,12 @@ void pci_rtl8139_get_mac(uint8 *mac_out) {
   }
 }
 
-void pci_rtl8139_transmit_packet(ethernet_frame_t *packet, uint16 len) {
+void pci_rtl8139_transmit_packet(eth_frame_t *frame, uint16 len) {
 
   uint32 TSAD_offset = RTL8139_TSAD0_OFFSET + (tsd_n * 0x4);
   uint32 TSD_offset = RTL8139_TSD0_OFFSET + (tsd_n * 0x4);
   tsd_n = tsd_n == 3 ? 0 : tsd_n + 1;
-  pci_rtl8139_outdw(TSAD_offset, (uint32)packet);
+  pci_rtl8139_outdw(TSAD_offset, (uint32)frame);
   pci_rtl8139_outdw(TSD_offset, len);
 }
 
