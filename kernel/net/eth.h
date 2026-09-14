@@ -1,5 +1,5 @@
-#ifndef ETHERNET_H
-#define ETHERNET_H
+#ifndef ETH_H
+#define ETH_H
 
 #include <types.h>
 

@@ -1,8 +1,8 @@
-#include "ethernet.h"
-#include "kprint.h"
 #include <ata.h>
+#include <eth.h>
 #include <kernel.h>
 #include <kheap.h>
+#include <kprint.h>
 #include <kstring.h>
 #include <multiboot_metadata.h>
 #include <pci.h>

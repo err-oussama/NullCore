@@ -1,5 +1,5 @@
 #include "types.h"
-#include <ethernet.h>
+#include <eth.h>
 #include <pmm.h>
 #include <rtl8139.h>
 

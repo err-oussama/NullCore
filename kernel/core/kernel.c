@@ -1,6 +1,6 @@
 #include "kernel.h"
 #include <ata.h>
-#include <ethernet.h>
+#include <eth.h>
 #include <gdt.h>
 #include <idt.h>
 #include <kheap.h>

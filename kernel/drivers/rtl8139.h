@@ -1,6 +1,6 @@
 #ifndef RTL8139_H
 #define RTL8139_H
-#include <ethernet.h>
+#include <eth.h>
 #include <pci.h>
 #include <types.h>
 
