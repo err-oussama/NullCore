@@ -7,7 +7,6 @@
 
 void *eth_tx_pool = NULL;
 uint8 eth_tx_index = 0;
-
 uint8 eth_tx_count = 10;
 
 void eth_init() {
@@ -18,15 +17,14 @@ void eth_init() {
     return;
   }
 }
-void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
-              uint16 payload_len) {
 
+void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
   if (!eth_tx_pool) {
     kprintf("TX buffer is NULL\n");
     return;
   }
-  if (payload_len > ETH_MTU) {
-    kprintf("Payload length exceed maximum %u\n", ETH_MTU);
+  if (len > ETH_PAYLOAD_MAX_LEN) {
+    kprintf("Payload length exceed maximum %u\n", ETH_PAYLOAD_MAX_LEN);
     return;
   }
 
@@ -37,14 +35,14 @@ void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
   for (uint8 i = 0; i < 6; i++)
     frame->dest_mac[i] = dest_mac[i];
 
-  frame->type = (ethertype & 0xFF) << 8 | (ethertype >> 8);
+  frame->type = (type & 0xFF) << 8 | (type >> 8);
 
   uint16 i = 0;
-  while (i < payload_len) {
+  while (i < len) {
     frame->payload[i] = payload[i];
     i++;
   }
-  while (i < 60 - sizeof(eth_frame_t)) {
+  while (i < ETH_PAYLOAD_MIN_LEN) {
     frame->payload[i] = 0;
     i++;
   }
