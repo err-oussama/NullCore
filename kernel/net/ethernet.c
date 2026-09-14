@@ -44,7 +44,7 @@ void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
     frame->payload[i] = payload[i];
     i++;
   }
-  while (i < 64 - sizeof(eth_frame_t)) {
+  while (i < 60 - sizeof(eth_frame_t)) {
     frame->payload[i] = 0;
     i++;
   }

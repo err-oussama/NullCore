@@ -6,8 +6,9 @@
 #define ETH_TYPE_IPV4 0x0800
 #define ETH_TYPE_ARP 0x0806
 
-#define ETH_FRAME_MAX_LEN 1518 // full frame: 14 header + 1500 payload + 4 CRC
-#define ETH_MTU 1500           // (Maximum Transmission Unit) Max payload size
+#define ETH_FRAME_MAX_LEN 1514 // full frame: 14 header + 1500 payload
+//                                (CRC added by hardware, not stored here)
+#define ETH_MTU 1500 // (Maximum Transmission Unit) Max payload size
 
 typedef struct __attribute__((packed)) {
   uint8 dest_mac[6];
