@@ -5,12 +5,13 @@
 
 #include <kprint.h>
 
-uint8 *eth_tx_pool = NULL;
+void *eth_tx_pool = NULL;
 uint8 eth_tx_index = 0;
 
 uint8 eth_tx_count = 10;
 
 void eth_init() {
+  pci_rtl8139_init();
   eth_tx_pool = pmm_alloc(4);
   if (!eth_tx_pool) {
     kprintf("Ethernet transmit pool allocation faild\n");
@@ -19,12 +20,17 @@ void eth_init() {
 }
 void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
               uint16 payload_len) {
-  eth_frame_t *frame =
-      (eth_frame_t *)(eth_tx_pool + (eth_tx_index * ETH_FRAME_MAX_LEN));
 
-  if (payload_len > ETH_MTU) {
+  if (!eth_tx_pool) {
+    kprintf("TX buffer is NULL\n");
     return;
   }
+  if (payload_len > ETH_MTU) {
+    kprintf("Payload length exceed maximum %u\n", ETH_MTU);
+    return;
+  }
+
+  eth_frame_t *frame = eth_tx_pool + (eth_tx_index * ETH_FRAME_MAX_LEN);
 
   pci_rtl8139_get_mac(frame->src_mac);
 
@@ -43,8 +49,5 @@ void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
     i++;
   }
   pci_rtl8139_transmit_packet(frame, i + sizeof(eth_frame_t));
-  eth_tx_index++;
-  if (eth_tx_index == eth_tx_count) {
-    eth_tx_index = 0;
-  }
+  eth_tx_index = eth_tx_index + 1 == eth_tx_count ? 0 : eth_tx_index + 1;
 }

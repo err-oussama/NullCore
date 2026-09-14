@@ -16,9 +16,11 @@ typedef struct __attribute__((packed)) {
   uint8 payload[];
 } eth_frame_t;
 
-void eth_receive(uint8 *frame, uint16 len);
-void eth_send(uint8 *dest_mac, uint16 ethertype, uint8 *payload,
-              uint16 payload_len);
+void eth_init();
+
+void eth_receive(void *frame, uint16 len);
+void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len);
+
 void eth_poll();
 
 #endif

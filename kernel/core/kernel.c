@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include <ata.h>
+#include <ethernet.h>
 #include <gdt.h>
 #include <idt.h>
 #include <kheap.h>
@@ -7,8 +8,8 @@
 #include <pic.h>
 #include <pit.h>
 #include <registers.h>
-
 #include <task.h>
+
 void setup_hardware() {
   setup_GDT();
   setup_IDT();
@@ -25,5 +26,6 @@ void init_kernel(multiboot_info *boot_info) {
   task_init();
   ata_drive_setup();
   pci_setup();
+  eth_init();
   enable_interrupt();
 }
