@@ -68,7 +68,7 @@ run: all
 	qemu-system-i386 -kernel $(TARGET) \
 		-drive file=disk.img,format=raw,index=0,media=disk \
 		-netdev user,id=net0 \
-		-device rtl8139,netdev=net0,mac=52:54:00:12:34:56 \
+		-device rtl8139,netdev=net0,mac=AA:12:34:56:78:FF \
 		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
 
 # Clean
