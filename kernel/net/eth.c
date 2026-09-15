@@ -5,17 +5,25 @@
 
 #include <kprint.h>
 
-void *eth_tx_pool = NULL;
-uint8 eth_tx_index = 0;
-uint8 eth_tx_count = 10;
+static void *eth_tx_pool = NULL;
+static uint8 eth_tx_index = 0;
+static uint8 eth_tx_count = 10;
+
+static void *eth_rx_queue = NULL;
+static uint8 eth_rx_count = 10;
+static uint8 eth_rx_index_w = 0; // write index
+static uint8 eth_rx_index_r = 0; // read index
 
 void eth_init() {
   pci_rtl8139_init();
+
   eth_tx_pool = pmm_alloc(4);
-  if (!eth_tx_pool) {
-    kprintf("Ethernet transmit pool allocation faild\n");
-    return;
-  }
+  if (!eth_tx_pool)
+    kprintf("Ethernet transmit pool allocation failed\n");
+
+  eth_rx_queue = pmm_alloc(4);
+  if (!eth_rx_queue)
+    kprintf("Ethernet receive queue allocation failed\n");
 }
 
 void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
@@ -48,4 +56,17 @@ void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
   }
   pci_rtl8139_transmit_packet(frame, i + sizeof(eth_frame_t));
   eth_tx_index = eth_tx_index + 1 == eth_tx_count ? 0 : eth_tx_index + 1;
+}
+
+void eth_receive(void *frame, uint16 len) {
+  uint8 *slot = eth_rx_queue + (eth_rx_index_w * ETH_FRAME_MAX_LEN);
+  *(uint16 *)slot = len;
+  slot += sizeof(uint16);
+
+  for (uint32 i = 0; i < len; i++)
+    slot[i] = ((uint8 *)frame)[i];
+
+  eth_rx_index_w++;
+  if (eth_rx_index_w == eth_rx_count)
+    eth_rx_index_w = 0;
 }

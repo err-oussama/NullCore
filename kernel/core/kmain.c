@@ -17,6 +17,7 @@ void kmain(multiboot_info *boot_info) {
           "]=============================");
   uint8 dest_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
+  pci_rtl8139_get_mac(dest_mac);
   uint8 *payload = pmm_alloc(1);
   uint16 payload_len = 82;
   for (uint8 i = 0; i < 20; i++) {
