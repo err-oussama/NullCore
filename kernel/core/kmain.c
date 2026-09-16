@@ -20,10 +20,12 @@ void kmain(multiboot_info *boot_info) {
   pci_rtl8139_get_mac(dest_mac);
   uint8 *payload = pmm_alloc(1);
   uint16 payload_len = 82;
-  for (uint8 i = 0; i < 20; i++) {
+  for (uint8 i = 0; i < 9; i++) {
     for (uint8 j = 0; j < payload_len; j++) {
       payload[j] = 'A' + i;
     }
-    eth_send(dest_mac, ETH_TYPE_ARP, payload, payload_len);
+    uint16 type = i % 2 ? ETH_TYPE_IPV4_HOST : ETH_TYPE_ARP_HOST;
+    eth_send(dest_mac, type, payload, payload_len - i);
   }
+  eth_poll();
 }

@@ -3,8 +3,13 @@
 
 #include <types.h>
 
-#define ETH_TYPE_IPV4 0x0800
-#define ETH_TYPE_ARP 0x0806
+#define HTONS(x) ((x >> 8) | ((x & 0xFF) << 8))
+
+#define ETH_TYPE_IPV4_HOST 0x0800
+#define ETH_TYPE_IPV4_NET HTONS(ETH_TYPE_IPV4_HOST)
+
+#define ETH_TYPE_ARP_HOST 0x0806
+#define ETH_TYPE_ARP_NET HTONS(ETH_TYPE_ARP_HOST)
 
 #define ETH_FRAME_MIN_LEN 60   // full frame: 14 header + 46 payload
 #define ETH_FRAME_MAX_LEN 1514 // full frame: 14 header + 1500 payload

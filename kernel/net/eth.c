@@ -1,4 +1,5 @@
 #include "types.h"
+#include "vga_print.h"
 #include <eth.h>
 #include <pmm.h>
 #include <rtl8139.h>
@@ -43,7 +44,7 @@ void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
   for (uint8 i = 0; i < 6; i++)
     frame->dest_mac[i] = dest_mac[i];
 
-  frame->type = (type & 0xFF) << 8 | (type >> 8);
+  frame->type = HTONS(type);
 
   uint16 i = 0;
   while (i < len) {
@@ -69,4 +70,23 @@ void eth_receive(void *frame, uint16 len) {
   eth_rx_index_w++;
   if (eth_rx_index_w == eth_rx_count)
     eth_rx_index_w = 0;
+}
+
+void eth_poll() {
+  while (eth_rx_index_r != eth_rx_index_w) {
+    void *slot = eth_rx_queue + (eth_rx_index_r * ETH_FRAME_MAX_LEN);
+    uint16 len = *(uint16 *)slot;
+    eth_frame_t *frame = slot + 2;
+    switch (frame->type) {
+    case ETH_TYPE_ARP_NET:
+      kprintf("ARP\n");
+      break;
+    case ETH_TYPE_IPV4_NET:
+      kprintf("IPV4\n");
+      break;
+    default:
+      kprintf("Unknown protocol %x\n", frame->type);
+    }
+    eth_rx_index_r = ++eth_rx_index_r == eth_rx_count ? 0 : eth_rx_index_r;
+  }
 }
