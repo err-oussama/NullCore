@@ -1,8 +1,8 @@
-#include "types.h"
-#include "vga_print.h"
+#include <arp.h>
 #include <eth.h>
 #include <pmm.h>
 #include <rtl8139.h>
+#include <types.h>
 
 #include <kprint.h>
 
@@ -27,7 +27,7 @@ void eth_init() {
     kprintf("Ethernet receive queue allocation failed\n");
 }
 
-void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
+void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len) {
   if (!eth_tx_pool) {
     kprintf("TX buffer is NULL\n");
     return;
@@ -48,7 +48,7 @@ void eth_send(uint8 *dest_mac, uint16 type, uint8 *payload, uint16 len) {
 
   uint16 i = 0;
   while (i < len) {
-    frame->payload[i] = payload[i];
+    frame->payload[i] = *(uint8 *)(payload + i);
     i++;
   }
   while (i < ETH_PAYLOAD_MIN_LEN) {
@@ -79,7 +79,7 @@ void eth_poll() {
     eth_frame_t *frame = slot + 2;
     switch (frame->type) {
     case ETH_TYPE_ARP_NET:
-      kprintf("ARP\n");
+      arp_handler((arp_t *)frame->payload);
       break;
     case ETH_TYPE_IPV4_NET:
       kprintf("IPV4\n");

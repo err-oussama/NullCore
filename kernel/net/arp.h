@@ -14,11 +14,13 @@ typedef struct __attribute__((packed)) {
   uint16 oper; // operation request; 1=APR request, 2=APR reply.
 
   uint8 sha[6]; // sender hardware address; sender MAC address
-  uint32 spa;   // sender protocol address; sender IP  address
+  uint8 spa[4]; // sender protocol address; sender IP  address
 
   uint8 tha[6]; // target hardware address; target MAC address
-  uint32 tpa;   // target protocol address; target IP  address
+  uint8 tpa[4]; // target protocol address; target IP  address
 
 } arp_t;
+
+void arp_handler(arp_t *message);
 
 #endif

@@ -1,3 +1,4 @@
+#include <arp.h>
 #include <ata.h>
 #include <eth.h>
 #include <kernel.h>
@@ -18,14 +19,30 @@ void kmain(multiboot_info *boot_info) {
   uint8 dest_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
   pci_rtl8139_get_mac(dest_mac);
-  uint8 *payload = pmm_alloc(1);
-  uint16 payload_len = 82;
-  for (uint8 i = 0; i < 9; i++) {
-    for (uint8 j = 0; j < payload_len; j++) {
-      payload[j] = 'A' + i;
-    }
-    uint16 type = i % 2 ? ETH_TYPE_IPV4_HOST : ETH_TYPE_ARP_HOST;
-    eth_send(dest_mac, type, payload, payload_len - i);
-  }
+  arp_t message;
+
+  message.htype = 10;
+  message.ptype = 20;
+
+  message.hlen = 6;
+  message.plen = 4;
+
+  message.oper = 1;
+
+  message.sha[0] = 0xAA;
+  message.sha[1] = 0xAA;
+  message.sha[2] = 0xAA;
+  message.sha[3] = 0xAA;
+  message.sha[4] = 0xAA;
+  message.sha[5] = 0xAA;
+
+  message.spa[0] = 124;
+  message.spa[1] = 124;
+  message.spa[2] = 124;
+  message.spa[3] = 124;
+
+  uint16 payload_len = sizeof(arp_t);
+
+  eth_send(dest_mac, ETH_TYPE_ARP, &message, payload_len);
   eth_poll();
 }
