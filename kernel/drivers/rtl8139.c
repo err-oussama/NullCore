@@ -111,7 +111,7 @@ void pci_rtl8139_receive_packet() {
   if (status & RTL8139_ISR_ROK) {
     while (!(pci_rtl8139_inb(RTL8139_CMD_OFFSET) & RTL8139_CMD_BUFE)) {
       rtl8139_rx_header_t *rtl_header = (void *)&rx_buffer[offset];
-      eth_receive(rtl_header + 1, rtl_header->length);
+      eth_receive(rtl_header + 1, rtl_header->length - ETH_CRC_SIZE);
       offset += (rtl_header->length + 4 + 3) & ~3;
       pci_rtl8139_outw(RTL8139_CAPR_OFFSET, offset - 16);
     }
