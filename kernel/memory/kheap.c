@@ -55,7 +55,7 @@ void *get_block_from_page(heap_page *page, uint32 size) {
     block = (heap_block *)ptr;
   }
   ptr = (uint8 *)block;
-  if (ptr + sizeof(heap_block) + size > page + PAGE_SIZE)
+  if ((void *)ptr + sizeof(heap_block) + size > (void *)page + PAGE_SIZE)
     return NULL;
 
   *block = size | 1;

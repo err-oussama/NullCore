@@ -3,7 +3,7 @@
 
 #include <types.h>
 
-#define HTONS(x) ((x >> 8) | ((x & 0xFF) << 8))
+#include <byteorder.h>
 
 #define ETH_TYPE_IPV4 0x0800
 #define ETH_TYPE_IPV4_HOST ETH_TYPE_IPV4
@@ -31,6 +31,7 @@ typedef struct __attribute__((packed)) {
 } eth_frame_t;
 
 void eth_init();
+void eth_get_mac(void *mac_out);
 
 void eth_receive(void *frame, uint16 len);
 void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len);

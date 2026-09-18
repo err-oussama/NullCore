@@ -1,7 +1,14 @@
 #ifndef ARP_H
 #define ARP_H
 
+#include <byteorder.h>
 #include <types.h>
+
+#define ARP_OPER_REPLY 2
+#define ARP_OPER_REQUEST 1
+
+#define ARP_OPER_REPLY_NET HTONS(ARP_OPER_REPLY)
+#define ARP_OPER_REQUEST_NET HTONS(ARP_OPER_REQUEST)
 
 typedef struct __attribute__((packed)) {
 
@@ -21,6 +28,6 @@ typedef struct __attribute__((packed)) {
 
 } arp_t;
 
+void arp_request(void *ip);
 void arp_handler(arp_t *message);
-
 #endif

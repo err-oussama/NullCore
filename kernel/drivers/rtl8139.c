@@ -54,7 +54,7 @@ void pci_rtl8139_init() {
     ;
 
   uint32 RBSTART = (uint32)rx_buffer;
-  uint32 RCR = RTL8139_RCR_APM;
+  uint32 RCR = RTL8139_RCR_AAP;
   uint16 IMR = RTL8139_IMR_ROK;
   uint32 TCR = RTL8139_TCR_LBK_LOOPBACK;
   uint8 CMD = RTL8139_CMD_TE | RTL8139_CMD_RE;
@@ -91,9 +91,9 @@ void pci_rtl8139_init() {
   MAC_address[5] = pci_rtl8139_inb(RTL8139_IDR5_OFFSET);
 }
 
-void pci_rtl8139_get_mac(uint8 *mac_out) {
+void pci_rtl8139_get_mac(void *mac_out) {
   for (uint8 i = 0; i < 6; i++) {
-    mac_out[i] = MAC_address[i];
+    *(uint8 *)(mac_out + i) = MAC_address[i];
   }
 }
 

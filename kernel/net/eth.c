@@ -27,6 +27,7 @@ void eth_init() {
     kprintf("Ethernet receive queue allocation failed\n");
 }
 
+void eth_get_mac(void *mac_out) { pci_rtl8139_get_mac(mac_out); }
 void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len) {
   if (!eth_tx_pool) {
     kprintf("TX buffer is NULL\n");
@@ -39,12 +40,12 @@ void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len) {
 
   eth_frame_t *frame = eth_tx_pool + (eth_tx_index * ETH_FRAME_MAX_LEN);
 
-  pci_rtl8139_get_mac(frame->src_mac);
-
   for (uint8 i = 0; i < 6; i++)
     frame->dest_mac[i] = dest_mac[i];
 
   frame->type = HTONS(type);
+
+  eth_get_mac(&frame->src_mac);
 
   uint16 i = 0;
   while (i < len) {

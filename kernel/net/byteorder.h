@@ -1,0 +1,9 @@
+#ifndef BYTEORDER_H
+#define BYTEORDER_H
+#include <types.h>
+
+#define HTONS(x) ((x >> 8) | ((x & 0xFF) << 8))
+
+uint16 htons(uint16 x);
+
+#endif
