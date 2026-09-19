@@ -17,7 +17,7 @@ void kmain(multiboot_info *boot_info) {
   kprintf("=============================[ NullCore - Network "
           "]=============================");
 
-  uint32 ip = 0x08080808;
+  uint32 ip = 0x0202000A;
   arp_request(&ip);
   eth_poll();
 }

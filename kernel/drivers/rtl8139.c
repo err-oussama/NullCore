@@ -56,7 +56,7 @@ void pci_rtl8139_init() {
   uint32 RBSTART = (uint32)rx_buffer;
   uint32 RCR = RTL8139_RCR_AAP;
   uint16 IMR = RTL8139_IMR_ROK;
-  uint32 TCR = RTL8139_TCR_LBK_LOOPBACK;
+  uint32 TCR = RTL8139_TCR_LBK_NORMAL;
   uint8 CMD = RTL8139_CMD_TE | RTL8139_CMD_RE;
 
   pci_rtl8139_outdw(RTL8139_RBSTART_OFFSET, RBSTART);
@@ -66,11 +66,11 @@ void pci_rtl8139_init() {
   pci_rtl8139_outw(RTL8139_IMR_OFFSET, IMR);
 
   uint32 TCR_after = pci_rtl8139_indw(RTL8139_TCR_OFFSET);
-  if (!(TCR_after & TCR)) {
-    kprint_err("Faild init TCR: ");
-    kprintf("0x%x\n", TCR_after & (~0x7FC00000));
-    return;
-  }
+  /* if (!(TCR_after & TCR)) { */
+  /*   kprint_err("Faild init TCR: "); */
+  /*   kprintf("0x%x\n", TCR_after & (~0x7FC00000)); */
+  /*   return; */
+  /* } */
 
   uint16 IMR_after = pci_rtl8139_inw(RTL8139_IMR_OFFSET);
   if (!(IMR_after & IMR)) {

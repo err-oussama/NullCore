@@ -12,6 +12,7 @@ void kprint_wrn(char *str);
 void kprint_err(char *str);
 void kprint_dec(long n);
 void kprint_hex(unsigned long n);
+void kprint_hex_len(uint32 n, uint32 len);
 void kprint_dec64(uint64 n);
 void kprint_hex64(uint64 n);
 void kprint_bin(unsigned long n);

@@ -74,6 +74,30 @@ void vga_print_cha(uint8 c) {
     g_col++;
   }
 }
+
+void vga_print_base(uint32 n, char *base, uint32 base_len, uint32 len) {
+
+  uint32 buff_len = 20;
+  char buff[buff_len];
+  int i = buff_len;
+
+  for (uint32 j = 0; j <= i; j++)
+    buff[j] = '0';
+
+  if (n == 0)
+    return (vga_print_str("0", VGA_WHITE, VGA_BLACK));
+  while (n > 0) {
+    buff[--i] = base[(n % base_len)];
+    n /= base_len;
+  }
+
+  if (len)
+    i = buff_len - len;
+
+  while (i < buff_len)
+    vga_print_cha(buff[i++]);
+}
+
 void vga_print_err(char *str) { vga_print_str(str, VGA_BLACK, VGA_RED); }
 void vga_print_warn(char *str) { vga_print_str(str, VGA_YELLOW, VGA_BLACK); }
 
@@ -84,26 +108,15 @@ void vga_print_dec(long n) {
     vga_print("-");
     n = -n;
   }
-  vga_print_base(n, "0123456789", 10);
+  vga_print_base(n, "0123456789", 10, 0);
 }
 
-void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16); }
-
-void vga_print_base(uint32 n, char *base, uint32 base_len) {
-  char buff[40];
-  int i = 39;
-
-  buff[i] = '\0';
-  if (n == 0)
-    return (vga_print_str("0", VGA_WHITE, VGA_BLACK));
-  while (n > 0) {
-    buff[--i] = base[(n % base_len)];
-    n /= base_len;
-  }
-  vga_print_str(&buff[i], VGA_WHITE, VGA_BLACK);
+void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16, 0); }
+void vga_print_hex_len(uint32 n, uint32 len) {
+  vga_print_base(n, "0123456789ABCDEF", 16, len);
 }
 
-void vga_print_bin(uint32 n) { vga_print_base(n, "01", 2); }
+void vga_print_bin(uint32 n) { vga_print_base(n, "01", 2, 8); }
 
 void vga_print_byte(uint8 byte) {
   uint32 i = 8;

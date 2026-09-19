@@ -3,50 +3,66 @@
 #include <eth.h>
 #include <kprint.h>
 #include <kstring.h>
+#define ARP_MAC_LEN 6
+#define ARP_IPV4_LEN 4
 
 void arp_dump(arp_t *message) {
-  kprintf("Operation: %x\n", message->oper);
+  kprintf("-- ARP ");
+  switch (message->oper) {
+  case ARP_OPER_REPLY_NET:
+    kprintf("REPLY --\n");
+    break;
+  case ARP_OPER_REQUEST_NET:
+    kprintf("REQUEST --\n");
+    break;
+  default:
+    kprintf("UNKNOWN --\n");
+    break;
+  }
+  kprintf("Sender: ");
 
-  kprintf("Hardware:\n");
-  kprintf("  type: %x\n", message->htype);
-  kprintf("  len : %x\n", message->hlen);
-  kprintf("  Sender Address: %x:%x:%x:%x:%x:%x\n", message->sha[0],
-          message->sha[1], message->sha[2], message->sha[3], message->sha[4],
-          message->sha[5]);
-  kprintf("  Target Address: %x:%x:%x:%x:%x:%x\n", message->tha[0],
-          message->tha[1], message->tha[2], message->tha[3], message->tha[4],
-          message->tha[5]);
+  for (uint32 i = 0; i < ARP_MAC_LEN; i++) {
+    kprint_hex_len(message->sha[i], 2);
+    if (i < ARP_MAC_LEN - 1)
+      kprint_cha(':');
+    else
+      kprint_cha(' ');
+  }
+  for (uint32 i = 0; i < ARP_IPV4_LEN; i++)
+    kprintf("%u%c", message->spa[i], i < ARP_IPV4_LEN - 1 ? '.' : '\n');
 
-  kprintf("Protocol:\n");
-  kprintf("  type: %x\n", message->ptype);
-  kprintf("  len : %x\n", message->plen);
+  kprintf("Target: ");
 
-  kprintf("  Sender Address: %u.%u.%u.%u\n", message->spa[0], message->spa[1],
-          message->spa[2], message->spa[3]);
-
-  kprintf("  Target Address: %u.%u.%u.%u\n", message->tpa[0], message->tpa[1],
-          message->tpa[2], message->tpa[3]);
+  for (uint32 i = 0; i < ARP_MAC_LEN; i++) {
+    kprint_hex_len(message->tha[i], 2);
+    if (i < ARP_MAC_LEN - 1)
+      kprint_cha(':');
+    else
+      kprint_cha(' ');
+  }
+  for (uint32 i = 0; i < ARP_IPV4_LEN; i++)
+    kprintf("%u%c", message->tpa[i], i < ARP_IPV4_LEN - 1 ? '.' : '\n');
 }
 
 void arp_init_msg(arp_t *msg) {
   msg->htype = HTONS(1);
   msg->ptype = ETH_TYPE_IPV4_NET;
-  msg->hlen = 6;
-  msg->plen = 4;
+  msg->hlen = ARP_MAC_LEN;
+  msg->plen = ARP_IPV4_LEN;
   eth_get_mac(msg->sha);
-  msg->spa[0] = 229; // mock IP address for now
-  msg->spa[1] = 123;
-  msg->spa[2] = 11;
-  msg->spa[3] = 19;
+  msg->spa[0] = 12; // mock IP address for now
+  msg->spa[1] = 34;
+  msg->spa[2] = 56;
+  msg->spa[3] = 78;
 }
 
 void arp_init_reply(arp_t *reply, arp_t *request) {
   arp_init_msg(reply);
   reply->oper = ARP_OPER_REPLY_NET;
-  for (uint32 i = 0; i < 6; i++) {
+  for (uint32 i = 0; i < ARP_MAC_LEN; i++) {
     reply->tha[i] = request->sha[i];
   }
-  for (uint32 i = 0; i < 4; i++) {
+  for (uint32 i = 0; i < ARP_IPV4_LEN; i++) {
     reply->tpa[i] = request->spa[i];
   }
 }
@@ -54,7 +70,7 @@ void arp_init_reply(arp_t *reply, arp_t *request) {
 void arp_init_request(arp_t *request, void *ip) {
   arp_init_msg(request);
   request->oper = ARP_OPER_REQUEST_NET;
-  for (uint32 i = 0; i < 4; i++) {
+  for (uint32 i = 0; i < ARP_IPV4_LEN; i++) {
     request->tpa[i] = *(uint8 *)(ip + i);
   }
 }
@@ -63,7 +79,9 @@ void arp_request(void *ip) {
   arp_t request;
   arp_init_request(&request, ip);
   uint8 dest_mac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  memset(request.tha, 0, ARP_MAC_LEN);
   eth_send(dest_mac, ETH_TYPE_ARP, &request, sizeof(arp_t));
+  arp_dump(&request);
 }
 
 void arp_reply(arp_t *request) {
