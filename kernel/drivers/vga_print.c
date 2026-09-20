@@ -84,8 +84,12 @@ void vga_print_base(uint32 n, char *base, uint32 base_len, uint32 len) {
   for (uint32 j = 0; j <= i; j++)
     buff[j] = '0';
 
-  if (n == 0)
-    return (vga_print_str("0", VGA_WHITE, VGA_BLACK));
+  if (n == 0) {
+    for (uint32 i = 1; i < len; i++)
+      vga_print_cha('0');
+    vga_print_cha('0');
+    return;
+  }
   while (n > 0) {
     buff[--i] = base[(n % base_len)];
     n /= base_len;
