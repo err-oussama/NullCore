@@ -1,4 +1,5 @@
-#include "kprint.h"
+#include "types.h"
+#include <kprint.h>
 #include <vga_print.h>
 
 void kclear_screen() { vga_clear_screen(); }
@@ -7,21 +8,24 @@ void kprint_wrn(char *str) { vga_print_warn(str); }
 void kprint_err(char *str) { vga_print_err(str); }
 
 void kprint_cha(uint8 c) { vga_print_cha(c); }
-void kprint_dec(long n) { vga_print_dec(n); }
-void kprint_hex(unsigned long n) { vga_print_hex(n); }
-void kprint_hex_len(unsigned n, unsigned len) { vga_print_hex_len(n, len); }
-void kprint_bin(unsigned long n) { vga_print_bin(n); }
+void kprint_dec(int32 n) { vga_print_dec(n); }
+void kprint_hex(uint32 n) { vga_print_hex(n); }
+void kprint_hex_padded(uint32 n, uint32 min_width) {
+  vga_print_hex_padded(n, min_width);
+}
+void kprint_bin(uint32 n) { vga_print_bin(n); }
 void kprint_hex64(uint64 n) {
   vga_print_hex((uint32)(n >> 32));
   vga_print_hex((uint32)n);
 }
 
-void kmemory_dump_bin(void *ptr, unsigned long size) {
+void kmemory_dump_bin(void *ptr, uint32 size) {
   vga_memory_dump_bin(ptr, size);
 }
-void kmemory_dump_hex(void *ptr, unsigned long size) {
+void kmemory_dump_hex(void *ptr, uint32 size) {
   vga_memory_dump_hex(ptr, size);
 }
+
 void kprintf(char *format, ...) {
   char *ptr;
 

@@ -28,9 +28,9 @@ void vga_print_str(char *str, int fg, int bg);
 
 void vga_print64bit_base(uint64 n, char *base, uint32 base_len);
 void vga_print_cha(uint8 c);
-void vga_print_dec(long n);
+void vga_print_dec(int32 n);
 void vga_print_hex(uint32 n);
-void vga_print_hex_len(uint32 n, uint32 len);
+void vga_print_hex_padded(uint32 n, uint32 min_width);
 void vga_print(char *str);
 void vga_print_err(char *str);
 void vga_print_warn(char *str);

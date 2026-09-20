@@ -22,7 +22,7 @@ void arp_dump(arp_t *message) {
   kprintf("Sender: ");
 
   for (uint32 i = 0; i < ARP_MAC_LEN; i++) {
-    kprint_hex_len(message->sha[i], 2);
+    kprint_hex_padded(message->sha[i], 2);
     if (i < ARP_MAC_LEN - 1)
       kprint_cha(':');
     else
@@ -34,7 +34,7 @@ void arp_dump(arp_t *message) {
   kprintf("Target: ");
 
   for (uint32 i = 0; i < ARP_MAC_LEN; i++) {
-    kprint_hex_len(message->tha[i], 2);
+    kprint_hex_padded(message->tha[i], 2);
     if (i < ARP_MAC_LEN - 1)
       kprint_cha(':');
     else
