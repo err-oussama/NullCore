@@ -43,9 +43,9 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 
 ### Networking
 - [x] PCI enumeration
-- [ ] NIC driver (RTL8139: TX, RX, interrupts)
-- [ ] Ethernet layer (frame dispatch by EtherType)
-- [ ] ARP (address resolution)
+- [x] NIC driver (RTL8139: TX, RX, interrupts)
+- [x] Ethernet layer (frame dispatch by EtherType)
+- [x] ARP (address resolution)
 - [ ] IPv4 (header parsing, routing decision)
 - [ ] ICMP (ping)
 - [ ] UDP
