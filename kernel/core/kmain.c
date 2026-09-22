@@ -14,10 +14,12 @@
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprintf("=============================[ NullCore - Network "
-          "]=============================");
+  kprintf("============================="
+          "[ NullCore - Network ]"
+          "=============================");
 
-  uint32 ip = 0x0202000A;
-  arp_request(&ip);
-  eth_poll();
+  uint8 ip[] = {192, 168, 100, 1};
+  /* arp_request(ip); */
+  while (1)
+    eth_poll();
 }

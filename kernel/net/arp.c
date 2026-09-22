@@ -7,6 +7,7 @@
 #define ARP_IPV4_LEN 4
 
 void arp_dump(arp_t *message) {
+  return;
   kprintf("-- ARP ");
   switch (message->oper) {
   case ARP_OPER_REPLY_NET:
@@ -50,10 +51,10 @@ void arp_init_msg(arp_t *msg) {
   msg->hlen = ARP_MAC_LEN;
   msg->plen = ARP_IPV4_LEN;
   eth_get_mac(msg->sha);
-  msg->spa[0] = 12; // mock IP address for now
-  msg->spa[1] = 34;
-  msg->spa[2] = 56;
-  msg->spa[3] = 78;
+  msg->spa[0] = 192; // mock IP address for now
+  msg->spa[1] = 168;
+  msg->spa[2] = 100;
+  msg->spa[3] = 2;
 }
 
 void arp_init_reply(arp_t *reply, arp_t *request) {
@@ -65,6 +66,7 @@ void arp_init_reply(arp_t *reply, arp_t *request) {
   for (uint32 i = 0; i < ARP_IPV4_LEN; i++) {
     reply->tpa[i] = request->spa[i];
   }
+  arp_dump(reply);
 }
 
 void arp_init_request(arp_t *request, void *ip) {

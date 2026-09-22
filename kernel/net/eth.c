@@ -81,13 +81,18 @@ void eth_poll() {
     switch (frame->type) {
     case ETH_TYPE_ARP_NET:
       arp_handler((arp_t *)frame->payload);
+      kprintf("ARP\n");
       break;
     case ETH_TYPE_IPV4_NET:
       kprintf("IPV4\n");
       break;
+    case ETH_TYPE_IPV6_NET:
+      kprintf("IPV6\n");
+      break;
     default:
-      kprintf("Unknown protocol %x\n", frame->type);
+      kprintf("Unknown protocol %x\n\n", frame->type);
     }
     eth_rx_index_r = ++eth_rx_index_r == eth_rx_count ? 0 : eth_rx_index_r;
   }
+  asm("hlt");
 }
