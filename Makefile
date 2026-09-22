@@ -1,3 +1,5 @@
+.PHONY: clean fclean all run 
+
 # Compiler / Assembler / Linker
 CC      := gcc
 ASM     := nasm
@@ -63,19 +65,16 @@ kernel/%.o: kernel/%.asm
 disk.img:
 	qemu-img create -f raw disk.img 32M
 
-# Running
-run: all
-	qemu-system-i386 -kernel $(TARGET) \
-		-drive file=disk.img,format=raw,index=0,media=disk \
-		-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-		-device rtl8139,netdev=net0,mac=AA:12:34:56:78:FF \
-		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
-
 # Clean
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
 fclean: clean
 	rm -f $(TARGET) user_program disk.img
 
-
-.PHONY: clean fclean all run 
+# Running
+run: all
+	qemu-system-i386 -kernel $(TARGET) \
+		-drive file=disk.img,format=raw,index=0,media=disk \
+		-netdev tap,id=net0,ifname=tap1,script=no,downscript=no \
+		-device rtl8139,netdev=net0,mac=AA:12:34:56:78:FF \
+		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
