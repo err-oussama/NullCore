@@ -1,5 +1,6 @@
 #include <arp.h>
 #include <eth.h>
+#include <ipv4.h>
 #include <pmm.h>
 #include <rtl8139.h>
 #include <types.h>
@@ -81,10 +82,11 @@ void eth_poll() {
     switch (frame->type) {
     case ETH_TYPE_ARP_NET:
       arp_handler((arp_t *)frame->payload);
-      kprintf("ARP\n");
+      /* kprintf("ARP\n"); */
       break;
     case ETH_TYPE_IPV4_NET:
-      kprintf("IPV4\n");
+      ipv4_handler((ipv4_t *)frame->payload);
+      /* kprintf("IPV4\n"); */
       break;
     case ETH_TYPE_IPV6_NET:
       kprintf("IPV6\n");

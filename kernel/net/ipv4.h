@@ -3,6 +3,10 @@
 
 #include <types.h>
 
+#define IPV4_PROTOCOL_ICMP 0x1 // Internet Control Message Protocol
+#define IPV4_PROTOCOL_UDP 0x11 // User Datagram Protocol
+#define TPV4_PROTOCOL_TCP 0x6  // Transmission Control Protocol
+
 // IP options are not supported;
 // header length (IHL) is expected to always be 5 (20-byte header, no options)
 typedef struct __attribute__((packed)) {
@@ -29,4 +33,5 @@ typedef struct __attribute__((packed)) {
   uint8 data[];
 } ipv4_t;
 
+void ipv4_handler(ipv4_t *packet);
 #endif
