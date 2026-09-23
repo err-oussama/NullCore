@@ -70,9 +70,14 @@ clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
 fclean: clean
 	rm -f $(TARGET) user_program disk.img
+	
 
+ni:
+	sudo ip tuntap add mode tap name tap0 user $$USER
+	sudo ip link set tap0 up
+	sudo ip addr add 192.168.100.1/24 dev tap0
 # Running
-run: all
+run: all ni 
 	qemu-system-i386 -kernel $(TARGET) \
 		-drive file=disk.img,format=raw,index=0,media=disk \
 		-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
