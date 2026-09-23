@@ -73,7 +73,7 @@ fclean: clean
 	
 
 # Running
-run: all ni 
+run: all
 	qemu-system-i386 -kernel $(TARGET) \
 		-drive file=disk.img,format=raw,index=0,media=disk \
 		-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
