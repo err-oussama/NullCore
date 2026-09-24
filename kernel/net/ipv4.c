@@ -3,18 +3,54 @@
 #include <ipv4.h>
 #include <kprint.h>
 
-void ipv4_dump(ipv4_t *packet) {
-  uint16 flags_frag = ntohs(packet->flags_frag);
-  kprintf("Ver: %u\n", packet->ver_ihl >> 4);
-  kprintf("IHL: %u\n", packet->ver_ihl & 0xF);
-  kprintf("TOS: %u\n", packet->tos);
-  kprintf("Total len: %u\n", ntohs(packet->total_len));
-  kprintf("Id: %u\n", ntohs(packet->id));
-  kprintf("DF: %u\n", (flags_frag >> 14) & 0x1);
-  kprintf("MF: %u\n", (flags_frag >> 13) & 0x1);
-  kprintf("Offset: %u\n", flags_frag & 0x1FFF);
-  kprintf("TTL: %u\n", packet->ttl);
-  kprintf("Protocol: %u\n", packet->protocol);
+const char *get_protocol(uint8 protocol) {
+  switch (protocol) {
+  case IPV4_PROTOCOL_ICMP:
+    return "ICMP";
+  case IPV4_PROTOCOL_TCP:
+    return "TCP";
+  case IPV4_PROTOCOL_UDP:
+    return "UDP";
+  }
+  return "UNKNOWN";
 }
 
-void ipv4_handler(ipv4_t *packet) { ipv4_dump(packet); }
+void ipv4_dump(ipv4_t *packet) {
+  uint16 flags_frag = ntohs(packet->flags_frag);
+  uint8 ver = packet->ver_ihl >> 4;
+  uint8 ihl = (packet->ver_ihl & 0x0F) * 4;
+  uint8 tos = packet->tos;
+  uint16 total_len = ntohs(packet->total_len);
+  uint16 id = ntohs(packet->id);
+  uint8 ttl = packet->ttl;
+  uint16 checksum = ntohs(packet->checksum);
+  uint8 *s_ip = packet->src_ip;
+  uint8 *d_ip = packet->dest_ip;
+  uint16 offset = (flags_frag & 0x1FFF) * 8;
+
+  kprintf("------ IPv4 packet ------\n");
+  kprintf("Ver=%u IHL=%u TOS=%u TotalLen=%u\n", ver, ihl, tos, total_len);
+  kprintf("Id=%u Flags=[%s %s] Offset=%u\n", id,
+          (flags_frag & 0x4000) ? "DF" : "--",
+          (flags_frag & 0x2000) ? "MF" : "--", offset);
+  kprintf("TTL=%u Protocol=%s Checksum=0x%x\n", ttl,
+          get_protocol(packet->protocol), checksum);
+
+  kprintf("Src: %u.%u.%u.%u -> Dest: %u.%u.%u.%u\n", s_ip[0], s_ip[1], s_ip[2],
+          s_ip[3], d_ip[0], d_ip[1], d_ip[2], d_ip[3]);
+  kprintf("-------------------------\n");
+}
+void ipv4_handler(ipv4_t *packet) {
+  /* ipv4_dump(packet); */
+  // TODO: check checksum
+  // TODO: check fragmentation
+
+  switch (packet->protocol) {
+  case IPV4_PROTOCOL_ICMP:
+    kprintf("ICMP packet\n");
+  case IPV4_PROTOCOL_TCP:
+    kprintf("TCP packet\n");
+  case IPV4_PROTOCOL_UDP:
+    kprintf("UDP packet\n");
+  }
+}
