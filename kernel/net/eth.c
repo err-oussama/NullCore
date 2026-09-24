@@ -88,9 +88,9 @@ void eth_poll() {
       ipv4_handler((ipv4_t *)frame->payload);
       /* kprintf("IPV4\n"); */
       break;
-    case ETH_TYPE_IPV6_NET:
-      kprintf("IPV6\n");
-      break;
+    /* case ETH_TYPE_IPV6_NET: */
+    /*   kprintf("IPV6\n"); */
+    /*   break; */
     default:
       kprintf("Unknown protocol %x\n\n", frame->type);
     }
