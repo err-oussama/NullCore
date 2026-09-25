@@ -79,3 +79,20 @@ void ipv4_handler(ipv4_t *packet) {
     break;
   }
 }
+
+void ipv4_send(uint8 *dest_ip, void *payload, uint32 size) {
+  // packet = ipv4_build_packet(dest, payload)
+  //
+  // next_hop_ip = none
+  // if dest_ip in local_netowrk:
+  // 		next_hop_ip = dest_ip
+  // else:
+  //		next_hop_ip = default_getway
+  //
+  // next_hop_mac = get_mac_of_ip(next_hop_ip)
+  // if next_hop_mac:
+  // 		eth_send(next_hop_mac, packet)
+  // else
+  //		arp_request(next_hop_ip)
+  //		arp_enqueue(next_hop_ip, packet)
+}
