@@ -6,4 +6,6 @@
 
 uint16 htons(uint16 x);
 uint16 ntohs(uint16 x);
+uint32 ntohl(uint32 x);
+uint32 htonl(uint32 x);
 #endif

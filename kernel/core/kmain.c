@@ -1,6 +1,7 @@
 #include <arp.h>
 #include <ata.h>
 #include <eth.h>
+#include <ipv4.h>
 #include <kernel.h>
 #include <kheap.h>
 #include <kprint.h>
@@ -17,9 +18,9 @@ void kmain(multiboot_info *boot_info) {
   kprintf("============================="
           "[ NullCore - Network ]"
           "=============================");
-
+  ipv4_init_iface();
   uint8 ip[] = {192, 168, 100, 1};
-  /* arp_request(ip); */
+  ipv4_send(ip, IPV4_PROTOCOL_ICMP, NULL, 0);
   while (1)
     eth_poll();
 }

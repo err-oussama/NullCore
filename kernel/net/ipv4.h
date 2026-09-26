@@ -44,11 +44,18 @@ typedef struct __attribute__((packed)) {
   uint16 checksum;
 
   uint8 src_ip[4];
-
   uint8 dest_ip[4];
-
   uint8 payload[];
 } ipv4_t;
 
+typedef struct {
+  uint8 dev_ip[4]; // the device IP itself: 192.168.100.2
+  uint8 net_ip[4]; // the network IP: 192.168.100.0
+  uint8 gateway[4];
+  uint8 mask; // 0-31 : 24
+} ipv4_iface_t;
+
 void ipv4_handler(ipv4_t *packet);
+void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size);
+void ipv4_init_iface();
 #endif

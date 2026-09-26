@@ -2,6 +2,13 @@
 #include <byteorder.h>
 #include <ipv4.h>
 #include <kprint.h>
+#include <kstring.h>
+#include <pmm.h>
+
+static ipv4_iface_t ipv4_iface;
+static int ipv4_next_id = 0;
+
+uint16 ipv4_get_id() { return ipv4_next_id++; }
 
 const char *ipv4_get_protocol(uint8 protocol) {
   switch (protocol) {
@@ -41,6 +48,26 @@ void ipv4_dump(ipv4_t *packet) {
   kprintf("-------------------------\n");
 }
 
+void ipv4_init_iface() {
+
+  ipv4_iface.dev_ip[0] = 192;
+  ipv4_iface.dev_ip[1] = 168;
+  ipv4_iface.dev_ip[2] = 100;
+  ipv4_iface.dev_ip[3] = 2;
+
+  ipv4_iface.net_ip[0] = 192;
+  ipv4_iface.net_ip[1] = 168;
+  ipv4_iface.net_ip[2] = 100;
+  ipv4_iface.net_ip[3] = 0;
+
+  ipv4_iface.gateway[0] = 0;
+  ipv4_iface.gateway[1] = 0;
+  ipv4_iface.gateway[2] = 0;
+  ipv4_iface.gateway[3] = 0;
+
+  ipv4_iface.mask = 24;
+}
+
 uint32 ipv4_header_word_sum(void *header) {
   uint16 *words = header;
   uint32 sum = 0;
@@ -48,7 +75,6 @@ uint32 ipv4_header_word_sum(void *header) {
     sum += words[i];
   return sum;
 }
-
 uint16 ipv4_checksum_is_valid(ipv4_t *packet) {
   uint32 sum = ipv4_header_word_sum(packet);
   while (sum >> 16)
@@ -80,7 +106,49 @@ void ipv4_handler(ipv4_t *packet) {
   }
 }
 
-void ipv4_send(uint8 *dest_ip, void *payload, uint32 size) {
+uint16 ipv4_calc_checksum(ipv4_t *packet) {
+  uint32 sum = ipv4_header_word_sum(packet);
+  while (sum >> 16)
+    sum = (sum & 0xFFFF) + (sum >> 16);
+  return ~sum & 0xFFFF;
+}
+
+void ipv4_init_packet(ipv4_t *packet, uint8 *dest_ip, uint8 protocol,
+                      void *payload, uint32 size) {
+  packet->ver_ihl = 0x45;
+  packet->tos = 0;
+  packet->total_len = htons(size + 20);
+  packet->id = htons(ipv4_get_id());
+  packet->flags_frag = 0;
+  packet->ttl = 64;
+  packet->protocol = protocol;
+  for (uint32 i = 0; i < 4; i++) {
+    packet->dest_ip[i] = dest_ip[i];
+    packet->src_ip[i] = ipv4_iface.dev_ip[i];
+  }
+  packet->checksum = 0;
+  packet->checksum = ipv4_calc_checksum(packet);
+
+  for (uint32 i = 0; i < size; i++) {
+    packet->payload[i] = *(uint8 *)(payload + i);
+  }
+}
+
+uint8 ipv4_is_in_same_net(uint8 *ip) {
+  uint32 ip_host = ntohl(*(uint32 *)ip);
+  uint32 dev_ip_host = htonl(*(uint32 *)ipv4_iface.dev_ip);
+  uint32 bit_mask = 0xFFFFFFFF << (32 - ipv4_iface.mask);
+  kprintf("%x <> %x\n", (ip_host & bit_mask), (dev_ip_host & bit_mask));
+  return (ip_host & bit_mask) == (dev_ip_host & bit_mask);
+}
+
+void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
+  ipv4_t *packet = pmm_alloc(1);
+  if (!packet)
+    return;
+  ipv4_init_packet(packet, dest_ip, protocol, payload, size);
+  kprintf("Is ip in same net: %u\n", ipv4_is_in_same_net(dest_ip));
+
   // packet = ipv4_build_packet(dest, payload)
   //
   // next_hop_ip = none
