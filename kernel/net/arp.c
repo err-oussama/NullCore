@@ -3,8 +3,12 @@
 #include <eth.h>
 #include <kprint.h>
 #include <kstring.h>
+
 #define ARP_MAC_LEN 6
 #define ARP_IPV4_LEN 4
+#define ARP_CACHE_SIZE 0x10
+
+static arp_cache_entry_t arp_cache[ARP_CACHE_SIZE];
 
 void arp_dump(arp_t *message) {
   return;
@@ -92,6 +96,21 @@ void arp_reply(arp_t *request) {
   eth_send(request->sha, ETH_TYPE_ARP, &reply, sizeof(arp_t));
 }
 
+void arp_cache_insert(arp_t *message) {
+  for (uint32 i = 0; i < ARP_CACHE_SIZE; i++) {
+    if (!arp_cache[i].in_use) {
+      for (uint32 j = 0; j < ARP_MAC_LEN; j++) {
+        arp_cache[i].mac[j] = message->sha[j];
+      }
+      for (uint32 j = 0; j < ARP_IPV4_LEN; j++) {
+        arp_cache[i].ip[j] = message->spa[j];
+      }
+      arp_cache[i].in_use = 1;
+      return;
+    }
+  }
+}
+
 void arp_handler(arp_t *message) {
   arp_dump(message);
   switch (message->oper) {
@@ -99,7 +118,27 @@ void arp_handler(arp_t *message) {
     arp_reply(message);
     break;
   case ARP_OPER_REPLY_NET:
-    // arp_save_ip();
+    arp_cache_insert(message);
     break;
+  }
+}
+
+void *arp_cache_lookup(uint8 *ipv4) {
+  for (uint32 i = 0; i < ARP_CACHE_SIZE; i++) {
+    if (*(uint32 *)ipv4 == *(uint32 *)(&arp_cache[i].ip)) {
+      return arp_cache[i].mac;
+    }
+  }
+  return NULL;
+}
+
+void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint32 size) {
+  uint8 *mac = arp_cache_lookup(ipv4);
+
+  if (mac)
+    eth_send(mac, ETH_TYPE_IPV4, packet, size);
+  else {
+    arp_request(ipv4);
+    /* arp_enqueue(ipv4, packet, size); */
   }
 }

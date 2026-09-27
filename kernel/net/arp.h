@@ -28,6 +28,14 @@ typedef struct __attribute__((packed)) {
 
 } arp_t;
 
+typedef struct {
+  uint8 ip[4];
+  uint8 mac[6];
+  uint16 in_use;
+} arp_cache_entry_t;
+
 void arp_request(void *ip);
 void arp_handler(arp_t *message);
+void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint32 size);
+
 #endif

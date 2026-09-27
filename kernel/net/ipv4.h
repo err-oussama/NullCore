@@ -57,5 +57,4 @@ typedef struct {
 
 void ipv4_handler(ipv4_t *packet);
 void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size);
-void ipv4_init_iface();
 #endif

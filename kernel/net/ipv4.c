@@ -1,11 +1,18 @@
-#include "types.h"
+#include <arp.h>
 #include <byteorder.h>
 #include <ipv4.h>
 #include <kprint.h>
 #include <kstring.h>
 #include <pmm.h>
+#include <types.h>
 
-static ipv4_iface_t ipv4_iface;
+static const ipv4_iface_t ipv4_iface = {
+    .dev_ip = {192, 168, 100, 2},
+    .net_ip = {192, 168, 100, 0},
+    .gateway = {192, 168, 100, 1},
+    .mask = 24,
+};
+
 static int ipv4_next_id = 0;
 
 uint16 ipv4_get_id() { return ipv4_next_id++; }
@@ -45,27 +52,7 @@ void ipv4_dump(ipv4_t *packet) {
 
   kprintf("Src: %u.%u.%u.%u -> Dest: %u.%u.%u.%u\n", s_ip[0], s_ip[1], s_ip[2],
           s_ip[3], d_ip[0], d_ip[1], d_ip[2], d_ip[3]);
-  kprintf("-------------------------\n");
-}
-
-void ipv4_init_iface() {
-
-  ipv4_iface.dev_ip[0] = 192;
-  ipv4_iface.dev_ip[1] = 168;
-  ipv4_iface.dev_ip[2] = 100;
-  ipv4_iface.dev_ip[3] = 2;
-
-  ipv4_iface.net_ip[0] = 192;
-  ipv4_iface.net_ip[1] = 168;
-  ipv4_iface.net_ip[2] = 100;
-  ipv4_iface.net_ip[3] = 0;
-
-  ipv4_iface.gateway[0] = 0;
-  ipv4_iface.gateway[1] = 0;
-  ipv4_iface.gateway[2] = 0;
-  ipv4_iface.gateway[3] = 0;
-
-  ipv4_iface.mask = 24;
+  kprintf("------------------------\n");
 }
 
 uint32 ipv4_header_word_sum(void *header) {
@@ -88,8 +75,6 @@ uint32 ipv4_is_fragment(ipv4_t *packet) {
 }
 
 void ipv4_handler(ipv4_t *packet) {
-  /* ipv4_dump(packet); */
-
   if (!ipv4_checksum_is_valid(packet) || ipv4_is_fragment(packet))
     return;
 
@@ -138,29 +123,31 @@ uint8 ipv4_is_in_same_net(uint8 *ip) {
   uint32 ip_host = ntohl(*(uint32 *)ip);
   uint32 dev_ip_host = htonl(*(uint32 *)ipv4_iface.dev_ip);
   uint32 bit_mask = 0xFFFFFFFF << (32 - ipv4_iface.mask);
-  kprintf("%x <> %x\n", (ip_host & bit_mask), (dev_ip_host & bit_mask));
   return (ip_host & bit_mask) == (dev_ip_host & bit_mask);
 }
 
+void ipv4_get_next_hop(uint8 *dest_ip, uint8 *next_hop_ip) {
+  if (ipv4_is_in_same_net(dest_ip))
+    for (uint32 i = 0; i < 4; i++)
+      next_hop_ip[i] = dest_ip[i];
+  else
+    for (uint32 i = 0; i < 4; i++)
+      next_hop_ip[i] = ipv4_iface.gateway[i];
+}
+
 void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
+
   ipv4_t *packet = pmm_alloc(1);
   if (!packet)
     return;
-  ipv4_init_packet(packet, dest_ip, protocol, payload, size);
-  kprintf("Is ip in same net: %u\n", ipv4_is_in_same_net(dest_ip));
 
-  // packet = ipv4_build_packet(dest, payload)
-  //
-  // next_hop_ip = none
-  // if dest_ip in local_netowrk:
-  // 		next_hop_ip = dest_ip
-  // else:
-  //		next_hop_ip = default_getway
-  //
-  // next_hop_mac = get_mac_of_ip(next_hop_ip)
-  // if next_hop_mac:
-  // 		eth_send(next_hop_mac, packet)
-  // else
-  //		arp_request(next_hop_ip)
-  //		arp_enqueue(next_hop_ip, packet)
+  ipv4_init_packet(packet, dest_ip, protocol, payload, size);
+
+  uint8 next_hop_ip[4];
+  ipv4_get_next_hop(dest_ip, next_hop_ip);
+
+  /* kprintf("Next Hop IP: %u.%u.%u.%u", next_hop_ip[0], next_hop_ip[1], */
+  /*         next_hop_ip[2], next_hop_ip[3]); */
+
+  arp_send_ipv4_packet(next_hop_ip, packet, size + 20);
 }
