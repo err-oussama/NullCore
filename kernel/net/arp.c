@@ -3,12 +3,15 @@
 #include <eth.h>
 #include <kprint.h>
 #include <kstring.h>
+#include <pmm.h>
 
 #define ARP_MAC_LEN 6
 #define ARP_IPV4_LEN 4
 #define ARP_CACHE_SIZE 0x10
+#define ARP_QUEUE_SIZE 0x10
 
 static arp_cache_entry_t arp_cache[ARP_CACHE_SIZE];
+static arp_pending_t arp_queue[ARP_QUEUE_SIZE];
 
 void arp_dump(arp_t *message) {
   return;
@@ -111,18 +114,6 @@ void arp_cache_insert(arp_t *message) {
   }
 }
 
-void arp_handler(arp_t *message) {
-  arp_dump(message);
-  switch (message->oper) {
-  case ARP_OPER_REQUEST_NET:
-    arp_reply(message);
-    break;
-  case ARP_OPER_REPLY_NET:
-    arp_cache_insert(message);
-    break;
-  }
-}
-
 void *arp_cache_lookup(uint8 *ipv4) {
   for (uint32 i = 0; i < ARP_CACHE_SIZE; i++) {
     if (*(uint32 *)ipv4 == *(uint32 *)(&arp_cache[i].ip)) {
@@ -132,13 +123,51 @@ void *arp_cache_lookup(uint8 *ipv4) {
   return NULL;
 }
 
-void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint32 size) {
+void arp_flush_pending(uint8 *ipv4) {
+  for (uint32 i = 0; i < ARP_QUEUE_SIZE; i++) {
+    if (!arp_queue[i].in_use)
+      continue;
+    if (*(uint32 *)arp_queue[i].ip == *(uint32 *)ipv4) {
+      uint8 *mac = arp_cache_lookup(ipv4);
+      eth_send(mac, ETH_TYPE_IPV4, arp_queue[i].packet, arp_queue[i].size);
+      arp_queue[i].in_use = 0;
+      pmm_free(arp_queue[i].packet, 1);
+    }
+  }
+}
+void arp_handler(arp_t *message) {
+  arp_dump(message);
+  switch (message->oper) {
+  case ARP_OPER_REQUEST_NET:
+    arp_reply(message);
+    break;
+  case ARP_OPER_REPLY_NET:
+    arp_cache_insert(message);
+    arp_flush_pending(message->spa);
+    break;
+  }
+}
+
+void arp_enqueue(uint8 *ipv4, void *packet, uint16 size) {
+  for (uint32 i = 0; i < ARP_QUEUE_SIZE; i++) {
+    if (!arp_queue[i].in_use) {
+      arp_queue[i].size = size;
+      arp_queue[i].packet = packet;
+      arp_queue[i].in_use = 1;
+      memcpy(ipv4, arp_queue[i].ip, 4);
+      break;
+    }
+  }
+}
+
+void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint16 size) {
   uint8 *mac = arp_cache_lookup(ipv4);
 
-  if (mac)
+  if (mac) {
     eth_send(mac, ETH_TYPE_IPV4, packet, size);
-  else {
+    pmm_free(packet, 1);
+  } else {
     arp_request(ipv4);
-    /* arp_enqueue(ipv4, packet, size); */
+    arp_enqueue(ipv4, packet, size);
   }
 }

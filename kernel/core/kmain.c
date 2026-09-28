@@ -18,9 +18,13 @@ void kmain(multiboot_info *boot_info) {
   kprintf("============================="
           "[ NullCore - Network ]"
           "=============================");
-  /* uint8 ip[] = {129, 168, 100, 255}; */
-  uint8 ip[] = {8, 8, 8, 8};
-  ipv4_send(ip, IPV4_PROTOCOL_ICMP, NULL, 0);
+  uint8 ip[] = {192, 168, 100, 1};
+  uint8 *payload = pmm_alloc(1);
+  uint16 size = 0x10;
+  for (uint16 i = 0; i < size; i++) {
+    payload[i] = 'X';
+  }
+  ipv4_send(ip, IPV4_PROTOCOL_ICMP, payload, size);
   while (1)
     eth_poll();
 }

@@ -34,8 +34,15 @@ typedef struct {
   uint16 in_use;
 } arp_cache_entry_t;
 
+typedef struct {
+  uint8 ip[4];
+  void *packet;
+  uint16 size;
+  uint16 in_use;
+} arp_pending_t;
+
 void arp_request(void *ip);
 void arp_handler(arp_t *message);
-void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint32 size);
+void arp_send_ipv4_packet(uint8 *ipv4, void *packet, uint16 size);
 
 #endif
