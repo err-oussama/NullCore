@@ -1,5 +1,6 @@
 #include <arp.h>
 #include <byteorder.h>
+#include <icmp.h>
 #include <ipv4.h>
 #include <kprint.h>
 #include <kstring.h>
@@ -74,23 +75,6 @@ uint32 ipv4_is_fragment(ipv4_t *packet) {
   return (flags_frag & 0x2000) || (flags_frag & 0x1FFF);
 }
 
-void ipv4_handler(ipv4_t *packet) {
-  if (!ipv4_checksum_is_valid(packet) || ipv4_is_fragment(packet))
-    return;
-
-  switch (packet->protocol) {
-  case IPV4_PROTOCOL_ICMP:
-    kprintf("ICMP packet\n");
-    break;
-  case IPV4_PROTOCOL_TCP:
-    kprintf("TCP packet\n");
-    break;
-  case IPV4_PROTOCOL_UDP:
-    kprintf("UDP packet\n");
-    break;
-  }
-}
-
 uint16 ipv4_calc_checksum(ipv4_t *packet) {
   uint32 sum = ipv4_header_word_sum(packet);
   while (sum >> 16)
@@ -150,4 +134,22 @@ void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
   /*         next_hop_ip[2], next_hop_ip[3]); */
 
   arp_send_ipv4_packet(next_hop_ip, packet, size + 20);
+}
+
+void ipv4_handler(ipv4_t *packet) {
+  if (!ipv4_checksum_is_valid(packet) || ipv4_is_fragment(packet))
+    return;
+
+  switch (packet->protocol) {
+  case IPV4_PROTOCOL_ICMP:
+    icmp_handler(packet->src_ip, (icmp_t *)packet->payload,
+                 ntohs(packet->total_len) - 20);
+    break;
+  case IPV4_PROTOCOL_TCP:
+    kprintf("TCP packet\n");
+    break;
+  case IPV4_PROTOCOL_UDP:
+    kprintf("UDP packet\n");
+    break;
+  }
 }
