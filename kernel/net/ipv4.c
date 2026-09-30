@@ -1,5 +1,6 @@
 #include <arp.h>
 #include <byteorder.h>
+#include <checksum.h>
 #include <icmp.h>
 #include <ipv4.h>
 #include <kprint.h>
@@ -56,30 +57,9 @@ void ipv4_dump(ipv4_t *packet) {
   kprintf("------------------------\n");
 }
 
-uint32 ipv4_header_word_sum(void *header) {
-  uint16 *words = header;
-  uint32 sum = 0;
-  for (uint32 i = 0; i < 10; i++)
-    sum += words[i];
-  return sum;
-}
-uint16 ipv4_checksum_is_valid(ipv4_t *packet) {
-  uint32 sum = ipv4_header_word_sum(packet);
-  while (sum >> 16)
-    sum = (sum & 0xFFFF) + (sum >> 16);
-  return sum == 0xFFFF;
-}
-
 uint32 ipv4_is_fragment(ipv4_t *packet) {
   uint16 flags_frag = ntohs(packet->flags_frag);
   return (flags_frag & 0x2000) || (flags_frag & 0x1FFF);
-}
-
-uint16 ipv4_calc_checksum(ipv4_t *packet) {
-  uint32 sum = ipv4_header_word_sum(packet);
-  while (sum >> 16)
-    sum = (sum & 0xFFFF) + (sum >> 16);
-  return ~sum & 0xFFFF;
 }
 
 void ipv4_init_packet(ipv4_t *packet, uint8 *dest_ip, uint8 protocol,
@@ -96,7 +76,7 @@ void ipv4_init_packet(ipv4_t *packet, uint8 *dest_ip, uint8 protocol,
     packet->src_ip[i] = ipv4_iface.dev_ip[i];
   }
   packet->checksum = 0;
-  packet->checksum = ipv4_calc_checksum(packet);
+  packet->checksum = checksum_calc(packet, sizeof(ipv4_t));
 
   for (uint32 i = 0; i < size; i++) {
     packet->payload[i] = *(uint8 *)(payload + i);
@@ -124,20 +104,14 @@ void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
   ipv4_t *packet = pmm_alloc(1);
   if (!packet)
     return;
-
   ipv4_init_packet(packet, dest_ip, protocol, payload, size);
-
   uint8 next_hop_ip[4];
   ipv4_get_next_hop(dest_ip, next_hop_ip);
-
-  /* kprintf("Next Hop IP: %u.%u.%u.%u", next_hop_ip[0], next_hop_ip[1], */
-  /*         next_hop_ip[2], next_hop_ip[3]); */
-
   arp_send_ipv4_packet(next_hop_ip, packet, size + 20);
 }
 
 void ipv4_handler(ipv4_t *packet) {
-  if (!ipv4_checksum_is_valid(packet) || ipv4_is_fragment(packet))
+  if (!checksum_is_valid(packet, sizeof(ipv4_t)) || ipv4_is_fragment(packet))
     return;
 
   switch (packet->protocol) {
