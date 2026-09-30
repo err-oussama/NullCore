@@ -35,5 +35,6 @@ typedef struct {
 } icmp_echo_session_t;
 
 void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len);
+void icmp_echo_request(uint8 *ipv4, void *data, uint16 len);
 
 #endif

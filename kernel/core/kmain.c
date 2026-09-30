@@ -1,6 +1,7 @@
 #include <arp.h>
 #include <ata.h>
 #include <eth.h>
+#include <icmp.h>
 #include <ipv4.h>
 #include <kernel.h>
 #include <kheap.h>
@@ -18,13 +19,13 @@ void kmain(multiboot_info *boot_info) {
   kprintf("============================="
           "[ NullCore - Network ]"
           "=============================");
-  uint8 ip[] = {192, 168, 100, 1};
-  uint8 *payload = pmm_alloc(1);
-  uint16 size = 0x10;
-  for (uint16 i = 0; i < size; i++) {
-    payload[i] = 'X';
-  }
-  ipv4_send(ip, IPV4_PROTOCOL_ICMP, payload, size);
+  /* uint8 ip[] = {192, 168, 100, 1}; */
+  /* uint8 ip[] = {10, 122, 93, 201}; */
+  /* uint8 ip[] = {172, 18, 0, 1}; */
+  uint8 ip[] = {172, 17, 0, 1};
+  uint8 data[] = {'Z', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'Z'};
+  icmp_echo_request(ip, data, sizeof(data));
+
   while (1)
     eth_poll();
 }
