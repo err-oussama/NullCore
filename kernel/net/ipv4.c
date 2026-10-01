@@ -7,8 +7,9 @@
 #include <kstring.h>
 #include <pmm.h>
 #include <types.h>
+#include <udp.h>
 
-static const ipv4_iface_t ipv4_iface = {
+static ipv4_iface_t ipv4_iface = {
     .dev_ip = {192, 168, 100, 2},
     .net_ip = {192, 168, 100, 0},
     .gateway = {192, 168, 100, 1},
@@ -99,6 +100,8 @@ void ipv4_get_next_hop(uint8 *dest_ip, uint8 *next_hop_ip) {
       next_hop_ip[i] = ipv4_iface.gateway[i];
 }
 
+uint8 *ipv4_get_dev_ip() { return ipv4_iface.dev_ip; }
+
 void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
 
   ipv4_t *packet = pmm_alloc(1);
@@ -114,16 +117,22 @@ void ipv4_handler(ipv4_t *packet) {
   if (!checksum_is_valid(packet, sizeof(ipv4_t)) || ipv4_is_fragment(packet))
     return;
 
+  uint8 ihl = (packet->ver_ihl & 0x0F) * 4;
+  if (ihl != 20)
+    return;
+
   switch (packet->protocol) {
   case IPV4_PROTOCOL_ICMP:
     icmp_handler(packet->src_ip, (icmp_t *)packet->payload,
                  ntohs(packet->total_len) - 20);
     break;
   case IPV4_PROTOCOL_TCP:
+    // tcp_handler();
     kprintf("TCP packet\n");
     break;
   case IPV4_PROTOCOL_UDP:
-    kprintf("UDP packet\n");
+    udp_handler(packet->src_ip, packet->dest_ip, (udp_t *)packet->payload,
+                ntohs(packet->total_len) - ihl);
     break;
   }
 }
