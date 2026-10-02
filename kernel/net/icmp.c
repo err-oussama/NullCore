@@ -51,6 +51,10 @@ void icmp_echo_request(uint8 *ipv4, void *data, uint16 len) {
   pmm_free(request, 1);
 }
 
+void icmp_dest_unreachable(icmp_t *msg) {
+  kprintf("Dest Unreachable. Code: %u\n", msg->code);
+}
+
 void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len) {
 
   if (!checksum_is_valid(msg, len))
@@ -62,6 +66,9 @@ void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len) {
     break;
   case ICMP_TYPE_ECHO_REPLY:
     icmp_handle_echo_reply(ipv4, msg, len);
+    break;
+  case ICMP_TYPE_DEST_UNREACHABLE:
+    icmp_dest_unreachable(msg);
     break;
   }
 }

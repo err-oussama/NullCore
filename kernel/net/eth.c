@@ -29,6 +29,7 @@ void eth_init() {
 }
 
 void eth_get_mac(void *mac_out) { pci_rtl8139_get_mac(mac_out); }
+
 void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len) {
   if (!eth_tx_pool) {
     kprintf("TX buffer is NULL\n");

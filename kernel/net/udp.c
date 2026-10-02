@@ -9,8 +9,13 @@
 
 void udp_dump(udp_t *datagram) {
   kprintf("----- UDP -----\n");
-  kprintf("src: %u, dest: %u, len: %u\n", ntohs(datagram->src_port),
+  kprintf("src: %u, dest: %u, len: %u\n[", ntohs(datagram->src_port),
           ntohs(datagram->dest_port), ntohs(datagram->len));
+
+  for (uint16 i = 0; i < ntohs(datagram->len) - sizeof(udp_t); i++)
+    kprintf("%c", datagram->payload[i]);
+
+  kprintf("]\n");
   kprintf("---------------\n");
 }
 
@@ -34,9 +39,6 @@ void udp_handler(uint8 *src_ip, uint8 *dest_ip, udp_t *datagram, uint16 len) {
   if (!udp_is_valid(src_ip, dest_ip, datagram, len))
     return;
   udp_dump(datagram);
-  for (uint32 i = 0; i < len - (sizeof(udp_t)); i++)
-    kprintf("%c", datagram->payload[i]);
-  kprintf("");
 }
 
 void udp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
@@ -61,4 +63,5 @@ void udp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
   datagram->checksum = ~checksum_fold(sum);
 
   ipv4_send(dest_ip, IPV4_PROTOCOL_UDP, datagram, total_len);
+  pmm_free(datagram, 1);
 }
