@@ -48,7 +48,7 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] ARP (address resolution)
 - [x] IPv4 (header parsing, routing decision)
 - [x] ICMP (ping)
-- [ ] UDP
+- [x] UDP
 - [ ] TCP
 
 
