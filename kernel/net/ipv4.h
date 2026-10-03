@@ -48,6 +48,14 @@ typedef struct __attribute__((packed)) {
   uint8 payload[];
 } ipv4_t;
 
+typedef struct __attribute__((packed)) {
+  uint8 src_ip[4];
+  uint8 dest_ip[4];
+  uint8 zero;
+  uint8 protocol;
+  uint16 len;
+} ipv4_pseudo_t;
+
 typedef struct {
   uint8 dev_ip[4]; // the device IP itself: 192.168.100.2
   uint8 net_ip[4]; // the network IP: 192.168.100.0

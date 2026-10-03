@@ -1,6 +1,6 @@
+#include "ipv4.h"
 #include <byteorder.h>
 #include <checksum.h>
-#include <ipv4.h>
 #include <kprint.h>
 #include <kstring.h>
 #include <pmm.h>
@@ -20,23 +20,23 @@ void udp_dump(udp_t *datagram) {
 }
 
 uint32 udp_pseudo_sum(uint8 *src_ip, uint8 *dest_ip, uint16 len) {
-  udp_pseudo_t pseudo;
+  ipv4_pseudo_t pseudo;
   memcpy(dest_ip, pseudo.dest_ip, 4);
   memcpy(src_ip, pseudo.src_ip, 4);
   pseudo.zero = 0;
-  pseudo.udp_len = htons(len);
+  pseudo.len = htons(len);
   pseudo.protocol = IPV4_PROTOCOL_UDP;
-  return checksum_word_sum(&pseudo, sizeof(udp_pseudo_t));
+  return checksum_word_sum(&pseudo, sizeof(ipv4_pseudo_t));
 }
 
-uint8 udp_is_valid(uint8 *src_ip, uint8 *dest_ip, udp_t *datagram, uint16 len) {
-  uint32 sum = checksum_word_sum(datagram, len);
-  sum += udp_pseudo_sum(src_ip, dest_ip, len);
+uint8 udp_is_valid(ipv4_pseudo_t *pseudo, udp_t *datagram, uint16 len) {
+  uint32 sum = checksum_word_sum(datagram, len) +
+               checksum_word_sum(pseudo, sizeof(ipv4_pseudo_t));
   return checksum_fold(sum) == 0xFFFF;
 }
 
-void udp_handler(uint8 *src_ip, uint8 *dest_ip, udp_t *datagram, uint16 len) {
-  if (!udp_is_valid(src_ip, dest_ip, datagram, len))
+void udp_handler(ipv4_pseudo_t *pseudo, udp_t *datagram, uint16 len) {
+  if (!udp_is_valid(pseudo, datagram, len))
     return;
   udp_dump(datagram);
 }

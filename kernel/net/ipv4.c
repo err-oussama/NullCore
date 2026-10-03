@@ -113,6 +113,16 @@ void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
   arp_send_ipv4_packet(next_hop_ip, packet, size + 20);
 }
 
+void ipv4_init_pseudo(ipv4_pseudo_t *pseudo, ipv4_t *packet, uint16 len,
+                      uint8 protocol) {
+
+  memcpy(packet->src_ip, pseudo->src_ip, 4);
+  memcpy(packet->dest_ip, pseudo->dest_ip, 4);
+  pseudo->zero = 0;
+  pseudo->protocol = protocol;
+  pseudo->len = htons(len);
+}
+
 void ipv4_handler(ipv4_t *packet) {
   if (!checksum_is_valid(packet, sizeof(ipv4_t)) || ipv4_is_fragment(packet))
     return;
@@ -120,19 +130,20 @@ void ipv4_handler(ipv4_t *packet) {
   uint8 ihl = (packet->ver_ihl & 0x0F) * 4;
   if (ihl != 20)
     return;
+  uint16 len = ntohs(packet->total_len) - ihl;
 
+  ipv4_pseudo_t pseudo;
   switch (packet->protocol) {
   case IPV4_PROTOCOL_ICMP:
-    icmp_handler(packet->src_ip, (icmp_t *)packet->payload,
-                 ntohs(packet->total_len) - 20);
+    icmp_handler(packet->src_ip, (icmp_t *)packet->payload, len);
+    break;
+  case IPV4_PROTOCOL_UDP:
+    ipv4_init_pseudo(&pseudo, packet, len, IPV4_PROTOCOL_UDP);
+    udp_handler(&pseudo, (udp_t *)packet->payload, len);
     break;
   case IPV4_PROTOCOL_TCP:
     // tcp_handler();
     kprintf("TCP packet\n");
-    break;
-  case IPV4_PROTOCOL_UDP:
-    udp_handler(packet->src_ip, packet->dest_ip, (udp_t *)packet->payload,
-                ntohs(packet->total_len) - ihl);
     break;
   }
 }
