@@ -8,60 +8,51 @@
 #include <udp.h>
 
 void udp_dump(udp_t *datagram) {
+  uint16 src_port = ntohs(datagram->src_port);
+  uint16 dest_port = ntohs(datagram->dest_port);
+  uint16 len = ntohs(datagram->len);
   kprintf("----- UDP -----\n");
-  kprintf("src: %u, dest: %u, len: %u\n[", ntohs(datagram->src_port),
-          ntohs(datagram->dest_port), ntohs(datagram->len));
+  kprintf("src: %u, dest: %u, len: %u\n[", src_port, dest_port, len);
 
   for (uint16 i = 0; i < ntohs(datagram->len) - sizeof(udp_t); i++)
     kprintf("%c", datagram->payload[i]);
 
-  kprintf("]\n");
-  kprintf("---------------\n");
+  kprintf("]\n---------------\n");
 }
 
-uint32 udp_pseudo_sum(uint8 *src_ip, uint8 *dest_ip, uint16 len) {
-  ipv4_pseudo_t pseudo;
-  memcpy(dest_ip, pseudo.dest_ip, 4);
-  memcpy(src_ip, pseudo.src_ip, 4);
-  pseudo.zero = 0;
-  pseudo.len = htons(len);
-  pseudo.protocol = IPV4_PROTOCOL_UDP;
-  return checksum_word_sum(&pseudo, sizeof(ipv4_pseudo_t));
+uint8 udp_is_valid(uint32 pseudo_sum, udp_t *datagram, uint16 len) {
+  return 0xFFFF == checksum_fold(checksum_word_sum(datagram, len) + pseudo_sum);
 }
 
-uint8 udp_is_valid(ipv4_pseudo_t *pseudo, udp_t *datagram, uint16 len) {
-  uint32 sum = checksum_word_sum(datagram, len) +
-               checksum_word_sum(pseudo, sizeof(ipv4_pseudo_t));
-  return checksum_fold(sum) == 0xFFFF;
-}
-
-void udp_handler(ipv4_pseudo_t *pseudo, udp_t *datagram, uint16 len) {
-  if (!udp_is_valid(pseudo, datagram, len))
-    return;
-  udp_dump(datagram);
+uint16 udp_calc_checksum(uint8 *dest_ip, udp_t *datagram, uint16 len) {
+  return ~checksum_fold(
+      checksum_word_sum(datagram, len) +
+      ipv4_pseudo_sum(ipv4_get_dev_ip(), dest_ip, IPV4_PROTOCOL_UDP, len));
 }
 
 void udp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
               uint16 len) {
   uint16 total_len = len + sizeof(udp_t);
-  if (total_len > 1450)
+  if (total_len > UDP_MAX_PAYLOAD_SIZE)
     return;
 
   udp_t *datagram = pmm_alloc(1);
   if (!datagram)
     return;
 
+  datagram->checksum = 0;
+  datagram->len = htons(total_len);
   datagram->src_port = htons(src_port);
   datagram->dest_port = htons(dest_port);
-  datagram->len = htons(total_len);
-  datagram->checksum = 0;
-  for (uint32 i = 0; i < len; i++)
-    datagram->payload[i] = *(uint8 *)(payload + i);
-
-  uint32 sum = checksum_word_sum(datagram, total_len);
-  sum += udp_pseudo_sum(ipv4_get_dev_ip(), dest_ip, total_len);
-  datagram->checksum = ~checksum_fold(sum);
+  memcpy(payload, datagram->payload, len);
+  datagram->checksum = udp_calc_checksum(dest_ip, datagram, total_len);
 
   ipv4_send(dest_ip, IPV4_PROTOCOL_UDP, datagram, total_len);
   pmm_free(datagram, 1);
+}
+
+void udp_handler(uint32 pseudo_sum, udp_t *datagram, uint16 len) {
+  if (!udp_is_valid(pseudo_sum, datagram, len))
+    return;
+  udp_dump(datagram);
 }

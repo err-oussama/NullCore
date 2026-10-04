@@ -113,14 +113,15 @@ void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size) {
   arp_send_ipv4_packet(next_hop_ip, packet, size + 20);
 }
 
-void ipv4_init_pseudo(ipv4_pseudo_t *pseudo, ipv4_t *packet, uint16 len,
-                      uint8 protocol) {
-
-  memcpy(packet->src_ip, pseudo->src_ip, 4);
-  memcpy(packet->dest_ip, pseudo->dest_ip, 4);
-  pseudo->zero = 0;
-  pseudo->protocol = protocol;
-  pseudo->len = htons(len);
+uint32 ipv4_pseudo_sum(uint8 *src_ip, uint8 *dest_ip, uint8 protocol,
+                       uint16 len) {
+  ipv4_pseudo_t pseudo;
+  memcpy(dest_ip, pseudo.dest_ip, 4);
+  memcpy(src_ip, pseudo.src_ip, 4);
+  pseudo.protocol = protocol;
+  pseudo.len = htons(len);
+  pseudo.zero = 0;
+  return checksum_word_sum(&pseudo, sizeof(ipv4_pseudo_t));
 }
 
 void ipv4_handler(ipv4_t *packet) {
@@ -131,17 +132,20 @@ void ipv4_handler(ipv4_t *packet) {
   if (ihl != 20)
     return;
   uint16 len = ntohs(packet->total_len) - ihl;
+  uint32 pseudo_sum = 0;
 
-  ipv4_pseudo_t pseudo;
   switch (packet->protocol) {
   case IPV4_PROTOCOL_ICMP:
     icmp_handler(packet->src_ip, (icmp_t *)packet->payload, len);
     break;
   case IPV4_PROTOCOL_UDP:
-    ipv4_init_pseudo(&pseudo, packet, len, IPV4_PROTOCOL_UDP);
-    udp_handler(&pseudo, (udp_t *)packet->payload, len);
+    pseudo_sum = ipv4_pseudo_sum(packet->src_ip, packet->dest_ip,
+                                 IPV4_PROTOCOL_UDP, len);
+    udp_handler(pseudo_sum, (udp_t *)packet->payload, len);
     break;
   case IPV4_PROTOCOL_TCP:
+    pseudo_sum = ipv4_pseudo_sum(packet->src_ip, packet->dest_ip,
+                                 IPV4_PROTOCOL_TCP, len);
     // tcp_handler();
     kprintf("TCP packet\n");
     break;

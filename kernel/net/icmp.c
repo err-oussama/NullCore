@@ -3,6 +3,7 @@
 #include <icmp.h>
 #include <ipv4.h>
 #include <kprint.h>
+#include <kstring.h>
 #include <pmm.h>
 #include <types.h>
 
@@ -43,9 +44,7 @@ void icmp_echo_request(uint8 *ipv4, void *data, uint16 len) {
   request->id = htons(echo_sess.id);
   request->seq = htons(echo_sess.seq);
   echo_sess.is_waiting = 1;
-  for (uint16 i = 0; i < len; i++) {
-    request->data[i] = *(uint8 *)(data + i);
-  }
+  memcpy(data, request->data, len);
   request->icmp.checksum = checksum_calc(request, len + sizeof(icmp_echo_t));
   ipv4_send(ipv4, IPV4_PROTOCOL_ICMP, request, len + sizeof(icmp_echo_t));
   pmm_free(request, 1);
@@ -56,7 +55,6 @@ void icmp_dest_unreachable(icmp_t *msg) {
 }
 
 void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len) {
-
   if (!checksum_is_valid(msg, len))
     return;
 
@@ -70,5 +68,7 @@ void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len) {
   case ICMP_TYPE_DEST_UNREACHABLE:
     icmp_dest_unreachable(msg);
     break;
+  default:
+    kprintf("[ICMP] type: %u, code: %u\n", msg->type, msg->code);
   }
 }
