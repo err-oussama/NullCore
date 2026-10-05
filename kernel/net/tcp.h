@@ -4,12 +4,12 @@
 
 #define TCP_MAX_PAYLOAD_SIZE 1450
 
-#define TCP_FLAGS_FIN
-#define TCP_FLAGS_SYN
-#define TCP_FLAGS_RST
-#define TCP_FLAGS_PSH
-#define TCP_FLAGS_ACK
-#define TCP_FLAGS_URG
+#define TCP_FLAGS_FIN 0x01 // Finish
+#define TCP_FLAGS_SYN 0x02 // Synchronize
+#define TCP_FLAGS_RST 0x04 // Reset
+#define TCP_FLAGS_PSH 0x08 // Push
+#define TCP_FLAGS_ACK 0x10 // Acknowledgment
+#define TCP_FLAGS_URG 0x20 // Urgent
 
 typedef struct __attribute__((packed)) {
 
