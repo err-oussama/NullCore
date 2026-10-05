@@ -3,9 +3,9 @@
 
 #include <types.h>
 
-#define IPV4_PROTOCOL_ICMP 0x1 // Internet Control Message Protocol
-#define IPV4_PROTOCOL_UDP 0x11 // User Datagram Protocol
-#define IPV4_PROTOCOL_TCP 0x6  // Transmission Control Protocol
+#define IPV4_PROTO_ICMP 0x1 // Internet Control Message Protocol
+#define IPV4_PROTO_UDP 0x11 // User Datagram Protocol
+#define IPV4_PROTO_TCP 0x6  // Transmission Control Protocol
 
 // IP options are not supported;
 // header length (IHL) is expected to always be 5 (20-byte header, no options)
@@ -63,11 +63,9 @@ typedef struct {
   uint8 mask; // 0-31 : 24
 } ipv4_iface_t;
 
-uint32 ipv4_pseudo_sum(uint8 *src_ip, uint8 *dest_ip, uint8 protocol,
-                       uint16 len);
-
+uint32 ipv4_pseudo_sum(uint8 *src_ip, uint8 *dest_ip, uint8 proto, uint16 len);
 void ipv4_handler(ipv4_t *packet);
-void ipv4_send(uint8 *dest_ip, uint8 protocol, void *payload, uint32 size);
-uint8 *ipv4_get_dev_ip();
+void ipv4_send(uint8 *dest_ip, uint8 proto, void *payload, uint32 size);
+uint8 *ipv4_dev_ip();
 
 #endif

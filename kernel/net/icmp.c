@@ -12,8 +12,8 @@ static icmp_echo_session_t echo_sess = {.id = 1, .seq = 1, .is_waiting = 0};
 void icmp_handle_echo_request(uint8 *ipv4, icmp_t *msg, uint16 len) {
   msg->checksum = 0;
   msg->type = ICMP_TYPE_ECHO_REPLY;
-  msg->checksum = checksum_calc(msg, len);
-  ipv4_send(ipv4, IPV4_PROTOCOL_ICMP, msg, len);
+  msg->checksum = checksum_calc(msg, len, 0);
+  ipv4_send(ipv4, IPV4_PROTO_ICMP, msg, len);
 }
 
 void icmp_handle_echo_reply(uint8 *ipv4, icmp_t *msg, uint16 len) {
@@ -38,6 +38,8 @@ void icmp_echo_request(uint8 *ipv4, void *data, uint16 len) {
   icmp_echo_t *request = pmm_alloc(1);
   if (!request)
     return;
+  uint16 total_len = len + sizeof(icmp_echo_t);
+
   request->icmp.type = ICMP_TYPE_ECHO_REQUEST;
   request->icmp.code = 0;
   request->icmp.checksum = 0;
@@ -45,8 +47,8 @@ void icmp_echo_request(uint8 *ipv4, void *data, uint16 len) {
   request->seq = htons(echo_sess.seq);
   echo_sess.is_waiting = 1;
   memcpy(data, request->data, len);
-  request->icmp.checksum = checksum_calc(request, len + sizeof(icmp_echo_t));
-  ipv4_send(ipv4, IPV4_PROTOCOL_ICMP, request, len + sizeof(icmp_echo_t));
+  request->icmp.checksum = checksum_calc(request, total_len, 0);
+  ipv4_send(ipv4, IPV4_PROTO_ICMP, request, total_len);
   pmm_free(request, 1);
 }
 
@@ -55,7 +57,7 @@ void icmp_dest_unreachable(icmp_t *msg) {
 }
 
 void icmp_handler(uint8 *ipv4, icmp_t *msg, uint16 len) {
-  if (!checksum_is_valid(msg, len))
+  if (!checksum_is_valid(msg, len, 0))
     return;
 
   switch (msg->type) {

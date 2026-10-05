@@ -1,3 +1,4 @@
+#include "types.h"
 #include <checksum.h>
 
 uint32 checksum_word_sum(void *addr, uint16 len) {
@@ -16,10 +17,10 @@ uint32 checksum_fold(uint32 sum) {
   return sum;
 }
 
-uint8 checksum_is_valid(void *addr, uint16 len) {
-  return checksum_fold(checksum_word_sum(addr, len)) == 0xFFFF;
+uint8 checksum_is_valid(void *addr, uint16 len, uint32 seed) {
+  return checksum_fold(checksum_word_sum(addr, len) + seed) == 0xFFFF;
 }
 
-uint16 checksum_calc(void *addr, uint16 len) {
-  return ~checksum_fold(checksum_word_sum(addr, len)) & 0xFFFF;
+uint16 checksum_calc(void *addr, uint16 len, uint32 seed) {
+  return ~checksum_fold(checksum_word_sum(addr, len) + seed) & 0xFFFF;
 }
