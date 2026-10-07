@@ -41,6 +41,32 @@ typedef struct __attribute__((packed)) {
   uint8 payload[];
 } tcp_t;
 
+typedef enum {
+  TCP_CLOSED,
+  TCP_ESTABLISHED,
+} tcp_state_e;
+
+typedef struct {
+  uint8 remote_ip[4];
+  uint8 local_ip[4];
+
+  uint16 remote_port;
+  uint16 local_port;
+
+  uint32 remote_ISN;
+  uint32 local_ISN;
+
+  uint32 remote_next_seq_n; // next seq_n expected from remote
+                            // what i send as ack_n
+  uint32 local_next_seq_n;  // next seq_n I'll use when sending data to remote
+
+  uint16 remote_window;
+
+  tcp_state_e state;
+
+  uint8 in_use;
+} tcb_t;
+
 void tcp_handler(uint32 pseudo_sum, tcp_t *segment, uint16 len);
 void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
               uint16 len);
