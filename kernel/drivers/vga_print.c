@@ -107,14 +107,14 @@ void vga_print_warn(char *str) { vga_print_str(str, VGA_YELLOW, VGA_BLACK); }
 
 void vga_print(char *str) { vga_print_str(str, VGA_WHITE, VGA_BLACK); }
 
-void vga_print_dec(int32 n) {
+void vga_print_int(int32 n) {
   if (n < 0) {
     vga_print("-");
     n = -n;
   }
   vga_print_base(n, "0123456789", 10, 0);
 }
-
+void vga_print_uint(uint32 n) { vga_print_base(n, "0123456789", 10, 0); }
 void vga_print_hex(uint32 n) { vga_print_base(n, "0123456789ABCDEF", 16, 0); }
 void vga_print_hex_padded(uint32 n, uint32 len) {
   vga_print_base(n, "0123456789ABCDEF", 16, len);

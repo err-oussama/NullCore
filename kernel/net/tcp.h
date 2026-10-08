@@ -23,7 +23,7 @@ typedef struct __attribute__((packed)) {
   uint32 ack_n;
 
   // bits 4-7: header length in 32-bit words; bits 0-3 reserved
-  uint8 data_offset;
+  uint8 header_len;
 
   // bits 0-5: FIN, SYN, RST, PSH, ACK, URG; bits 6-7: reserved
   uint8 flags;
@@ -61,14 +61,19 @@ typedef struct {
   uint32 local_next_seq_n;  // next seq_n I'll use when sending data to remote
 
   uint16 remote_window;
-
   tcp_state_e state;
-
   uint8 in_use;
+
+  void *tx_buf;
+  void *rx_buf;
+
+  uint16 tx_len;
+  uint16 rx_len;
 } tcb_t;
 
 void tcp_handler(uint32 pseudo_sum, tcp_t *segment, uint16 len);
-void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
-              uint16 len);
+void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
+                 void *payload, uint16 len);
 
+void tcp_init_tcb_table();
 #endif

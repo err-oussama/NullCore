@@ -8,7 +8,8 @@ void kprint_wrn(char *str) { vga_print_warn(str); }
 void kprint_err(char *str) { vga_print_err(str); }
 
 void kprint_cha(uint8 c) { vga_print_cha(c); }
-void kprint_dec(int32 n) { vga_print_dec(n); }
+void kprint_int(int32 n) { vga_print_int(n); }
+void kprint_uint(uint32 n) { vga_print_uint(n); }
 void kprint_hex(uint32 n) { vga_print_hex(n); }
 void kprint_hex_padded(uint32 n, uint32 min_width) {
   vga_print_hex_padded(n, min_width);
@@ -36,10 +37,10 @@ void kprintf(char *format, ...) {
     if (*format == '%') {
       format++;
       if (*format == 'd' || *format == 'i') {
-        kprint_dec(*(int32 *)(ptr));
+        kprint_int(*(int32 *)(ptr));
         ptr += sizeof(uint32);
       } else if (*format == 'u') {
-        kprint_dec(*(uint32 *)(ptr));
+        kprint_uint(*(uint32 *)(ptr));
         ptr += sizeof(uint32);
       } else if (*format == 'c') {
         kprint_cha(*(uint8 *)(ptr));

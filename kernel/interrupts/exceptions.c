@@ -30,9 +30,9 @@ void page_fault_handler(uint32 error) {
   uint32 *pt = (uint32 *)(pd[pdi] & 0xFFFFF000);
   kprint_str("Page Table Walk Info:\n");
   kprint_str("  Page Directory Index: ");
-  kprint_dec(pdi);
+  kprint_int(pdi);
   kprint_str("\n  Page Table Index: ");
-  kprint_dec(pti);
+  kprint_int(pti);
   kprint_str("\n");
   if (!(pd[pdi] & 0x1))
     kprint_str(

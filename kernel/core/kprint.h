@@ -10,7 +10,8 @@ void kprint_str(char *str);
 void kprint_cha(uint8 c);
 void kprint_wrn(char *str);
 void kprint_err(char *str);
-void kprint_dec(int32 n);
+void kprint_int(int32 n);
+void kprint_uint(uint32 n);
 
 void kprint_hex(uint32 n);
 void kprint_hex_padded(uint32 n, uint32 min_width);
