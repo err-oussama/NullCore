@@ -71,7 +71,8 @@ typedef struct {
   uint16 rx_len;
 } tcb_t;
 
-void tcp_handler(uint32 pseudo_sum, tcp_t *segment, uint16 len);
+void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
+                 tcp_t *segment, uint16 len);
 void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
                  void *payload, uint16 len);
 

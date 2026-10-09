@@ -134,19 +134,20 @@ void ipv4_handler(ipv4_t *packet) {
 
   uint16 len = ntohs(packet->total_len) - ihl;
   uint32 pseudo_sum = 0;
+  uint8 *src_ip = packet->src_ip;
+  uint8 *dest_ip = packet->dest_ip;
+
   switch (packet->protocol) {
   case IPV4_PROTO_ICMP:
-    icmp_handler(packet->src_ip, (icmp_t *)packet->payload, len);
+    icmp_handler(src_ip, (icmp_t *)packet->payload, len);
     break;
   case IPV4_PROTO_UDP:
-    pseudo_sum =
-        ipv4_pseudo_sum(packet->src_ip, packet->dest_ip, IPV4_PROTO_UDP, len);
+    pseudo_sum = ipv4_pseudo_sum(src_ip, dest_ip, IPV4_PROTO_UDP, len);
     udp_handler(pseudo_sum, (udp_t *)packet->payload, len);
     break;
   case IPV4_PROTO_TCP:
-    pseudo_sum =
-        ipv4_pseudo_sum(packet->src_ip, packet->dest_ip, IPV4_PROTO_TCP, len);
-    tcp_handler(pseudo_sum, (tcp_t *)packet->payload, len);
+    pseudo_sum = ipv4_pseudo_sum(src_ip, dest_ip, IPV4_PROTO_TCP, len);
+    tcp_handler(pseudo_sum, src_ip, dest_ip, (tcp_t *)packet->payload, len);
     break;
   }
 }

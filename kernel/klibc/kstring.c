@@ -37,3 +37,14 @@ uint32 strlen(char *str) {
     len++;
   return len;
 }
+
+uint32 memcmp(void *addr1, void *addr2, uint32 size) {
+  uint8 *b1 = addr1;
+  uint8 *b2 = addr2;
+  uint32 i = 0;
+  while (i < size) {
+    if (b1[i] != b2[i])
+      return b1[i] - b2[i];
+  }
+  return 0;
+}

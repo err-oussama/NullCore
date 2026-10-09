@@ -50,38 +50,62 @@ void tcp_dump(tcp_t *segment, uint16 len) {
   kprintf("-------------------------\n");
 }
 
-void tcp_handler(uint32 pseudo_sum, tcp_t *segment, uint16 len) {
-  if (!checksum_is_valid(segment, len, pseudo_sum))
-    return;
-  tcp_dump(segment, len);
+tcb_t *tcp_get_tcb(uint8 *src_ip, uint8 *dest_ip, uint16 src_port,
+                   uint16 dest_port) {
+  for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
+    if (memcmp(src_ip, tcb_table[i].remote_ip, 4) &&
+        memcmp(dest_ip, tcb_table[i].local_ip, 4) &&
+        src_port == tcb_table[i].local_port &&
+        dest_port == tcb_table[i].remote_port)
+      return &tcb_table[i];
+  }
+
+  return NULL;
 }
 
 uint32 tcp_gen_ISN() { return (pit_get_tick() >> 4) * pit_get_tick() / 2; }
 
-void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
-                 void *payload, uint16 len) {
-  if (len > TCP_MAX_PAYLOAD_SIZE)
-    return;
-
+tcb_t *tcp_setup_tcb(uint8 *local_ip, uint8 *remote_ip, uint16 local_port,
+                     uint16 remote_port) {
   for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
     if (tcb_table[i].in_use)
       continue;
-
-    tcb_table[i].local_port = src_port;
-    tcb_table[i].remote_port = dest_port;
-    memcpy(dest_ip, tcb_table[i].remote_ip, 4);
-    memcpy(ipv4_dev_ip(), tcb_table[i].local_ip, 4);
+    tcb_table[i].local_port = local_port;
+    tcb_table[i].remote_port = remote_port;
+    memcpy(remote_ip, tcb_table[i].remote_ip, 4);
+    memcpy(local_ip, tcb_table[i].local_ip, 4);
     tcb_table[i].local_ISN = tcp_gen_ISN();
     tcb_table[i].remote_ISN = 0;
     tcb_table[i].local_next_seq_n = tcb_table[i].local_ISN;
     tcb_table[i].remote_next_seq_n = 0;
     tcb_table[i].remote_window = 0;
     tcb_table[i].state = TCP_CLOSED;
-    tcb_table[i].tx_len = len;
     tcb_table[i].rx_len = 0;
-    memcpy(payload, tcb_table[i].tx_buf, len);
-
     tcb_table[i].in_use = 1;
-    break;
+    return &tcb_table[i];
+  }
+  return NULL;
+}
+
+void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
+                 void *payload, uint16 len) {
+  if (len > TCP_MAX_PAYLOAD_SIZE)
+    return;
+
+  tcb_t *conn = tcp_setup_tcb(ipv4_dev_ip(), dest_ip, src_port, dest_port);
+  if (!conn)
+    return;
+  memcpy(payload, conn->tx_buf, len);
+  conn->tx_len = len;
+}
+void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
+                 tcp_t *segment, uint16 len) {
+  if (!checksum_is_valid(segment, len, pseudo_sum))
+    return;
+  /* tcp_dump(segment, len); */
+
+  if (segment->flags == TCP_FLAGS_SYN) {
+    uint16 src_port = ntohs(segment->src_port);
+    uint16 dest_port = ntohs(segment->src_port);
   }
 }
