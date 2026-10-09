@@ -17,9 +17,10 @@ void tcp_init_tcb_table() {
     tcb_table[i].tx_buf = pmm_alloc(1);
     tcb_table[i].rx_buf = pmm_alloc(1);
 
-    if (!tcb_table[i].tx_buf || !tcb_table[i].rx_buf)
+    if (!tcb_table[i].tx_buf || !tcb_table[i].rx_buf) {
       kprintf("[TCP error]: faild to allocate buffers");
-    return;
+      return;
+    }
   }
 }
 
@@ -39,7 +40,7 @@ void tcp_dump(tcp_t *segment, uint16 len) {
 
   kprintf("Port: %u -> %u, HdrLen=%u, PayloadLen=%u\n", src_port, dest_port,
           hlen, len);
-  kprintf("Seq=%u, Ack=%u, Win=%u, Urg=%u\n", seq_n, ack_n, win);
+  kprintf("Seq=%u, Ack=%u, Win=%u, Urg=%u\n", seq_n, ack_n, win, urg);
   kprintf("Flags=[ %s%s%s%s%s%s], checksum: %u\n",
           (f & TCP_FLAGS_ACK) ? "ACK " : "", (f & TCP_FLAGS_SYN) ? "SYN " : "",
           (f & TCP_FLAGS_FIN) ? "FIN " : "", (f & TCP_FLAGS_RST) ? "RST " : "",
@@ -77,6 +78,7 @@ void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
     tcb_table[i].remote_window = 0;
     tcb_table[i].state = TCP_CLOSED;
     tcb_table[i].tx_len = len;
+    tcb_table[i].rx_len = 0;
     memcpy(payload, tcb_table[i].tx_buf, len);
 
     tcb_table[i].in_use = 1;
