@@ -45,6 +45,7 @@ uint32 memcmp(void *addr1, void *addr2, uint32 size) {
   while (i < size) {
     if (b1[i] != b2[i])
       return b1[i] - b2[i];
+    i++;
   }
   return 0;
 }
