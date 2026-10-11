@@ -50,21 +50,7 @@ void tcp_dump(tcp_t *segment, uint16 len) {
   kprintf("-------------------------\n");
 }
 
-tcb_t *tcp_get_tcb(uint8 *src_ip, uint8 *dest_ip, uint16 src_port,
-                   uint16 dest_port) {
-  for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
-    if (memcmp(src_ip, tcb_table[i].remote_ip, 4) &&
-        memcmp(dest_ip, tcb_table[i].local_ip, 4) &&
-        src_port == tcb_table[i].local_port &&
-        dest_port == tcb_table[i].remote_port)
-      return &tcb_table[i];
-  }
-
-  return NULL;
-}
-
 uint32 tcp_gen_ISN() { return (pit_get_tick() >> 4) * pit_get_tick() / 2; }
-
 tcb_t *tcp_setup_tcb(uint8 *local_ip, uint8 *remote_ip, uint16 local_port,
                      uint16 remote_port) {
   for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
@@ -79,10 +65,24 @@ tcb_t *tcp_setup_tcb(uint8 *local_ip, uint8 *remote_ip, uint16 local_port,
     tcb_table[i].local_next_seq_n = tcb_table[i].local_ISN;
     tcb_table[i].remote_next_seq_n = 0;
     tcb_table[i].remote_window = 0;
-    tcb_table[i].state = TCP_CLOSED;
+    tcb_table[i].state = TCP_LISTEN;
     tcb_table[i].rx_len = 0;
     tcb_table[i].in_use = 1;
     return &tcb_table[i];
+  }
+  return NULL;
+}
+
+tcb_t *tcp_get_tcb(uint8 *local_ip, uint8 *remote_ip, uint16 local_port,
+                   uint16 remote_port) {
+  for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
+    if (tcb_table[i].in_use) {
+      if (!memcmp(remote_ip, tcb_table[i].remote_ip, 4) &&
+          !memcmp(local_ip, tcb_table[i].local_ip, 4) &&
+          local_port == tcb_table[i].local_port &&
+          remote_port == tcb_table[i].remote_port)
+        return &tcb_table[i];
+    }
   }
   return NULL;
 }
@@ -98,14 +98,57 @@ void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
   memcpy(payload, conn->tx_buf, len);
   conn->tx_len = len;
 }
+
+void tcp_listen_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
+  if (segment->flags != TCP_FLAGS_SYN)
+    return;
+  kprintf("SYN\n");
+  conn->remote_window = ntohs(segment->window);
+  conn->remote_ISN = ntohl(segment->seq_n);
+
+  tcp_t seg;
+  seg.src_port = htons(conn->local_port);
+  seg.dest_port = htons(conn->remote_port);
+
+  seg.seq_n = htonl(conn->local_ISN);
+  seg.ack_n = htonl(conn->remote_ISN + 1);
+
+  seg.header_len = 5 << 4;
+  seg.flags = TCP_FLAGS_ACK | TCP_FLAGS_SYN;
+  seg.window = htons(0x1000);
+
+  seg.checksum = 0;
+  seg.urgent_ptr = 0;
+  uint32 pseudo_sum = ipv4_pseudo_sum(conn->local_ip, conn->remote_ip,
+                                      IPV4_PROTO_TCP, sizeof(tcp_t));
+  seg.checksum = checksum_calc(&seg, sizeof(tcp_t), pseudo_sum);
+
+  conn->local_next_seq_n = conn->local_ISN + 1;
+  conn->remote_next_seq_n = conn->remote_ISN + 1;
+  conn->state = TCP_SYN_RECEIVED;
+
+  ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, sizeof(tcp_t));
+}
+
 void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
                  tcp_t *segment, uint16 len) {
   if (!checksum_is_valid(segment, len, pseudo_sum))
     return;
-  /* tcp_dump(segment, len); */
+  uint16 remote_port = ntohs(segment->src_port);
+  uint16 local_port = ntohs(segment->dest_port);
+  tcb_t *conn = tcp_get_tcb(dest_ip, src_ip, local_port, remote_port);
+  if (!conn) {
+    if (segment->flags == TCP_FLAGS_SYN)
+      conn = tcp_setup_tcb(dest_ip, src_ip, local_port, remote_port);
+    if (!conn)
+      return;
+  }
 
-  if (segment->flags == TCP_FLAGS_SYN) {
-    uint16 src_port = ntohs(segment->src_port);
-    uint16 dest_port = ntohs(segment->src_port);
+  switch (conn->state) {
+  case TCP_LISTEN:
+    tcp_listen_state_handler(conn, segment, len);
+    break;
+  default:
+    kprintf("Unhandled state\n");
   }
 }

@@ -42,8 +42,17 @@ typedef struct __attribute__((packed)) {
 } tcp_t;
 
 typedef enum {
-  TCP_CLOSED,
+  TCP_LISTEN,
+  TCP_SYN_SENT,
+  TCP_SYN_RECEIVED,
   TCP_ESTABLISHED,
+  TCP_FIN_WAIT_1,
+  TCP_FIN_WAIT_2,
+  TCP_CLOSE_WAIT,
+  TCP_CLOSING,
+  TCP_LAST_ACK,
+  TCP_TIME_WAIT,
+
 } tcp_state_e;
 
 typedef struct {
