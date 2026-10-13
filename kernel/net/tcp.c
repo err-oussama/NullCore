@@ -12,9 +12,7 @@
 
 static tcb_t tcb_table[TCP_MAX_TCBS];
 
-uint32 tcp_gen_ISN() {
-  return (pit_get_tick() >> (pit_get_tick() % 16)) * pit_get_tick() / 2;
-}
+uint32 tcp_gen_ISN() { return pit_get_tick(); }
 
 void tcp_init_tcb_table() {
   for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
@@ -50,6 +48,12 @@ void tcp_dump(tcp_t *segment, uint16 len) {
           (f & TCP_FLAGS_FIN) ? "FIN " : "", (f & TCP_FLAGS_RST) ? "RST " : "",
           (f & TCP_FLAGS_PSH) ? "PSH " : "", (f & TCP_FLAGS_URG) ? "URG " : "",
           checksum);
+
+  kprintf("\n");
+  for (uint32 i = 0; i < len; i++) {
+    kprintf("%c", segment->payload[i]);
+  }
+  kprintf("\n");
 
   kprintf("-------------------------\n");
 }
@@ -122,10 +126,6 @@ void tcp_init_segment(tcp_t *segment, uint16 len, tcb_t *conn, uint8 flags,
   segment->checksum = checksum_calc(segment, sizeof(tcp_t), pseudo_sum);
 }
 
-void tcp_syn_reseived_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
-  tcp_dump(segment, len);
-}
-
 void tcp_listen_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
   if (segment->flags != TCP_FLAGS_SYN)
     return;
@@ -145,10 +145,27 @@ void tcp_listen_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
 
   uint32 pseudo_sum =
       ipv4_pseudo_sum(conn->remote_ip, conn->local_ip, IPV4_PROTO_TCP, len);
-  if (checksum_is_valid(&seg, len, pseudo_sum))
-    ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, sizeof(tcp_t));
-  else
-    kprintf("Invalid\n");
+  ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, sizeof(tcp_t));
+}
+
+void tcp_syn_reseived_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
+
+  uint32 seq_n = ntohl(segment->seq_n);
+  uint32 ack_n = ntohl(segment->ack_n);
+
+  if (segment->flags != TCP_FLAGS_ACK)
+    return;
+
+  if (ack_n == conn->local_next_seq_n && seq_n == conn->remote_next_seq_n) {
+    if (segment->header_len * 4 == len)
+      kprintf("data in the segment");
+    conn->state = TCP_ESTABLISHED;
+  }
+
+  /* kprintf("seq_n: %u, ", seq_n); */
+  /* kprintf("ack_n: %u, ", ack_n); */
+  /* kprintf("l_n_seq_n: %u, ", conn->local_next_seq_n); */
+  /* kprintf("r_n_seq_n: %u\n", conn->remote_next_seq_n); */
 }
 
 void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
@@ -172,8 +189,8 @@ void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
   case TCP_SYN_RECEIVED:
     tcp_syn_reseived_state_handler(conn, segment, len);
     break;
-
   default:
+
     kprintf("Unhandled state\n");
   }
 }
