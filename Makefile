@@ -51,15 +51,15 @@ all: disk.img user_program $(TARGET)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
-	$(LD) $(LDFLAGS) -o $@ $^
+	@$(LD) $(LDFLAGS) -o $@ $^
 	@rm -f $(ASM_OBJ) $(C_OBJ)
 
 # Compile C sources
 kernel/%.o: kernel/%.c
-	$(CC) $(CFLAGS) $(INCL)  $< -o $@
+	@$(CC) $(CFLAGS) $(INCL)  $< -o $@
 
 kernel/%.o: kernel/%.asm 
-	$(ASM) $(ASFLAGS) $< -o $@
+	@$(ASM) $(ASFLAGS) $< -o $@
 
 
 disk.img:
