@@ -156,16 +156,46 @@ void tcp_syn_reseived_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
   if (segment->flags != TCP_FLAGS_ACK)
     return;
 
-  if (ack_n == conn->local_next_seq_n && seq_n == conn->remote_next_seq_n) {
-    if (segment->header_len * 4 == len)
-      kprintf("data in the segment");
-    conn->state = TCP_ESTABLISHED;
-  }
+  if ((segment->header_len >> 4) * 4 != len)
+    kprintf("data in the segment");
+  conn->state = TCP_ESTABLISHED;
+}
 
-  /* kprintf("seq_n: %u, ", seq_n); */
-  /* kprintf("ack_n: %u, ", ack_n); */
-  /* kprintf("l_n_seq_n: %u, ", conn->local_next_seq_n); */
-  /* kprintf("r_n_seq_n: %u\n", conn->remote_next_seq_n); */
+void tcp_established_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
+  kprintf("TCP_ESTABLISHED\n");
+  uint16 hlen = (segment->header_len >> 4) * 4;
+  if (!(segment->flags & TCP_FLAGS_ACK))
+    return;
+
+  if (segment->flags & TCP_FLAGS_FIN) {
+    tcp_t seg;
+    uint32 size = sizeof(tcp_t);
+    uint8 flags = TCP_FLAGS_ACK | TCP_FLAGS_FIN;
+
+    conn->local_next_seq_n++;
+    conn->remote_next_seq_n++;
+    uint32 seq_n = conn->remote_next_seq_n;
+    uint32 ack_n = conn->remote_next_seq_n;
+    conn->state = TCP_CLOSE_WAIT;
+
+    tcp_init_segment(&seg, size, conn, flags, seq_n, ack_n);
+    uint32 pseudo_sum =
+        ipv4_pseudo_sum(conn->remote_ip, conn->local_ip, IPV4_PROTO_TCP, size);
+    ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, size);
+  } else {
+    tcp_t seg;
+    uint32 size = sizeof(tcp_t);
+    uint8 flags = TCP_FLAGS_ACK | TCP_FLAGS_FIN;
+
+    conn->remote_next_seq_n += len - hlen;
+    uint32 seq_n = conn->remote_next_seq_n;
+    uint32 ack_n = conn->remote_next_seq_n;
+
+    tcp_init_segment(&seg, size, conn, flags, seq_n, ack_n);
+    uint32 pseudo_sum =
+        ipv4_pseudo_sum(conn->remote_ip, conn->local_ip, IPV4_PROTO_TCP, size);
+    ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, size);
+  }
 }
 
 void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
@@ -189,8 +219,10 @@ void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
   case TCP_SYN_RECEIVED:
     tcp_syn_reseived_state_handler(conn, segment, len);
     break;
+  case TCP_ESTABLISHED:
+    tcp_established_state_handler(conn, segment, len);
+    break;
   default:
-
     kprintf("Unhandled state\n");
   }
 }
