@@ -161,8 +161,7 @@ void tcp_syn_reseived_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
 }
 
 void tcp_established_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
-  // NOTE: this only handle receving, it does not store data, will implement
-  // 			 soon.
+  // NOTE: this only handle receving
 
   uint16 hlen = (segment->header_len >> 4) * 4;
 
@@ -192,8 +191,15 @@ void tcp_established_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
     conn->local_next_seq_n++;
     conn->state = TCP_LAST_ACK;
   } else {
-    ack_n += len - hlen;
-    conn->remote_next_seq_n += len - hlen;
+    uint16 payload_len = len - hlen;
+    ack_n += payload_len;
+    conn->remote_next_seq_n += payload_len;
+
+    memcpy(segment->payload, conn->rx_buf + conn->rx_len, payload_len);
+    conn->rx_len += payload_len;
+
+    for (uint16 i = 0; i < conn->rx_len; i++)
+      kprintf("%c", *(char *)(conn->rx_buf + i));
   }
 
   tcp_init_segment(conn, &seg, size, flags, seq_n, ack_n);
@@ -206,6 +212,23 @@ void tcp_last_ack_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
     conn->in_use = 0;
   }
 }
+
+void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
+              uint32 len) {
+  tcb_t *conn = tcp_setup_tcb(ipv4_dev_ip(), dest_ip, src_port, dest_port);
+  if (!conn)
+    return;
+
+  conn->tx_len = len;
+  memcpy(payload, conn->tx_buf, len);
+
+  tcp_t seg;
+  tcp_init_segment(conn, &seg, len, TCP_FLAGS_SYN, conn->local_ISN,
+                   conn->remote_ISN);
+
+  conn->state = TCP_SYN_SENT;
+}
+
 void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
                  tcp_t *segment, uint16 len) {
   if (!checksum_is_valid(segment, len, pseudo_sum))
