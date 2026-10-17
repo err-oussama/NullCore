@@ -85,5 +85,7 @@ void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
 void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
                  void *payload, uint16 len);
 
+void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
+              uint32 len);
 void tcp_init_tcb_table();
 #endif
