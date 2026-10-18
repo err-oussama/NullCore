@@ -35,5 +35,7 @@ void kmain(multiboot_info *boot_info) {
   /* uint8 data[] = {'Z', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'Z'}; */
   uint8 payload[] = {'X', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'X'};
 
-  tcp_send(ip, 5555, 2000, payload, 12);
+  tcp_send(ip, 5555, 2000, payload, sizeof(payload));
+  while (1)
+    tcp_sender();
 }

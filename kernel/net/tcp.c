@@ -12,7 +12,7 @@
 
 static tcb_t tcb_table[TCP_MAX_TCBS];
 
-uint32 tcp_gen_ISN() { return pit_get_tick(); }
+uint32 tcp_gen_ISN() { return pit_get_tick() * 77; }
 
 void tcp_init_tcb_table() {
   for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
@@ -123,7 +123,7 @@ void tcp_init_segment(tcb_t *conn, tcp_t *segment, uint16 len, uint8 flags,
 
   uint32 pseudo_sum =
       ipv4_pseudo_sum(conn->local_ip, conn->remote_ip, IPV4_PROTO_TCP, len);
-  segment->checksum = checksum_calc(segment, sizeof(tcp_t), pseudo_sum);
+  segment->checksum = checksum_calc(segment, len, pseudo_sum);
 }
 
 void tcp_listen_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
@@ -186,6 +186,7 @@ void tcp_syn_sent_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
   tcp_t seg;
   tcp_init_segment(conn, &seg, sizeof(tcp_t), TCP_FLAGS_ACK,
                    conn->local_next_seq_n, conn->remote_next_seq_n);
+  ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, sizeof(tcp_t));
 
   conn->state = TCP_ESTABLISHED;
 }
@@ -260,6 +261,36 @@ void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
   ipv4_send(dest_ip, IPV4_PROTO_TCP, &seg, sizeof(tcp_t));
 
   conn->state = TCP_SYN_SENT;
+}
+
+void tcp_sender() {
+  for (uint32 i = 0; i < TCP_MAX_TCBS; i++) {
+    tcb_t *conn = &tcb_table[i];
+    if (!conn->in_use || conn->state != TCP_ESTABLISHED)
+      continue;
+
+    uint32 seq_n = conn->local_next_seq_n;
+    uint32 offset = seq_n - conn->local_ISN - 1;
+    if (offset == conn->tx_len)
+      continue;
+
+    tcp_t *seg = pmm_alloc(1);
+    if (!seg)
+      return;
+
+    uint32 left = conn->tx_len - offset;
+    uint32 size = left < 1450 ? left : 1450;
+
+    memcpy(conn->tx_buf + offset, seg->payload, size);
+    tcp_init_segment(conn, seg, size + sizeof(tcp_t), TCP_FLAGS_ACK, seq_n,
+                     conn->remote_next_seq_n);
+
+    tcp_dump(seg, size);
+
+    conn->local_next_seq_n += size;
+
+    ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, seg, size + sizeof(tcp_t));
+  }
 }
 
 void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,

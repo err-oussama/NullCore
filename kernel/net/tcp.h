@@ -88,4 +88,6 @@ void tcp_connect(uint8 *dest_ip, uint16 src_port, uint16 dest_port,
 void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
               uint32 len);
 void tcp_init_tcb_table();
+
+void tcp_sender();
 #endif
