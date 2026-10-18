@@ -12,15 +12,22 @@
 #include <pmio.h>
 #include <pmm.h>
 #include <rtl8139.h>
+#include <task.h>
 #include <tcp.h>
 #include <types.h>
 #include <udp.h>
+
+void eth_listenr() {
+  while (1)
+    eth_poll();
+}
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprintf("============================="
           "[ NullCore - Network ]"
           "=============================");
+  create_task(eth_listenr);
   uint8 ip[] = {192, 168, 100, 1};
   /* uint8 ip[] = {10, 122, 93, 201}; */
   /* uint8 ip[] = {172, 18, 0, 1}; */
@@ -29,6 +36,4 @@ void kmain(multiboot_info *boot_info) {
   uint8 payload[] = {'X', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'X'};
 
   tcp_send(ip, 5555, 2000, payload, 12);
-  while (1)
-    eth_poll();
 }
