@@ -49,7 +49,7 @@ A minimal x86 32-bit kernel built from scratch for educational purposes.
 - [x] IPv4 (header parsing, routing decision)
 - [x] ICMP (ping)
 - [x] UDP
-- [ ] TCP
+- [x] TCP
 
 
 ### Filesystem
