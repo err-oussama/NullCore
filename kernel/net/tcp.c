@@ -177,8 +177,6 @@ void tcp_syn_sent_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
   if (ack_n != conn->local_next_seq_n)
     return;
 
-  tcp_dump(segment, len);
-
   conn->remote_ISN = seq_n;
   conn->remote_next_seq_n = conn->remote_ISN + 1;
   conn->remote_window = ntohs(segment->window);
@@ -242,6 +240,31 @@ void tcp_last_ack_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
   }
 }
 
+void tcp_fin_wait1_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
+  if (segment->flags & TCP_FLAGS_RST) {
+    conn->in_use = 0;
+    return;
+  }
+  if (segment->flags & TCP_FLAGS_ACK) {
+    conn->state = TCP_FIN_WAIT_2;
+  }
+  tcp_dump(segment, len);
+}
+
+void tcp_fin_wait2_state_handler(tcb_t *conn, tcp_t *segment, uint16 len) {
+  if (segment->flags & TCP_FLAGS_RST) {
+    conn->in_use = 0;
+    return;
+  }
+  if (segment->flags & TCP_FLAGS_ACK && segment->flags & TCP_FLAGS_FIN) {
+    conn->state = TCP_CLOSE_WAIT;
+    tcp_t seg;
+    uint32 size = sizeof(tcp_t);
+    tcp_init_segment(conn, &seg, size, TCP_FLAGS_ACK, conn->local_next_seq_n,
+                     ntohl(segment->seq_n) + 1);
+    ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, size);
+  }
+}
 void tcp_send(uint8 *dest_ip, uint16 src_port, uint16 dest_port, void *payload,
               uint32 len) {
   if (len > TCP_MAX_PAYLOAD_SIZE)
@@ -271,8 +294,19 @@ void tcp_sender() {
 
     uint32 seq_n = conn->local_next_seq_n;
     uint32 offset = seq_n - conn->local_ISN - 1;
-    if (offset == conn->tx_len)
+    if (offset == conn->tx_len && offset) {
+
+      tcp_t seg;
+      uint32 size = sizeof(tcp_t);
+      tcp_init_segment(conn, &seg, sizeof(tcp_t), TCP_FLAGS_FIN | TCP_FLAGS_ACK,
+                       seq_n, conn->remote_next_seq_n);
+
+      ipv4_send(conn->remote_ip, IPV4_PROTO_TCP, &seg, size);
+
+      conn->state = TCP_FIN_WAIT_1;
+      conn->local_next_seq_n++;
       continue;
+    }
 
     tcp_t *seg = pmm_alloc(1);
     if (!seg)
@@ -284,8 +318,6 @@ void tcp_sender() {
     memcpy(conn->tx_buf + offset, seg->payload, size);
     tcp_init_segment(conn, seg, size + sizeof(tcp_t), TCP_FLAGS_ACK, seq_n,
                      conn->remote_next_seq_n);
-
-    tcp_dump(seg, size);
 
     conn->local_next_seq_n += size;
 
@@ -323,8 +355,15 @@ void tcp_handler(uint32 pseudo_sum, uint8 *src_ip, uint8 *dest_ip,
   case TCP_LAST_ACK:
     tcp_last_ack_state_handler(conn, segment, len);
     break;
+  case TCP_FIN_WAIT_1:
+    tcp_fin_wait1_state_handler(conn, segment, len);
+    break;
+  case TCP_FIN_WAIT_2:
+    tcp_fin_wait2_state_handler(conn, segment, len);
+    break;
 
   default:
     kprintf("Unhandled state\n");
+    tcp_dump(segment, len);
   }
 }
