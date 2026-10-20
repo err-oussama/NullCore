@@ -16,64 +16,40 @@ Video Graphics Array (VGA) -- Text Mode Memory layout
 
 */
 
-int g_row = 0;
-int g_col = 0;
+uint32 vga_offset = 0;
+
 volatile uint16 *vga = (uint16 *)0xB8000;
 
 void vga_clear_screen() {
   for (uint32 i = 0; i < VGA_MAX_ROW * (VGA_MAX_COL); i++)
     vga[i] = ((VGA_BLACK << 4 | VGA_BLACK) << 8) | ' ';
 }
-void vg_put_char(char c, int fg, int bg, int row, int col) {
-  vga[row * VGA_MAX_COL + col] = ((bg << 4 | fg) << 8) | c;
-}
+void vga_put_char(uint8 c, int fg, int bg) {
 
+  switch (c) {
+
+  case '\b':
+    vga[vga_offset] = ((bg << 4 | fg) << 8) | ' ';
+    vga_offset--;
+    break;
+
+  case '\n':
+    vga_offset += VGA_MAX_COL - (vga_offset % VGA_MAX_COL);
+    break;
+
+  default:
+    vga[vga_offset] = ((bg << 4 | fg) << 8) | c;
+    vga_offset++;
+  }
+
+  vga_offset = vga_offset >= VGA_MAX_COL * VGA_MAX_ROW ? 0 : vga_offset;
+}
 void vga_print_str(char *str, int fg, int bg) {
-  while (*str) {
-    if (g_col >= VGA_MAX_COL || *str == '\n') {
-      g_row = g_row == VGA_MAX_ROW ? 0 : (g_row + 1) % VGA_MAX_ROW;
-      g_col = 0;
-    }
-
-    if (*str != '\n') {
-      vga[g_row * VGA_MAX_COL + g_col] = ((bg << 4 | fg) << 8) | *str;
-      g_col = g_col == VGA_MAX_COL ? 0 : (g_col + 1) % VGA_MAX_COL;
-    }
-    str++;
-  }
+  while (*str)
+    vga_put_char(*str++, fg, bg);
 }
 
-void vga_print_cha(uint8 c) {
-  if (g_col >= VGA_MAX_COL) {
-    g_col = 0;
-    g_row++;
-  }
-  if (g_row >= VGA_MAX_ROW)
-    g_row = 0;
-
-  if (c == '\b') {
-    if (!g_col && !g_row)
-      return;
-    if (!g_col) {
-      g_row--;
-      g_col = 79;
-    } else
-      g_col--;
-
-    vga[g_row * VGA_MAX_COL + g_col] =
-        ((VGA_BLACK << 4 | VGA_WHITE) << 8) | ' ';
-  }
-
-  else if (c == '\n') {
-    g_col = 0;
-    g_row++;
-    if (g_row >= VGA_MAX_ROW)
-      g_row = 0;
-  } else {
-    vga[g_row * VGA_MAX_COL + g_col] = ((VGA_BLACK << 4 | VGA_WHITE) << 8) | c;
-    g_col++;
-  }
-}
+void vga_print_cha(uint8 c) { vga_put_char(c, VGA_WHITE, VGA_BLACK); }
 
 void vga_print_base(uint32 n, char *base, uint32 base_len, uint32 min_width) {
 
