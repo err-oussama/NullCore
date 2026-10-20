@@ -99,3 +99,8 @@ void eth_poll() {
   }
   asm("hlt");
 }
+
+void eth_listenr() {
+  while (1)
+    eth_poll();
+}

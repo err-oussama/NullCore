@@ -42,4 +42,5 @@ void eth_send(uint8 *dest_mac, uint16 type, void *payload, uint16 len);
 
 void eth_poll();
 
+void eth_listenr();
 #endif

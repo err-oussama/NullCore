@@ -17,11 +17,6 @@
 #include <types.h>
 #include <udp.h>
 
-void eth_listenr() {
-  while (1)
-    eth_poll();
-}
-
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
   kprintf("============================="
@@ -35,7 +30,7 @@ void kmain(multiboot_info *boot_info) {
   /* uint8 data[] = {'Z', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'Z'}; */
   uint8 payload[] = {'X', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'X'};
 
-  tcp_send(ip, 5555, 2000, payload, sizeof(payload));
+  tcp_send(ip, 5555, 2000, payload, 12);
   while (1)
     tcp_sender();
 }
