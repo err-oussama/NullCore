@@ -19,18 +19,7 @@
 
 void kmain(multiboot_info *boot_info) {
   init_kernel(boot_info);
-  kprintf("============================="
-          "[ NullCore - Network ]"
-          "=============================");
-  create_task(eth_listenr);
-  uint8 ip[] = {192, 168, 100, 1};
-  /* uint8 ip[] = {10, 122, 93, 201}; */
-  /* uint8 ip[] = {172, 18, 0, 1}; */
-  /* uint8 ip[] = {172, 17, 0, 1}; */
-  /* uint8 data[] = {'Z', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'Z'}; */
-  uint8 payload[] = {'X', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'X'};
-
-  tcp_send(ip, 5555, 2000, payload, 12);
-  while (1)
-    tcp_sender();
+  kprintf("==========================="
+          "[ NullCore - File System ]"
+          "===========================");
 }
