@@ -22,4 +22,12 @@ void kmain(multiboot_info *boot_info) {
   kprintf("==========================="
           "[ NullCore - File System ]"
           "===========================");
+
+  void *buffer = pmm_alloc(1);
+
+  ata_read_sector(0, 1, buffer);
+
+  kprintf("%s", buffer);
+
+  ata_identify(buffer);
 }
