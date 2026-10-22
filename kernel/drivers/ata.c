@@ -5,6 +5,8 @@
 #include <kstring.h>
 #include <pmm.h>
 
+static uint32 sector_count;
+
 // wait after writing in one of these three registers:
 // 1. DRIVE_HEAD
 // 2. CONTROL
@@ -13,6 +15,8 @@ void ata_wait() {
   for (int i = 0; i < 4; i++) // wait 400ns
     inb(ATA_PRIMARY_CONTROL); // No meaning for the reading just to wait
 }
+
+uint32 ata_get_sector_count() { return sector_count; }
 
 int ata_drive_setup() {
   outb(ATA_PRIMARY_CONTROL, ATA_CONTROL_nIEN | ATA_CONTROL_SRST);
@@ -60,14 +64,18 @@ int ata_identify(uint16 *buffer) {
   memset(buffer, 0, 0x1000);
   for (int i = 0; i < ATA_SECTOR_WORDS; i++)
     buffer[i] = inw(ATA_PRIMARY_DATA);
+  sector_count = *(uint32 *)&buffer[60];
+  return 0;
+}
+
+void ata_dump(void *ata_identify_buffer) {
+  uint16 *buffer = ata_identify_buffer;
   for (int i = 27; i < 46; i++)
     kprintf("%c%c", (buffer[i] >> 8) & 0x00FF, buffer[i] & 0x00FF);
   kprintf("\n");
 
-  uint32 total_sectors = *(uint32 *)&buffer[60];
-  kprintf("Total sector: %u\n", total_sectors);
-  kprintf("Disk size: %uM\n", (total_sectors * 512) / (1024 * 1024));
-  return 0;
+  kprintf("Total sector: %u\n", sector_count);
+  kprintf("Disk size: %uM\n", (sector_count * 512) / (1024 * 1024));
 }
 
 int ata_setup_transfer(uint32 lba, uint8 sector_count, uint8 CMD) {

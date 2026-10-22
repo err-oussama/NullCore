@@ -23,11 +23,8 @@ void kmain(multiboot_info *boot_info) {
           "[ NullCore - File System ]"
           "===========================");
 
-  void *buffer = pmm_alloc(1);
-
-  ata_read_sector(0, 1, buffer);
-
-  kprintf("%s", buffer);
-
+  void *buffer;
   ata_identify(buffer);
+  ata_dump(buffer);
+  kprintf("sector count: %u\n", ata_get_sector_count());
 }
