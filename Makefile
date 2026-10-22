@@ -30,6 +30,7 @@ INCL   	:= 	-I./kernel/interrupts/ \
 						-I./kernel/cpu/ \
 						-I./kernel/elf/ \
 						-I./kernel/net/ \
+						-I./kernel/fs/ \
 
 TARGET  := kernel.bin
 
