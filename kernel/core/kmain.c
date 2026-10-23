@@ -26,5 +26,5 @@ void kmain(multiboot_info *boot_info) {
   void *buffer;
   ata_identify(buffer);
   ata_dump(buffer);
-  kprintf("sector count: %u\n", ata_get_sector_count());
+  kprintf("sector count: %u\n", ata_sector_count());
 }

@@ -16,7 +16,7 @@ void ata_wait() {
     inb(ATA_PRIMARY_CONTROL); // No meaning for the reading just to wait
 }
 
-uint32 ata_get_sector_count() { return sector_count; }
+uint32 ata_sector_count() { return sector_count; }
 
 int ata_drive_setup() {
   outb(ATA_PRIMARY_CONTROL, ATA_CONTROL_nIEN | ATA_CONTROL_SRST);

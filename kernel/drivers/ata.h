@@ -70,7 +70,7 @@
 #define ATA_SECTOR_WORDS 0x100 // 16-bit * 256
 
 int ata_drive_setup();
-uint32 ata_get_sector_count();
+uint32 ata_sector_count();
 void ata_dump(void *ata_identify_buffer);
 int ata_identify(uint16 *buffer);
 int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
