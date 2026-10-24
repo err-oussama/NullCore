@@ -7,17 +7,20 @@
 typedef struct {
   uint32 sector_count;
   uint32 sector_size;
-} disk_t;
+} fs_disk_t;
 
 typedef struct {
   uint32 start;
   uint32 count;
-} extent_t;
+} fs_extent_t;
 
 typedef struct {
   uint32 size;
   uint32 extent_count;
-  extent_t extents[];
-} file_index_t;
+  fs_extent_t extents[];
+} fs_file_index_t;
+
+void fs_init_disk();
+void *fs_get_bitmap();
 
 #endif

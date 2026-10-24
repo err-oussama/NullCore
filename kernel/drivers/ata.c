@@ -31,6 +31,12 @@ int ata_drive_setup() {
   ata_wait();
   while (inb(ATA_PRIMARY_STATUS) & ATA_STATUS_BSY)
     ;
+
+  void *buffer = pmm_alloc(1);
+  if (!buffer)
+    return 1;
+  ata_identify(buffer);
+
   return 0;
 }
 
