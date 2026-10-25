@@ -119,6 +119,7 @@ void vga_memory_dump_bin(void *ptr, uint32 size) {
     vga_print(" ");
     vga_print_byte(p[i]);
   }
+  vga_print_cha('\n');
 }
 
 void vga_memory_dump_hex(void *ptr, uint32 size) {
@@ -138,4 +139,5 @@ void vga_memory_dump_hex(void *ptr, uint32 size) {
     vga_print_hex((uint32)(p[i] >> 0x4));
     vga_print_hex((uint32)(p[i] & 0x0F));
   }
+  vga_print_cha('\n');
 }
