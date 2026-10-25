@@ -22,5 +22,7 @@ typedef struct {
 
 void fs_init_disk();
 void *fs_get_bitmap();
+void fs_alloc_extent(fs_extent_t *extent);
+void fs_free_extent(fs_extent_t *extent);
 
 #endif

@@ -8,6 +8,8 @@
 static fs_disk_t fs_disk;
 static uint8 *fs_bitmap;
 
+static uint32 fs_data_start = 0;
+
 static void fs_mark_used(uint32 lba) {
   fs_bitmap[lba / 8] |= (0x1 << (lba % 8));
 }
@@ -29,3 +31,32 @@ void fs_init_disk() {
 }
 
 void *fs_get_bitmap() { return fs_bitmap; }
+
+void fs_free_extent(fs_extent_t *extent) {
+  for (uint32 i = 0; i < extent->count; i++)
+    fs_mark_free(extent->start + i);
+}
+
+void fs_alloc_extent(fs_extent_t *extent) {
+  extent->start = 0;
+  uint32 count = 0;
+  for (uint32 sec = fs_data_start;
+       sec < fs_disk.sector_count && count < extent->count; sec++) {
+
+    if (fs_is_used(sec))
+      continue;
+
+    count = 0;
+    extent->start = sec;
+    while (sec < fs_disk.sector_count && !fs_is_used(sec) &&
+           count < extent->count) {
+      count++;
+      sec++;
+    }
+    if (count == extent->count)
+      break;
+  }
+  extent->count = count;
+  for (uint32 i = 0; i < count; i++)
+    fs_mark_used(extent->start + i);
+}
