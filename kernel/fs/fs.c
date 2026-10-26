@@ -39,7 +39,9 @@ void fs_free_extent(fs_extent_t *extent) {
 
 void fs_alloc_extent(fs_extent_t *extent) {
   extent->start = 0;
+  uint32 best_count = 0;
   uint32 count = 0;
+  uint32 start = 0;
   for (uint32 sec = fs_data_start;
        sec < fs_disk.sector_count && count < extent->count; sec++) {
 
@@ -47,16 +49,22 @@ void fs_alloc_extent(fs_extent_t *extent) {
       continue;
 
     count = 0;
-    extent->start = sec;
+    start = sec;
     while (sec < fs_disk.sector_count && !fs_is_used(sec) &&
            count < extent->count) {
       count++;
       sec++;
     }
-    if (count == extent->count)
+
+    if (count > best_count) {
+      best_count = count;
+      extent->start = start;
+    }
+
+    if (count >= extent->count)
       break;
   }
-  extent->count = count;
-  for (uint32 i = 0; i < count; i++)
+  extent->count = best_count;
+  for (uint32 i = 0; i < best_count; i++)
     fs_mark_used(extent->start + i);
 }
