@@ -70,8 +70,14 @@ disk.img:
 clean:
 	rm -f $(ASM_OBJ) $(C_OBJ) user_program user/user_program_asm.o 
 fclean: clean
-	rm -f $(TARGET) user_program disk.img
-	
+	rm -f $(TARGET) user_program disk.img 
+
+net:
+	sudo ip tuntap add dev tap0 mode tap
+	sudo ip link set tap0 up
+	sudo ip addr add 192.168.100.1/24 dev tap0
+
+
 
 # Running
 run: all
@@ -80,3 +86,16 @@ run: all
 		-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
 		-device rtl8139,netdev=net0,mac=AA:12:34:56:78:FF \
 		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
+
+
+
+
+
+
+
+
+
+
+
+
+
