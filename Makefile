@@ -34,6 +34,13 @@ INCL   	:= 	-I./kernel/interrupts/ \
 
 TARGET  := kernel.bin
 
+
+TAP_IF := nulltap0
+NET_ID := nullcore-net
+NET_CAPTURE_FILE := null-core-capture.pcap 
+DISK_IMAGE_FILE := null-core-disk.img
+
+
 # kernel/elf/initrd.o: kernel/elf/initrd.asm user_program
 # 	$(ASM) $(ASFLAGS) $< -o $@
 
@@ -48,7 +55,7 @@ user_program: user/user_program_asm.o user/user_program.c
 
 
 # Default target
-all: disk.img user_program $(TARGET)
+all: $(DISK_IMAGE_FILE) user_program $(TARGET)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
@@ -63,8 +70,8 @@ kernel/%.o: kernel/%.asm
 	@$(ASM) $(ASFLAGS) $< -o $@
 
 
-disk.img:
-	qemu-img create -f raw disk.img 32M
+$(DISK_IMAGE_FILE):
+	qemu-img create -f raw $(DISK_IMAGE_FILE) 32M
 
 # Clean
 clean:
@@ -73,29 +80,22 @@ fclean: clean
 	rm -f $(TARGET) user_program disk.img 
 
 net:
-	sudo ip tuntap add dev tap0 mode tap
-	sudo ip link set tap0 up
-	sudo ip addr add 192.168.100.1/24 dev tap0
+	sudo ip tuntap add dev $(TAP_IF) mode tap
+	sudo ip link set $(TAP_IF) up
+	sudo ip addr add 192.168.100.1/24 dev $(TAP_IF)
 
 
+run-net: all
+	qemu-system-i386 -kernel $(TARGET) \
+		-drive file=$(DISK_IMAGE_FILE),format=raw,index=0,media=disk \
+		-netdev tap,id=$(NET_ID),ifname=$(TAP_IF),script=no,downscript=no \
+		-device rtl8139,netdev=$(NET_ID),mac=AA:12:34:56:78:FF \
+		-object filter-dump,id=f1,netdev=$(NET_ID),file=$(NET_CAPTURE_FILE)
 
 # Running
 run: all
 	qemu-system-i386 -kernel $(TARGET) \
-		-drive file=disk.img,format=raw,index=0,media=disk \
-		-netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-		-device rtl8139,netdev=net0,mac=AA:12:34:56:78:FF \
-		-object filter-dump,id=f1,netdev=net0,file=capture.pcap
-
-
-
-
-
-
-
-
-
-
-
-
-
+		-drive file=$(DISK_IMAGE_FILE),format=raw,index=0,media=disk \
+		-netdev user,id=$(NET_ID) \
+		-device rtl8139,netdev=$(NET_ID),mac=AA:12:34:56:78:FF \
+		-object filter-dump,id=f1,netdev=$(NET_ID),file=$(NET_CAPTURE_FILE)
