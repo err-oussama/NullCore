@@ -68,3 +68,7 @@ void fs_alloc_extent(fs_extent_t *extent) {
   for (uint32 i = 0; i < best_count; i++)
     fs_mark_used(extent->start + i);
 }
+
+uint32 fs_sectors_needed(uint32 size) {
+  return size / fs_disk.sector_size + (size % fs_disk.sector_size ? 1 : 0);
+}
