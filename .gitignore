@@ -2,8 +2,8 @@
 # kernel binray file
 kernel.bin
 user_program
-disk.img
-capture.pcap
+null-core-capture.pcap
+null-core-disk.img
 .clangd
 # Prerequisites
 *.d
