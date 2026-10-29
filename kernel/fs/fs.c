@@ -65,28 +65,58 @@ uint32 fs_sectors_needed(uint32 size) {
   return size / fs_disk.sector_size + (size % fs_disk.sector_size ? 1 : 0);
 }
 
-void fs_format_disk() {
-  fs_superblock_t *superblock = pmm_alloc(1);
+void fs_format() {
 
-  if (!superblock)
-    return;
-  bezero(superblock, fs_disk.sector_size);
-
-  uint32 sec_c = fs_disk.sector_count;
-  uint32 bitmap_bytes = (sec_c / 8) + (sec_c % 8 ? 1 : 0);
+  // how many sector the superblock and rood dir will take;
+  uint32 fixed_sectors_bytes = fs_disk.sector_size * 2;
+  uint32 bitmap_bytes =
+      (fs_disk.sector_count / 8) + (fs_disk.sector_count % 8 ? 1 : 0);
   uint32 sec_needed = fs_sectors_needed(bitmap_bytes);
+  uint32 frame_count = (bitmap_bytes / PMM_FRAME_SIZE);
+  frame_count += (bitmap_bytes % PMM_FRAME_SIZE) ? 1 : 0;
+  frame_count += fixed_sectors_bytes / PMM_FRAME_SIZE;
+  frame_count += fixed_sectors_bytes % PMM_FRAME_SIZE ? 1 : 0;
+
+  void *buff = pmm_alloc(frame_count);
+  if (!buff)
+    return;
+  bezero(buff, frame_count * PMM_FRAME_SIZE);
+
+  fs_superblock_t *superblock = buff;
 
   memcpy(FS_MAGIC, superblock->magic, FS_MAGIC_LEN);
   superblock->version = FS_VERSION;
   superblock->sector_count = fs_disk.sector_count;
   superblock->sector_size = fs_disk.sector_size;
   superblock->bitmap_start = 1;
-  superblock->bitmap_size = bitmap_bytes;
+  superblock->bitmap_bytes = bitmap_bytes;
   superblock->root_dir = superblock->bitmap_start + sec_needed;
-  superblock->data_start = superblock->root_dir + 5;
+  superblock->data_start = superblock->root_dir + 1;
 
-  ata_write_sector(0, 1, superblock);
-  pmm_free(superblock, 1);
+  fs_bitmap = buff + fs_disk.sector_size;
+  for (uint32 i = 0; i < superblock->data_start; i++)
+    fs_mark_used(i);
+
+  ata_write_sector(0, superblock->data_start, buff);
+  pmm_free(buff, frame_count);
+}
+
+void fs_superblock_dump(fs_superblock_t *superblock) {
+  kprintf("----------superblock----------\n");
+  kprintf("magic        : ");
+  for (uint32 i = 0; i < FS_MAGIC_LEN; i++)
+    kprint_cha(superblock->magic[i]);
+
+  kprintf("\n");
+  kprintf("version      : %u\n", superblock->version);
+  kprintf("sector count : %u\n", superblock->sector_count);
+  kprintf("sector size  : %u\n", superblock->sector_size);
+  kprintf("bitmap start : %u\n", superblock->bitmap_start);
+  kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
+  kprintf("root dir     : %u\n", superblock->root_dir);
+  kprintf("data start   : %u\n", superblock->data_start);
+
+  kprintf("------------------------------\n");
 }
 
 void fs_init_disk() {
@@ -98,11 +128,17 @@ void fs_init_disk() {
     return;
 
   ata_read_sector(0, 1, sector);
+  memcpy(sector, &fs_superblock, sizeof(fs_superblock));
+  if (fs_superblock.sector_count != fs_disk.sector_count ||
+      fs_superblock.sector_size != fs_disk.sector_size) {
+    fs_format();
+    return;
+  }
   for (uint32 i = 0; i < FS_MAGIC_LEN; i++) {
-    if (sector[i] != FS_MAGIC[i]) {
-      fs_format_disk();
+    if (fs_superblock.magic[i] != FS_MAGIC[i]) {
+      fs_format();
       return;
     }
   }
-  memcpy(sector, &fs_superblock, sizeof(fs_superblock));
+  fs_superblock_dump(&fs_superblock);
 }
