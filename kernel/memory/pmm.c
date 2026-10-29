@@ -11,7 +11,7 @@ void pmm_init(void *pmp_start, uint32 pmp_size) {
   pmp.start = pmp_start;
   pmp.size = pmp_size;
   bitmap = (uint8 *)pmp_start;
-  bitmap_size = (((pmp_size / 0x1000) + 0x7) / 0x8);
+  bitmap_size = (((pmp_size / PMM_FRAME_SIZE) + 0x7) / 0x8);
   memset(bitmap, 0, bitmap_size);
   pmm_use_frame(0);
 }
@@ -37,9 +37,13 @@ void *pmm_get_pool_start() { return pmp.start; }
 
 uint32 pmm_get_pool_size() { return pmp.size; }
 
-uint32 pmm_addre_to_frame(void *addre) { return (addre - pmp.start) / 0x1000; }
+uint32 pmm_addre_to_frame(void *addre) {
+  return (addre - pmp.start) / PMM_FRAME_SIZE;
+}
 
-void *pmm_frame_to_addre(uint32 frame) { return (frame * 0x1000) + pmp.start; }
+void *pmm_frame_to_addre(uint32 frame) {
+  return (frame * PMM_FRAME_SIZE) + pmp.start;
+}
 
 uint8 pmm_is_frame_free(uint32 frame) {
 
@@ -64,7 +68,7 @@ void pmm_free_frame(uint32 frame_number) {
 
 void *pmm_alloc(uint32 n_frames) {
   uint32 count = 0;
-  for (uint32 i = 0; i < pmp.size / 0x1000; i++) {
+  for (uint32 i = 0; i < pmp.size / PMM_FRAME_SIZE; i++) {
     if (pmm_is_frame_free(i))
       count++;
     else
