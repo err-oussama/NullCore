@@ -90,8 +90,8 @@ void fs_format() {
   superblock->sector_size = fs_disk.sector_size;
   superblock->bitmap_start = 1;
   superblock->bitmap_bytes = bitmap_bytes;
-  superblock->root_dir = superblock->bitmap_start + sec_needed;
-  superblock->data_start = superblock->root_dir + 1;
+  superblock->root_dir_start = superblock->bitmap_start + sec_needed;
+  superblock->data_start = superblock->root_dir_start + 1;
 
   fs_bitmap = buff + fs_disk.sector_size;
   for (uint32 i = 0; i < superblock->data_start; i++)
@@ -113,7 +113,7 @@ void fs_superblock_dump(fs_superblock_t *superblock) {
   kprintf("sector size  : %u\n", superblock->sector_size);
   kprintf("bitmap start : %u\n", superblock->bitmap_start);
   kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
-  kprintf("root dir     : %u\n", superblock->root_dir);
+  kprintf("root dir     : %u\n", superblock->root_dir_start);
   kprintf("data start   : %u\n", superblock->data_start);
 
   kprintf("------------------------------\n");

@@ -32,7 +32,7 @@ typedef struct __attribute__((packed)) {
   uint32 sector_size;
   uint32 bitmap_start;
   uint32 bitmap_bytes;
-  uint32 root_dir;
+  uint32 root_dir_start;
   uint32 data_start;
 } fs_superblock_t;
 
