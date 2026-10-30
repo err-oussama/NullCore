@@ -14,12 +14,12 @@ typedef struct {
   uint32 sector_size;
 } fs_disk_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
   uint32 start;
   uint32 count;
 } fs_extent_t;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
   uint32 size;
   uint32 extent_count;
   fs_extent_t extents[];
