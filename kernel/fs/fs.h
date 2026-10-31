@@ -12,6 +12,9 @@
 #define FS_ENTRY_TYPE_FILE 0x1
 #define FS_ENTRY_TYPE_DIR 0x2
 
+#define FS_PATH_SEP '/'
+#define FS_ROOT_PATH "/"
+
 typedef struct {
   uint32 sector_count;
   uint32 sector_size;
