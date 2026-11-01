@@ -41,6 +41,10 @@ uint32 pmm_addre_to_frame(void *addre) {
   return (addre - pmp.start) / PMM_FRAME_SIZE;
 }
 
+uint32 pmm_frame_for(uint32 bytes) {
+  return ((bytes / PMM_FRAME_SIZE) + (bytes % PMM_FRAME_SIZE ? 1 : 0));
+}
+
 void *pmm_frame_to_addre(uint32 frame) {
   return (frame * PMM_FRAME_SIZE) + pmp.start;
 }

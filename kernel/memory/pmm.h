@@ -17,6 +17,8 @@ void *pmm_get_pool_start();
 uint32 pmm_get_pool_size();
 void pmm_show_bitmap(uint32 size);
 
+uint32 pmm_frame_for(uint32 bytes);
+
 uint32 pmm_addre_to_frame(void *addre);
 void *pmm_frame_to_addre(uint32 frame);
 uint8 pmm_is_frame_free(uint32 frame);
