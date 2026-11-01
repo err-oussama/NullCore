@@ -5,44 +5,55 @@
 #include <kstring.h>
 #include <pmm.h>
 
-static fs_disk_t fs_disk;
+static fs_t fs;
 
-static fs_superblock_t fs_superblock;
+static void fs_superblock_dump(fs_superblock_t *superblock) {
+  kprintf("----------superblock----------\n");
+  kprintf("magic        : ");
+  for (uint32 i = 0; i < FS_MAGIC_LEN; i++)
+    kprint_cha(superblock->magic[i]);
 
-static uint8 *fs_bitmap;
+  kprintf("\n");
+  kprintf("version      : %u\n", superblock->version);
+  kprintf("sector count : %u\n", superblock->sector_count);
+  kprintf("sector size  : %u\n", superblock->sector_size);
+  kprintf("bitmap start : %u\n", superblock->bitmap_start);
+  kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
+  kprintf("root dir     : %u\n", superblock->root_dir_start);
+  kprintf("data start   : %u\n", superblock->data_start);
 
-static uint32 fs_data_start = 0;
+  kprintf("------------------------------\n");
+}
 
 static void fs_mark_used(uint32 lba) {
-  fs_bitmap[lba / 8] |= (0x1 << (lba % 8));
+  fs.bitmap[lba / 8] |= (0x1 << (lba % 8));
 }
 static void fs_mark_free(uint32 lba) {
-  fs_bitmap[lba / 8] &= ~(0x1 << (lba % 8));
+  fs.bitmap[lba / 8] &= ~(0x1 << (lba % 8));
 }
 static uint8 fs_is_used(uint32 lba) {
-  return (fs_bitmap[lba / 8] >> (lba % 8)) & 1;
+  return (fs.bitmap[lba / 8] >> (lba % 8)) & 1;
 }
-void *fs_get_bitmap() { return fs_bitmap; }
 
-void fs_free_extent(fs_extent_t *extent) {
+static void fs_free_extent(fs_extent_t *extent) {
   for (uint32 i = 0; i < extent->count; i++)
     fs_mark_free(extent->start + i);
 }
 
-void fs_alloc_extent(fs_extent_t *extent) {
+static void fs_alloc_extent(fs_extent_t *extent) {
   extent->start = 0;
   uint32 best_count = 0;
   uint32 count = 0;
   uint32 start = 0;
-  for (uint32 sec = fs_data_start;
-       sec < fs_disk.sector_count && count < extent->count; sec++) {
+  for (uint32 sec = fs.sb.data_start;
+       sec < fs.disk.sector_count && count < extent->count; sec++) {
 
     if (fs_is_used(sec))
       continue;
 
     count = 0;
     start = sec;
-    while (sec < fs_disk.sector_count && !fs_is_used(sec) &&
+    while (sec < fs.disk.sector_count && !fs_is_used(sec) &&
            count < extent->count) {
       count++;
       sec++;
@@ -62,20 +73,17 @@ void fs_alloc_extent(fs_extent_t *extent) {
 }
 
 uint32 fs_sectors_needed(uint32 size) {
-  return size / fs_disk.sector_size + (size % fs_disk.sector_size ? 1 : 0);
+  return size / fs.disk.sector_size + (size % fs.disk.sector_size ? 1 : 0);
 }
 
-void fs_format() {
+static void fs_format() {
 
   // how many sector the superblock and rood dir will take;
-  uint32 fixed_sectors_bytes = fs_disk.sector_size * 2;
+  uint32 fixed_sectors_bytes = fs.disk.sector_size * 2;
   uint32 bitmap_bytes =
-      (fs_disk.sector_count / 8) + (fs_disk.sector_count % 8 ? 1 : 0);
+      (fs.disk.sector_count / 8) + (fs.disk.sector_count % 8 ? 1 : 0);
   uint32 sec_needed = fs_sectors_needed(bitmap_bytes);
-  uint32 frame_count = (bitmap_bytes / PMM_FRAME_SIZE);
-  frame_count += (bitmap_bytes % PMM_FRAME_SIZE) ? 1 : 0;
-  frame_count += fixed_sectors_bytes / PMM_FRAME_SIZE;
-  frame_count += fixed_sectors_bytes % PMM_FRAME_SIZE ? 1 : 0;
+  uint32 frame_count = pmm_frame_for(bitmap_bytes + fixed_sectors_bytes);
 
   void *buff = pmm_alloc(frame_count);
   if (!buff)
@@ -86,59 +94,62 @@ void fs_format() {
 
   memcpy(FS_MAGIC, superblock->magic, FS_MAGIC_LEN);
   superblock->version = FS_VERSION;
-  superblock->sector_count = fs_disk.sector_count;
-  superblock->sector_size = fs_disk.sector_size;
+  superblock->sector_count = fs.disk.sector_count;
+  superblock->sector_size = fs.disk.sector_size;
   superblock->bitmap_start = 1;
+  superblock->bitmap_sectors = sec_needed;
   superblock->bitmap_bytes = bitmap_bytes;
   superblock->root_dir_start = superblock->bitmap_start + sec_needed;
   superblock->data_start = superblock->root_dir_start + 1;
 
-  fs_bitmap = buff + fs_disk.sector_size;
+  fs.bitmap = buff + fs.disk.sector_size;
   for (uint32 i = 0; i < superblock->data_start; i++)
     fs_mark_used(i);
 
   ata_write_sector(0, superblock->data_start, buff);
   pmm_free(buff, frame_count);
 }
-
-void fs_superblock_dump(fs_superblock_t *superblock) {
-  kprintf("----------superblock----------\n");
-  kprintf("magic        : ");
-  for (uint32 i = 0; i < FS_MAGIC_LEN; i++)
-    kprint_cha(superblock->magic[i]);
-
-  kprintf("\n");
-  kprintf("version      : %u\n", superblock->version);
-  kprintf("sector count : %u\n", superblock->sector_count);
-  kprintf("sector size  : %u\n", superblock->sector_size);
-  kprintf("bitmap start : %u\n", superblock->bitmap_start);
-  kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
-  kprintf("root dir     : %u\n", superblock->root_dir_start);
-  kprintf("data start   : %u\n", superblock->data_start);
-
-  kprintf("------------------------------\n");
+void fs_bitmap_load() {
+  fs.bitmap_frames = pmm_frame_for(fs.sb.bitmap_bytes);
+  fs.bitmap = pmm_alloc(fs.bitmap_frames);
+  if (!fs.bitmap)
+    kprintf("FS bitmap allocation faild\n");
 }
-
+void fs_bitmap_flush() {
+  ata_write_sector(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
+}
 void fs_init_disk() {
-  fs_disk.sector_count = ata_sector_count();
-  fs_disk.sector_size = ATA_SECTOR_SIZE;
+  fs.disk.sector_count = ata_sector_count();
+  fs.disk.sector_size = ATA_SECTOR_SIZE;
 
   uint8 *sector = pmm_alloc(1);
   if (!sector)
     return;
 
   ata_read_sector(0, 1, sector);
-  memcpy(sector, &fs_superblock, sizeof(fs_superblock));
-  if (fs_superblock.sector_count != fs_disk.sector_count ||
-      fs_superblock.sector_size != fs_disk.sector_size) {
+  memcpy(sector, &fs.sb, sizeof(fs.sb));
+  if (fs.sb.sector_count != fs.disk.sector_count ||
+      fs.sb.sector_size != fs.disk.sector_size) {
     fs_format();
     return;
   }
   for (uint32 i = 0; i < FS_MAGIC_LEN; i++) {
-    if (fs_superblock.magic[i] != FS_MAGIC[i]) {
+    if (fs.sb.magic[i] != FS_MAGIC[i]) {
       fs_format();
       return;
     }
   }
-  fs_superblock_dump(&fs_superblock);
+  fs_superblock_dump(&(fs.sb));
+  fs_bitmap_load();
+}
+
+void fs_add_file(int8 *path, int8 *filename) {
+  if (memcmp(path, FS_ROOT_PATH, 1))
+    return;
+
+  uint32 root_lba = fs.sb.root_dir_start;
+  fs_index_t *buff = pmm_alloc(1);
+  ata_read_sector(root_lba, 1, buff);
+
+  pmm_free(buff, 1);
 }

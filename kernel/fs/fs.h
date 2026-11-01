@@ -26,6 +26,7 @@ typedef struct __attribute__((packed)) {
   uint32 sector_count;
   uint32 sector_size;
   uint32 bitmap_start;
+  uint32 bitmap_sectors;
   uint32 bitmap_bytes;
   uint32 root_dir_start;
   uint32 data_start;
@@ -48,13 +49,19 @@ typedef struct __attribute__((packed)) {
   fs_extent_t extents[];
 } fs_index_t;
 
+typedef struct {
+  fs_disk_t disk;
+  fs_superblock_t sb;
+  uint8 *bitmap;
+  uint32 bitmap_frames;
+} fs_t;
+
 _Static_assert(sizeof(fs_entry_t) == 64, "fs_entry_t must be 64 byte");
 _Static_assert(sizeof(fs_extent_t) == 8, "fs_extent_t must be 8 byte");
 _Static_assert(sizeof(fs_index_t) == 8, "fs_index_t must be 8 byte");
 
 void fs_init_disk();
-void *fs_get_bitmap();
-void fs_alloc_extent(fs_extent_t *extent);
-void fs_free_extent(fs_extent_t *extent);
+
+void fs_create(int8 *path, int8 *name, uint8 type);
 
 #endif
