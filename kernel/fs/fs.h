@@ -62,6 +62,6 @@ _Static_assert(sizeof(fs_index_t) == 8, "fs_index_t must be 8 byte");
 
 void fs_init_disk();
 
-void fs_create(int8 *path, int8 *name, uint8 type);
+void fs_new_entry(int8 *path, int8 *name, uint8 type);
 
 #endif

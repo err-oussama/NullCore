@@ -1,9 +1,9 @@
-#include "types.h"
 #include <ata.h>
 #include <fs.h>
 #include <kprint.h>
 #include <kstring.h>
 #include <pmm.h>
+#include <types.h>
 
 static fs_t fs;
 
@@ -147,15 +147,36 @@ void fs_init_disk() {
   fs_bitmap_load();
 }
 
-void fs_add_file(int8 *path, int8 *filename) {
+void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   if (memcmp(path, FS_ROOT_PATH, 1))
     return;
 
   uint32 root_lba = fs.sb.root_dir_start;
   fs_index_t *root_index = pmm_alloc(1);
   ata_read_sector(root_lba, 1, root_index);
+  fs_extent_t *extent;
+
+  uint32 ext_indx = 0;
+  while (ext_indx < root_index->extent_count)
+    ext_indx++;
+  extent = &root_index->extents[ext_indx];
+  extent->count = 1;
+  fs_alloc_extent(extent);
+  if (!extent->count)
+    return;
+
+  fs_entry_t *entry = pmm_alloc(1);
+  if (!entry)
+    return;
+
+  memcpy(name, entry->name, strlen(name) + 1);
+  entry->type = type;
+  entry->index_lba = 0;
+
   kprintf("root index size: %u\n", root_index->size);
   kprintf("root index extent count: %u\n", root_index->extent_count);
+
+  ata_write_sector(extent->start, 1, entry);
 
   pmm_free(root_index, 1);
 }

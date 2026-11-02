@@ -17,4 +17,6 @@ void kmain(multiboot_info *boot_info) {
   banner();
 
   fs_init_disk();
+
+  fs_new_entry("/", "home", FS_ENTRY_TYPE_FILE);
 }
