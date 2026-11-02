@@ -109,15 +109,19 @@ static void fs_format() {
   ata_write_sector(0, superblock->data_start, buff);
   pmm_free(buff, frame_count);
 }
+
 void fs_bitmap_load() {
   fs.bitmap_frames = pmm_frame_for(fs.sb.bitmap_bytes);
   fs.bitmap = pmm_alloc(fs.bitmap_frames);
   if (!fs.bitmap)
     kprintf("FS bitmap allocation faild\n");
+  ata_read_sector(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
 }
+
 void fs_bitmap_flush() {
   ata_write_sector(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
 }
+
 void fs_init_disk() {
   fs.disk.sector_count = ata_sector_count();
   fs.disk.sector_size = ATA_SECTOR_SIZE;
@@ -148,8 +152,10 @@ void fs_add_file(int8 *path, int8 *filename) {
     return;
 
   uint32 root_lba = fs.sb.root_dir_start;
-  fs_index_t *buff = pmm_alloc(1);
-  ata_read_sector(root_lba, 1, buff);
+  fs_index_t *root_index = pmm_alloc(1);
+  ata_read_sector(root_lba, 1, root_index);
+  kprintf("root index size: %u\n", root_index->size);
+  kprintf("root index extent count: %u\n", root_index->extent_count);
 
-  pmm_free(buff, 1);
+  pmm_free(root_index, 1);
 }
