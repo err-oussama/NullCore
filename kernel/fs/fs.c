@@ -152,14 +152,14 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
     return;
 
   uint32 root_lba = fs.sb.root_dir_start;
-  fs_index_t *root_index = pmm_alloc(1);
-  ata_read_sector(root_lba, 1, root_index);
+  fs_extent_t *extents = pmm_alloc(1);
+  ata_read_sector(root_lba, 1, extents);
   fs_extent_t *extent;
 
-  uint32 ext_indx = 0;
-  while (ext_indx < root_index->extent_count)
-    ext_indx++;
-  extent = &root_index->extents[ext_indx];
+  uint32 i = 0;
+  while (i < FS_EXTENTS_MAX && extents[i].start)
+    i++;
+  extent = &extents[i];
   extent->count = 1;
   fs_alloc_extent(extent);
   if (!extent->count)
@@ -173,10 +173,6 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   entry->type = type;
   entry->index_lba = 0;
 
-  kprintf("root index size: %u\n", root_index->size);
-  kprintf("root index extent count: %u\n", root_index->extent_count);
-
   ata_write_sector(extent->start, 1, entry);
-
-  pmm_free(root_index, 1);
+  pmm_free(extents, 1);
 }

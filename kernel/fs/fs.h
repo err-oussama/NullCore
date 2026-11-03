@@ -7,7 +7,7 @@
 #define FS_VERSION 0
 
 #define FS_EXTENTS_MAX 63
-#define FS_NAME_MAX 58
+#define FS_NAME_MAX 54
 
 #define FS_ENTRY_TYPE_FILE 0x1
 #define FS_ENTRY_TYPE_DIR 0x2
@@ -34,6 +34,7 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
   uint32 index_lba;
+  uint32 size;
   uint8 type;
   int8 name[FS_NAME_MAX + 1];
 } fs_entry_t;
@@ -42,12 +43,6 @@ typedef struct __attribute__((packed)) {
   uint32 start;
   uint32 count;
 } fs_extent_t;
-
-typedef struct __attribute__((packed)) {
-  uint32 size;
-  uint32 extent_count;
-  fs_extent_t extents[];
-} fs_index_t;
 
 typedef struct {
   fs_disk_t disk;
@@ -58,7 +53,6 @@ typedef struct {
 
 _Static_assert(sizeof(fs_entry_t) == 64, "fs_entry_t must be 64 byte");
 _Static_assert(sizeof(fs_extent_t) == 8, "fs_extent_t must be 8 byte");
-_Static_assert(sizeof(fs_index_t) == 8, "fs_index_t must be 8 byte");
 
 void fs_init_disk();
 
