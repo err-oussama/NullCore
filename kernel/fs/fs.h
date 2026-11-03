@@ -6,7 +6,7 @@
 #define FS_MAGIC_LEN 0x10
 #define FS_VERSION 0
 
-#define FS_EXTENTS_MAX 63
+#define FS_EXTENTS_MAX 64
 #define FS_NAME_MAX 54
 
 #define FS_ENTRY_TYPE_FILE 0x1
