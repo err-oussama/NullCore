@@ -20,6 +20,7 @@ static void fs_superblock_dump(fs_superblock_t *superblock) {
   kprintf("bitmap start : %u\n", superblock->bitmap_start);
   kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
   kprintf("root dir     : %u\n", superblock->root_dir_start);
+  kprintf("root size    : %u\n", superblock->root_size);
   kprintf("data start   : %u\n", superblock->data_start);
 
   kprintf("------------------------------\n");
@@ -100,6 +101,7 @@ static void fs_format() {
   superblock->bitmap_sectors = sec_needed;
   superblock->bitmap_bytes = bitmap_bytes;
   superblock->root_dir_start = superblock->bitmap_start + sec_needed;
+  superblock->root_size = 0;
   superblock->data_start = superblock->root_dir_start + 1;
 
   fs.bitmap = buff + fs.disk.sector_size;
@@ -147,32 +149,39 @@ void fs_init_disk() {
   fs_bitmap_load();
 }
 
+void fs_update_sector(uint32 sector, uint16 offset, void *data, uint16 len) {
+
+  void *buff = pmm_alloc(1);
+  if (!buff)
+    return;
+
+  ata_read_sector(sector, 1, buff);
+  memcpy(data, buff + offset, len);
+  ata_write_sector(sector, 1, buff);
+  fs.sb.root_size += len;
+  pmm_free(buff, 1);
+}
+
 void fs_new_entry(int8 *path, int8 *name, uint8 type) {
-  if (memcmp(path, FS_ROOT_PATH, 1))
+  if (memcmp(path, FS_ROOT_PATH, 1) || !fs.sb.root_dir_start)
     return;
-
   uint32 root_lba = fs.sb.root_dir_start;
-  fs_extent_t *extents = pmm_alloc(1);
-  ata_read_sector(root_lba, 1, extents);
-  fs_extent_t *extent;
 
-  uint32 i = 0;
-  while (i < FS_EXTENTS_MAX && extents[i].start)
-    i++;
-  extent = &extents[i];
-  extent->count = 1;
-  fs_alloc_extent(extent);
-  if (!extent->count)
+  uint32 sector = root_lba + fs.sb.root_size / fs.disk.sector_size;
+  uint32 offset = fs.sb.root_size % fs.disk.sector_size;
+
+  kprintf("root_size: %u, sec: %u, offset: %u\n", fs.sb.root_size, sector,
+          offset);
+
+  uint16 name_size = strlen(name) + 1;
+  if (name_size > FS_NAME_MAX)
     return;
+  fs_entry_t entry;
+  bezero(&entry, sizeof(fs_entry_t));
+  memcpy(name, entry.name, name_size);
+  entry.type = type;
+  entry.size = 0;
+  entry.index_lba = 0;
 
-  fs_entry_t *entry = pmm_alloc(1);
-  if (!entry)
-    return;
-
-  memcpy(name, entry->name, strlen(name) + 1);
-  entry->type = type;
-  entry->index_lba = 0;
-
-  ata_write_sector(extent->start, 1, entry);
-  pmm_free(extents, 1);
+  fs_update_sector(sector, offset, &entry, sizeof(fs_entry_t));
 }
