@@ -59,4 +59,5 @@ void fs_init_disk();
 
 void fs_new_entry(int8 *path, int8 *name, uint8 type);
 
+uint32 fs_get_lba(fs_extent_t *extents, uint32 sector);
 #endif

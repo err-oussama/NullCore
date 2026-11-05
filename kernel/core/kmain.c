@@ -1,8 +1,8 @@
-
 #include <ata.h>
 #include <fs.h>
 #include <kernel.h>
 #include <kprint.h>
+#include <kstring.h>
 #include <multiboot_metadata.h>
 #include <types.h>
 
@@ -18,7 +18,10 @@ void kmain(multiboot_info *boot_info) {
 
   fs_init_disk();
 
-  fs_new_entry("/", "AAAAAAAAAAAAAAAAAAAAAAAAA", FS_ENTRY_TYPE_FILE);
-  fs_new_entry("/", "BBBBBBBBBBBBBBBBBBBBBBBBB", FS_ENTRY_TYPE_FILE);
-  fs_new_entry("/", "CCCCCCCCCCCCCCCCCCCCCCCCC", FS_ENTRY_TYPE_FILE);
+  int8 name[50];
+  for (uint32 i = 0; i < 28; i++) {
+    memset(name, i + 'A', sizeof(name) / 2);
+    memset(name + sizeof(name) / 2, i + 'a', sizeof(name) / 2);
+    fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
+  }
 }

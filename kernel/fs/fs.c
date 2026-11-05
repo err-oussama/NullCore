@@ -145,7 +145,7 @@ void fs_init_disk() {
       return;
     }
   }
-  fs_superblock_dump(&(fs.sb));
+  /* fs_superblock_dump(&(fs.sb)); */
   fs_bitmap_load();
 }
 
@@ -162,20 +162,49 @@ void fs_update_sector(uint32 sector, uint16 offset, void *data, uint16 len) {
   pmm_free(buff, 1);
 }
 
+uint32 fs_get_lba(fs_extent_t *extents, uint32 sector) {
+
+  for (uint32 i = 0; extents[i].start; i++) {
+    uint32 start = extents[i].start;
+    uint32 count = extents[i].count;
+    if (sector < count)
+      return start + sector;
+    sector -= count;
+  }
+  return 0;
+}
+
 void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   if (memcmp(path, FS_ROOT_PATH, 1) || !fs.sb.root_dir_start)
     return;
   uint32 root_lba = fs.sb.root_dir_start;
 
-  uint32 sector = root_lba + fs.sb.root_size / fs.disk.sector_size;
+  uint32 sector = fs.sb.root_size / fs.disk.sector_size;
   uint32 offset = fs.sb.root_size % fs.disk.sector_size;
 
-  kprintf("root_size: %u, sec: %u, offset: %u\n", fs.sb.root_size, sector,
-          offset);
+  fs_extent_t *extents = pmm_alloc(1);
+  if (!extents)
+    return;
+  ata_read_sector(fs.sb.root_dir_start, 1, extents);
+
+  uint32 lba = fs_get_lba(extents, sector);
+  if (!lba) {
+    uint32 i = 0;
+    while (extents[i].start)
+      i++;
+    extents[i].count = 4;
+    fs_alloc_extent(&extents[i]);
+    if (!extents[i].count)
+      return;
+    fs_bitmap_flush();
+    ata_write_sector(fs.sb.root_dir_start, 1, extents);
+    lba = extents[i].start;
+  }
 
   uint16 name_size = strlen(name) + 1;
   if (name_size > FS_NAME_MAX)
     return;
+  kprintf("root_size: %u, lba: %u, offset: %u\n", fs.sb.root_size, lba, offset);
   fs_entry_t entry;
   bezero(&entry, sizeof(fs_entry_t));
   memcpy(name, entry.name, name_size);
@@ -183,5 +212,5 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   entry.size = 0;
   entry.index_lba = 0;
 
-  fs_update_sector(sector, offset, &entry, sizeof(fs_entry_t));
+  fs_update_sector(lba, offset, &entry, sizeof(fs_entry_t));
 }
