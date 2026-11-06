@@ -6,7 +6,7 @@
 #define FS_MAGIC_LEN 0x10
 #define FS_VERSION 0
 
-#define FS_EXTENTS_MAX 64
+#define FS_EXTENTS_MAX 63
 #define FS_NAME_MAX 54
 
 #define FS_ENTRY_TYPE_FILE 0x1
@@ -21,17 +21,15 @@ typedef struct {
 } fs_disk_t;
 
 typedef struct __attribute__((packed)) {
-  uint8 magic[FS_MAGIC_LEN];
-  uint32 version;
-  uint32 sector_count;
-  uint32 sector_size;
-  uint32 bitmap_start;
-  uint32 bitmap_sectors;
-  uint32 bitmap_bytes;
-  uint32 root_dir_start;
-  uint32 root_size;
-  uint32 data_start;
-} fs_superblock_t;
+  uint32 start;
+  uint32 count;
+} fs_extent_t;
+
+typedef struct __attribute__((packed)) {
+  uint32 next; // Next index sector LBA; 0 = last one.
+  uint32 padding;
+  fs_extent_t extents[FS_EXTENTS_MAX];
+} fs_index_t;
 
 typedef struct __attribute__((packed)) {
   uint32 index_lba;
@@ -41,9 +39,16 @@ typedef struct __attribute__((packed)) {
 } fs_entry_t;
 
 typedef struct __attribute__((packed)) {
-  uint32 start;
-  uint32 count;
-} fs_extent_t;
+  uint8 magic[FS_MAGIC_LEN];
+  uint32 version;
+  uint32 sector_count;
+  uint32 sector_size;
+  uint32 bitmap_start;
+  uint32 bitmap_sectors;
+  uint32 bitmap_bytes;
+  uint32 data_start;
+  fs_entry_t root;
+} fs_superblock_t;
 
 typedef struct {
   fs_disk_t disk;

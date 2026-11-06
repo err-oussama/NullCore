@@ -19,9 +19,12 @@ void kmain(multiboot_info *boot_info) {
   fs_init_disk();
 
   int8 name[50];
-  for (uint32 i = 0; i < 28; i++) {
-    memset(name, i + 'A', sizeof(name) / 2);
-    memset(name + sizeof(name) / 2, i + 'a', sizeof(name) / 2);
-    fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
+  for (uint32 l = 0; l < 20; l++) {
+    for (uint32 i = 0; i < 28; i++) {
+      uint32 half = sizeof(name) / 2;
+      memset(name, i + 'A', half);
+      memset(name + half, i + 'a', half);
+      fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
+    }
   }
 }

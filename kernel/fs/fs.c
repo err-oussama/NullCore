@@ -19,8 +19,8 @@ static void fs_superblock_dump(fs_superblock_t *superblock) {
   kprintf("sector size  : %u\n", superblock->sector_size);
   kprintf("bitmap start : %u\n", superblock->bitmap_start);
   kprintf("bitmap bytes : %u\n", superblock->bitmap_bytes);
-  kprintf("root dir     : %u\n", superblock->root_dir_start);
-  kprintf("root size    : %u\n", superblock->root_size);
+  kprintf("root dir     : %u\n", superblock->root.index_lba);
+  kprintf("root size    : %u\n", superblock->root.size);
   kprintf("data start   : %u\n", superblock->data_start);
 
   kprintf("------------------------------\n");
@@ -100,9 +100,9 @@ static void fs_format() {
   superblock->bitmap_start = 1;
   superblock->bitmap_sectors = sec_needed;
   superblock->bitmap_bytes = bitmap_bytes;
-  superblock->root_dir_start = superblock->bitmap_start + sec_needed;
-  superblock->root_size = 0;
-  superblock->data_start = superblock->root_dir_start + 1;
+  superblock->root.index_lba = superblock->bitmap_start + sec_needed;
+  superblock->root.size = 0;
+  superblock->data_start = superblock->root.index_lba + 1;
 
   fs.bitmap = buff + fs.disk.sector_size;
   for (uint32 i = 0; i < superblock->data_start; i++)
@@ -158,59 +158,87 @@ void fs_update_sector(uint32 sector, uint16 offset, void *data, uint16 len) {
   ata_read_sector(sector, 1, buff);
   memcpy(data, buff + offset, len);
   ata_write_sector(sector, 1, buff);
-  fs.sb.root_size += len;
+  fs.sb.root.size += len;
   pmm_free(buff, 1);
 }
 
-uint32 fs_get_lba(fs_extent_t *extents, uint32 sector) {
-
-  for (uint32 i = 0; extents[i].start; i++) {
-    uint32 start = extents[i].start;
-    uint32 count = extents[i].count;
+uint32 fs_get_lba(fs_extent_t *index, uint32 sector) {
+  for (uint32 i = 0; index[i].start; i++) {
+    uint32 count = index[i].count;
     if (sector < count)
-      return start + sector;
+      return index[i].start + sector;
     sector -= count;
   }
   return 0;
 }
 
-void fs_new_entry(int8 *path, int8 *name, uint8 type) {
-  if (memcmp(path, FS_ROOT_PATH, 1) || !fs.sb.root_dir_start)
-    return;
-  uint32 root_lba = fs.sb.root_dir_start;
+uint32 fs_add_extent(fs_index_t *index, uint32 index_lba) {
 
-  uint32 sector = fs.sb.root_size / fs.disk.sector_size;
-  uint32 offset = fs.sb.root_size % fs.disk.sector_size;
+  uint32 i = 0;
+  while (index->extents[i].start && i < FS_EXTENTS_MAX)
+    i++;
+  if (i >= FS_EXTENTS_MAX) {
+    fs_extent_t extent;
+    extent.count = 1;
+    fs_alloc_extent(&extent);
+    if (!extent.start)
+      return 0;
+    fs_index_t *new_index = pmm_alloc(1);
+    if (!new_index)
+      return 0;
+    bezero(new_index, fs.disk.sector_size);
+    new_index->extents[0].count = 1;
+    fs_alloc_extent(&new_index->extents[0]);
+    if (!new_index->extents[0].start)
+      return 0;
 
-  fs_extent_t *extents = pmm_alloc(1);
-  if (!extents)
-    return;
-  ata_read_sector(fs.sb.root_dir_start, 1, extents);
-
-  uint32 lba = fs_get_lba(extents, sector);
-  if (!lba) {
-    uint32 i = 0;
-    while (extents[i].start)
-      i++;
-    extents[i].count = 4;
-    fs_alloc_extent(&extents[i]);
-    if (!extents[i].count)
-      return;
+    ata_write_sector(extent.start, 1, new_index);
     fs_bitmap_flush();
-    ata_write_sector(fs.sb.root_dir_start, 1, extents);
-    lba = extents[i].start;
+    index->next = extent.start;
+
+    return new_index->extents[0].start;
+  } else {
+    index->extents[i].count = 1;
+    fs_alloc_extent(&index->extents[i]);
+    if (!index->extents[i].count)
+      return 0;
+    fs_bitmap_flush();
+  }
+  ata_write_sector(index_lba, 1, index);
+
+  return index->extents[i].start;
+}
+
+void fs_new_entry(int8 *path, int8 *name, uint8 type) {
+  if (memcmp(path, FS_ROOT_PATH, 2) || !fs.sb.root.index_lba)
+    return;
+  uint32 root_lba = fs.sb.root.index_lba;
+
+  uint32 sector = fs.sb.root.size / fs.disk.sector_size;
+  uint32 offset = fs.sb.root.size % fs.disk.sector_size;
+
+  fs_index_t *index = pmm_alloc(1);
+  if (!index)
+    return;
+  ata_read_sector(fs.sb.root.index_lba, 1, index);
+
+  uint32 lba = fs_get_lba(index->extents, sector);
+  if (!lba) {
+    lba = fs_add_extent(index, fs.sb.root.index_lba);
+    if (!lba) {
+
+      kprintf("index is full\n");
+      return;
+    }
   }
 
   uint16 name_size = strlen(name) + 1;
   if (name_size > FS_NAME_MAX)
     return;
-  kprintf("root_size: %u, lba: %u, offset: %u\n", fs.sb.root_size, lba, offset);
   fs_entry_t entry;
   bezero(&entry, sizeof(fs_entry_t));
   memcpy(name, entry.name, name_size);
   entry.type = type;
-  entry.size = 0;
-  entry.index_lba = 0;
 
   fs_update_sector(lba, offset, &entry, sizeof(fs_entry_t));
 }
