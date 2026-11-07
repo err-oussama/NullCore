@@ -12,12 +12,7 @@ void banner() {
           "===========================");
 }
 
-void kmain(multiboot_info *boot_info) {
-  init_kernel(boot_info);
-  banner();
-
-  fs_init_disk();
-
+void fill_disk() {
   int8 name[50];
   for (uint32 l = 0; l < 20; l++) {
     for (uint32 i = 0; i < 28; i++) {
@@ -27,4 +22,22 @@ void kmain(multiboot_info *boot_info) {
       fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
     }
   }
+}
+
+void one() {
+
+  int8 name[50];
+  uint32 half = sizeof(name) / 2;
+  memset(name, 'X', half);
+  memset(name + half, 'Z', half);
+  fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
+}
+
+void kmain(multiboot_info *boot_info) {
+  init_kernel(boot_info);
+  banner();
+  fs_init_disk();
+
+  /* fill_disk(); */
+  one();
 }
