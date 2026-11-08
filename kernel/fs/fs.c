@@ -193,14 +193,15 @@ uint32 fs_get_lba(fs_index_t *index, uint32 sector) {
 
 uint32 fs_add_extent(fs_index_t *index, uint32 index_lba) {
 
-  uint32 i = 0;
+  uint32 i;
   while (1) {
+    i = 0;
     while (index->extents[i].start && i < FS_EXTENTS_MAX)
       i++;
     if (!index->next)
       break;
     index_lba = index->next;
-    ata_read_sector(index->next, 1, index);
+    ata_read_sector(index_lba, 1, index);
   }
   if (i >= FS_EXTENTS_MAX) {
     fs_extent_t extent;
@@ -210,6 +211,7 @@ uint32 fs_add_extent(fs_index_t *index, uint32 index_lba) {
       return 0;
     index->next = extent.start;
     ata_write_sector(index_lba, 1, index);
+    fs_bitmap_flush();
     bezero(index, fs.disk.sector_size);
     index_lba = extent.start;
     i = 0;
@@ -220,34 +222,39 @@ uint32 fs_add_extent(fs_index_t *index, uint32 index_lba) {
     return 0;
   ata_write_sector(index_lba, 1, index);
   fs_bitmap_flush();
-  kprintf("%u\n", i);
   return index->extents[i].start;
+}
+
+uint32 fs_lba(uint32 index_lba, uint32 sec_id) {
+  fs_index_t *index = pmm_alloc(1);
+  if (!index)
+    return 0;
+
+  ata_read_sector(index_lba, 1, index);
+  uint32 lba = fs_get_lba(index, sec_id);
+  if (!lba) {
+    ata_read_sector(index_lba, 1, index);
+    lba = fs_add_extent(index, fs.sb.root.index_lba);
+  }
+  pmm_free(index, 1);
+  return lba;
 }
 
 void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   if (memcmp(path, FS_ROOT_PATH, 2) || !fs.sb.root.index_lba)
     return;
-  uint32 root_lba = fs.sb.root.index_lba;
 
   uint32 sector = fs.sb.root.size / fs.disk.sector_size;
   uint32 offset = fs.sb.root.size % fs.disk.sector_size;
 
-  fs_index_t *index = pmm_alloc(1);
-  if (!index)
-    return;
-  ata_read_sector(fs.sb.root.index_lba, 1, index);
-  uint32 lba = fs_get_lba(index, sector);
-  if (!lba) {
-    lba = fs_add_extent(index, fs.sb.root.index_lba);
-    if (!lba) {
-      kprintf("index is full\n");
-      return;
-    }
-  }
-
   uint16 name_size = strlen(name) + 1;
   if (name_size > FS_NAME_MAX)
     return;
+
+  uint32 lba = fs_lba(fs.sb.root.index_lba, sector);
+  if (!lba)
+    return;
+
   fs_entry_t entry;
   bezero(&entry, sizeof(fs_entry_t));
   memcpy(name, entry.name, name_size);

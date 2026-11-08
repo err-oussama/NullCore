@@ -26,10 +26,9 @@ void fill_disk() {
 
 void one() {
 
-  int8 name[50];
-  uint32 half = sizeof(name) / 2;
-  memset(name, 'X', half);
-  memset(name + half, 'Z', half);
+  int8 name[54];
+  memset(name, 'X', 25);
+  memset(name + 25, 'Z', 28);
   fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
 }
 
@@ -38,6 +37,6 @@ void kmain(multiboot_info *boot_info) {
   banner();
   fs_init_disk();
 
-  /* fill_disk(); */
-  one();
+  fill_disk();
+  /* one(); */
 }
