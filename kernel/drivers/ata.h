@@ -73,7 +73,9 @@ int ata_drive_setup();
 uint32 ata_sector_count();
 void ata_dump(void *ata_identify_buffer);
 int ata_identify(uint16 *buffer);
-int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer);
-int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer);
+int ata_read_sectors(uint32 lba, uint8 sector_count, void *buffer);
+int ata_write_sectors(uint32 lba, uint8 sector_count, void *buffer);
 
+int ata_read_sector(uint32 lba, void *buffer);
+int ata_write_sector(uint32 lba, void *buffer);
 #endif

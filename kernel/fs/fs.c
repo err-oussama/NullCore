@@ -82,11 +82,11 @@ void fs_bitmap_load() {
   fs.bitmap = pmm_alloc(fs.bitmap_frames);
   if (!fs.bitmap)
     kprintf("FS bitmap allocation faild\n");
-  ata_read_sector(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
+  ata_read_sectors(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
 }
 
 void fs_bitmap_flush() {
-  ata_write_sector(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
+  ata_write_sectors(fs.sb.bitmap_start, fs.sb.bitmap_sectors, fs.bitmap);
 }
 
 static void fs_format() {
@@ -120,7 +120,7 @@ static void fs_format() {
   for (uint32 i = 0; i < superblock->data_start; i++)
     fs_mark_used(i);
 
-  ata_write_sector(0, superblock->data_start, buff);
+  ata_write_sectors(0, superblock->data_start, buff);
   pmm_free(buff, frame_count);
 
   // TODO: remove this later
@@ -128,7 +128,7 @@ static void fs_format() {
   if (!sector)
     return;
 
-  ata_read_sector(0, 1, sector);
+  ata_read_sector(0, sector);
   memcpy(sector, &fs.sb, sizeof(fs.sb));
   fs_bitmap_load();
 }
@@ -141,7 +141,7 @@ void fs_init_disk() {
   if (!sector)
     return;
 
-  ata_read_sector(0, 1, sector);
+  ata_read_sector(0, sector);
   memcpy(sector, &fs.sb, sizeof(fs.sb));
   if (fs.sb.sector_count != fs.disk.sector_count ||
       fs.sb.sector_size != fs.disk.sector_size) {
@@ -162,15 +162,15 @@ void fs_update_sector(uint32 sector, uint16 offset, void *data, uint16 len) {
   if (!buff)
     return;
 
-  ata_read_sector(sector, 1, buff);
+  ata_read_sector(sector, buff);
   memcpy(data, buff + offset, len);
-  ata_write_sector(sector, 1, buff);
+  ata_write_sector(sector, buff);
 
-  ata_read_sector(0, 1, buff);
+  ata_read_sector(0, buff);
   fs.sb.root.size += len;
   fs_superblock_t *sb = buff;
   sb->root.size += len;
-  ata_write_sector(0, 1, buff);
+  ata_write_sector(0, buff);
 
   pmm_free(buff, 1);
 }
@@ -186,7 +186,7 @@ uint32 fs_index_lookup(fs_index_t *index, uint32 sector) {
     }
     if (!index->next)
       break;
-    ata_read_sector(index->next, 1, index);
+    ata_read_sector(index->next, index);
   }
   return 0;
 }
@@ -201,7 +201,7 @@ uint32 fs_index_grow(fs_index_t *index, uint32 index_lba) {
     if (!index->next)
       break;
     index_lba = index->next;
-    ata_read_sector(index_lba, 1, index);
+    ata_read_sector(index_lba, index);
   }
   if (i >= FS_EXTENTS_MAX) {
     fs_extent_t extent;
@@ -210,7 +210,7 @@ uint32 fs_index_grow(fs_index_t *index, uint32 index_lba) {
     if (!extent.start)
       return 0;
     index->next = extent.start;
-    ata_write_sector(index_lba, 1, index);
+    ata_write_sector(index_lba, index);
     fs_bitmap_flush();
     bezero(index, fs.disk.sector_size);
     index_lba = extent.start;
@@ -220,7 +220,7 @@ uint32 fs_index_grow(fs_index_t *index, uint32 index_lba) {
   fs_alloc_extent(&index->extents[i]);
   if (!index->extents[i].count)
     return 0;
-  ata_write_sector(index_lba, 1, index);
+  ata_write_sector(index_lba, index);
   fs_bitmap_flush();
   return index->extents[i].start;
 }
@@ -230,10 +230,10 @@ uint32 fs_map_sector(uint32 index_lba, uint32 sec_id) {
   if (!index)
     return 0;
 
-  ata_read_sector(index_lba, 1, index);
+  ata_read_sector(index_lba, index);
   uint32 lba = fs_index_lookup(index, sec_id);
   if (!lba) {
-    ata_read_sector(index_lba, 1, index);
+    ata_read_sector(index_lba, index);
     lba = fs_index_grow(index, fs.sb.root.index_lba);
   }
   pmm_free(index, 1);

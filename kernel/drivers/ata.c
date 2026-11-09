@@ -109,7 +109,7 @@ int ata_setup_transfer(uint32 lba, uint8 sector_count, uint8 CMD) {
   return 0;
 }
 
-int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer) {
+int ata_read_sectors(uint32 lba, uint8 sector_count, void *buffer) {
   uint16 *buff = buffer;
 
   if (ata_setup_transfer(lba, sector_count, ATA_CMD_READ)) {
@@ -136,8 +136,10 @@ int ata_read_sector(uint32 lba, uint8 sector_count, void *buffer) {
 
   return 0;
 }
-
-int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer) {
+int ata_read_sector(uint32 lba, void *buffer) {
+  return ata_read_sectors(lba, 1, buffer);
+}
+int ata_write_sectors(uint32 lba, uint8 sector_count, void *buffer) {
   uint16 *buff = buffer;
   if (ata_setup_transfer(lba, sector_count, ATA_CMD_WRITE)) {
     kprintf("[Error]: Write sector faild\n");
@@ -164,4 +166,7 @@ int ata_write_sector(uint32 lba, uint8 sector_count, void *buffer) {
   while (inb(ATA_PRIMARY_STATUS) & ATA_STATUS_BSY)
     ;
   return 0;
+}
+int ata_write_sector(uint32 lba, void *buffer) {
+  return ata_write_sectors(lba, 1, buffer);
 }
