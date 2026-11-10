@@ -42,6 +42,7 @@ typedef struct __attribute__((packed)) {
   uint8 magic[FS_MAGIC_LEN];
   uint32 version;
   uint32 sector_count;
+
   uint32 sector_size;
   uint32 bitmap_start;
   uint32 bitmap_sectors;

@@ -156,23 +156,24 @@ void fs_init_disk() {
   }
 }
 
-void fs_update_sector(uint32 sector, uint16 offset, void *data, uint16 len) {
+uint32 fs_update_sector(uint32 entry_lba, uint32 entry_offset, uint32 sector,
+                        uint16 offset, void *data, uint16 len) {
 
   void *buff = pmm_alloc(1);
   if (!buff)
-    return;
+    return 1;
 
   ata_read_sector(sector, buff);
   memcpy(data, buff + offset, len);
   ata_write_sector(sector, buff);
 
-  ata_read_sector(0, buff);
-  fs.sb.root.size += len;
-  fs_superblock_t *sb = buff;
-  sb->root.size += len;
-  ata_write_sector(0, buff);
+  ata_read_sector(entry_lba, buff);
+  fs_entry_t *entry = buff + entry_offset;
+  entry->size += len;
+  ata_write_sector(entry_lba, buff);
 
   pmm_free(buff, 1);
+  return 0;
 }
 
 uint32 fs_index_lookup(fs_index_t *index, uint32 sector) {
@@ -234,21 +235,36 @@ uint32 fs_map_sector(uint32 index_lba, uint32 sec_id) {
   uint32 lba = fs_index_lookup(index, sec_id);
   if (!lba) {
     ata_read_sector(index_lba, index);
-    lba = fs_index_grow(index, fs.sb.root.index_lba);
+    lba = fs_index_grow(index, index_lba);
   }
   pmm_free(index, 1);
   return lba;
 }
 
-void fs_new_entry(int8 *path, int8 *name, uint8 type) {
-  if (memcmp(path, FS_ROOT_PATH, 2) || !fs.sb.root.index_lba)
-    return;
+fs_entry_t *fs_resolve(int8 *path) { return &fs.sb.root; }
 
-  uint32 sector_index = fs.sb.root.size / fs.disk.sector_size;
-  uint32 sector_offset = fs.sb.root.size % fs.disk.sector_size;
+void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
+  uint32 sector_index = offset / fs.disk.sector_size;
+  uint32 sector_offset = offset % fs.disk.sector_size;
 
-  uint32 lba = fs_map_sector(fs.sb.root.index_lba, sector_index);
+  // TODO: fs_resolve should also return the (lba, offset) of where the entry
+  // exist in the disk
+  fs_entry_t *entry = fs_resolve(path);
+  uint32 entry_lba = 0;
+  uint32 entry_offset = (void *)(&fs.sb.root) - (void *)(&fs.sb);
+
+  uint32 lba = fs_map_sector(entry->index_lba, sector_index);
   if (!lba)
+    return;
+  if (fs_update_sector(entry_lba, entry_offset, lba, sector_offset, data, len))
+    return;
+  entry->size += len;
+}
+
+void fs_new_entry(int8 *path, int8 *name, uint8 type) {
+
+  // TODO: this check for testing
+  if (memcmp(path, FS_ROOT_PATH, 2) || !fs.sb.root.index_lba)
     return;
 
   uint16 name_size = strlen(name) + 1;
@@ -259,6 +275,5 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   bezero(&entry, sizeof(fs_entry_t));
   memcpy(name, entry.name, name_size);
   entry.type = type;
-
-  fs_update_sector(lba, sector_offset, &entry, sizeof(fs_entry_t));
+  fs_write(path, fs.sb.root.size, &entry, sizeof(fs_entry_t));
 }
