@@ -38,6 +38,12 @@ typedef struct __attribute__((packed)) {
   int8 name[FS_NAME_MAX + 1];
 } fs_entry_t;
 
+typedef struct {
+  fs_entry_t entry;
+  uint32 entry_lba;
+  uint32 entry_offset;
+} fs_node_t;
+
 typedef struct __attribute__((packed)) {
   uint8 magic[FS_MAGIC_LEN];
   uint32 version;
