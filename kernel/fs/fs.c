@@ -1,3 +1,4 @@
+#include "strings.h"
 #include <ata.h>
 #include <fs.h>
 #include <kprint.h>
@@ -279,4 +280,19 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   memcpy(name, entry.name, name_size);
   entry.type = type;
   fs_write(path, fs.sb.root.size, &entry, sizeof(fs_entry_t));
+}
+
+void fs_ls(int8 *path) {
+
+  fs_node_t node;
+
+  fs_resolve(path, &node);
+
+  uint32 lba = fs_map_sector(node.entry.index_lba, node.entry_lba);
+  if (!lba)
+    return;
+
+  fs_index_t *index = pmm_alloc(1);
+
+  pmm_free(index, 1);
 }
