@@ -1,4 +1,3 @@
-#include "strings.h"
 #include <ata.h>
 #include <fs.h>
 #include <kprint.h>
@@ -288,11 +287,31 @@ void fs_ls(int8 *path) {
 
   fs_resolve(path, &node);
 
-  uint32 lba = fs_map_sector(node.entry.index_lba, node.entry_lba);
-  if (!lba)
-    return;
-
   fs_index_t *index = pmm_alloc(1);
+  fs_entry_t *sec = pmm_alloc(1);
+  uint32 lba = node.entry.index_lba;
 
+  uint32 z = 0;
+  uint32 x = 0;
+  while (1) {
+    ata_read_sector(lba, index);
+    for (uint32 i = 0; i < FS_EXTENTS_MAX && index->extents[i].start; i++) {
+      uint32 start = index->extents[i].start;
+      uint32 end = start + index->extents[i].count;
+      for (uint32 j = start; j < end; j++) {
+        ata_read_sector(j, sec);
+        for (uint32 k = 0; k < 8 && sec[k].type; k++) {
+          kprintf("%s:: %u:: %u\n", sec[k].name, z, x);
+          z++;
+        }
+      }
+    }
+    if (!index->next)
+      break;
+    x++;
+    lba = index->next;
+  }
+
+  pmm_free(sec, 1);
   pmm_free(index, 1);
 }

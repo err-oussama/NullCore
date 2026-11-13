@@ -14,6 +14,7 @@ void banner() {
 
 void fill_disk() {
   int8 name[50];
+  memset(name, 0, 50);
   for (uint32 l = 0; l < 20; l++) {
     for (uint32 i = 0; i < 28; i++) {
       uint32 half = sizeof(name) / 2;
@@ -37,6 +38,7 @@ void kmain(multiboot_info *boot_info) {
   banner();
   fs_init_disk();
 
-  fill_disk();
+  /* fill_disk(); */
+  fs_ls("/");
   /* one(); */
 }
