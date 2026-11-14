@@ -183,8 +183,9 @@ uint32 fs_index_lookup(fs_index_t *index, uint32 sector) {
   while (1) {
     for (uint32 i = 0; index->extents[i].start; i++) {
       uint32 count = index->extents[i].count;
-      if (sector < count)
+      if (sector < count) {
         return index->extents[i].start + sector;
+      }
       sector -= count;
     }
     if (!index->next)
@@ -254,7 +255,6 @@ void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
   uint32 sector_offset = offset % fs.disk.sector_size;
 
   fs_node_t node;
-
   fs_resolve(path, &node);
 
   uint32 lba = fs_map_sector(node.entry.index_lba, sector_index);
@@ -263,6 +263,30 @@ void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
   if (fs_update_sector(node.entry_lba, node.entry_offset, lba, sector_offset,
                        data, len))
     return;
+}
+
+uint32 fs_read(int8 *path, uint32 offset, void *buffer, uint32 buffer_len) {
+  uint32 sector_index = offset / fs.disk.sector_size;
+  uint32 count = 0;
+
+  fs_node_t node;
+  fs_resolve(path, &node);
+
+  if (offset > node.entry.size && !(buffer_len % fs.disk.sector_size))
+    return count;
+  bezero(buffer, buffer_len);
+
+  while (count < buffer_len) {
+    uint32 lba = fs_map_sector(node.entry.index_lba, sector_index);
+    if (!lba)
+      return count;
+    ata_read_sector(lba, buffer);
+    count += fs.disk.sector_size;
+    buffer += fs.disk.sector_size;
+    sector_index++;
+  }
+
+  return count;
 }
 
 void fs_new_entry(int8 *path, int8 *name, uint8 type) {
@@ -287,31 +311,18 @@ void fs_ls(int8 *path) {
 
   fs_resolve(path, &node);
 
-  fs_index_t *index = pmm_alloc(1);
-  fs_entry_t *sec = pmm_alloc(1);
-  uint32 lba = node.entry.index_lba;
+  fs_entry_t *buffer = pmm_alloc(1);
+  uint32 buff_len = PMM_FRAME_SIZE;
 
-  uint32 z = 0;
-  uint32 x = 0;
-  while (1) {
-    ata_read_sector(lba, index);
-    for (uint32 i = 0; i < FS_EXTENTS_MAX && index->extents[i].start; i++) {
-      uint32 start = index->extents[i].start;
-      uint32 end = start + index->extents[i].count;
-      for (uint32 j = start; j < end; j++) {
-        ata_read_sector(j, sec);
-        for (uint32 k = 0; k < 8 && sec[k].type; k++) {
-          kprintf("%s:: %u:: %u\n", sec[k].name, z, x);
-          z++;
-        }
-      }
+  uint32 entry_count = buff_len / sizeof(fs_entry_t);
+  uint32 offset = 0;
+  while (offset < node.entry.size) {
+    fs_read("/", offset, buffer, PMM_FRAME_SIZE);
+    for (uint32 i = 0; i < entry_count && offset < node.entry.size; i++) {
+      kprintf("%s\n", buffer[i].name);
+      offset += sizeof(fs_entry_t);
     }
-    if (!index->next)
-      break;
-    x++;
-    lba = index->next;
   }
-
-  pmm_free(sec, 1);
-  pmm_free(index, 1);
+  pmm_free(buffer, 1);
+  return;
 }
