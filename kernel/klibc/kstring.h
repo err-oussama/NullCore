@@ -4,8 +4,10 @@
 
 void memset(void *addr, uint32 c, uint32 size);
 void memcpy(void *src, void *dest, uint32 size);
-uint32 strlen(char *str);
 void bezero(void *addr, uint32 size);
 uint32 memcmp(void *addr1, void *addr2, uint32 size);
+uint32 strlen(char *str);
+
+int8 *strchr(int8 *s, uint8 c);
 
 #endif

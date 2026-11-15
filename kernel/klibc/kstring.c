@@ -49,3 +49,10 @@ uint32 memcmp(void *addr1, void *addr2, uint32 size) {
   }
   return 0;
 }
+
+int8 *strchr(int8 *s, uint8 c) {
+  for (uint32 i = 0; s[i]; i++)
+    if (s[i] == c)
+      return s + i;
+  return NULL;
+}
