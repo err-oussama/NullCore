@@ -244,10 +244,14 @@ uint32 fs_map_sector(uint32 index_lba, uint32 sec_id) {
   return lba;
 }
 
-void fs_resolve(int8 *path, fs_node_t *node) {
+int32 fs_resolve(int8 *path, fs_node_t *node) {
+  if (path[0] != '/')
+    return -1;
+
   memcpy(&fs.sb.root, node, sizeof(fs_entry_t));
   node->entry_lba = 0;
   node->entry_offset = (void *)(&fs.sb.root) - (void *)(&fs.sb);
+  return 0;
 }
 
 void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
@@ -255,14 +259,14 @@ void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
   uint32 sector_offset = offset % fs.disk.sector_size;
 
   fs_node_t node;
-  fs_resolve(path, &node);
+  if (fs_resolve(path, &node))
+    return;
 
   uint32 lba = fs_map_sector(node.entry.index_lba, sector_index);
   if (!lba)
     return;
-  if (fs_update_sector(node.entry_lba, node.entry_offset, lba, sector_offset,
-                       data, len))
-    return;
+  fs_update_sector(node.entry_lba, node.entry_offset, lba, sector_offset, data,
+                   len);
 }
 
 uint32 fs_read(int8 *path, uint32 offset, void *buffer, uint32 buffer_len) {
@@ -295,7 +299,7 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
     return;
 
   uint16 name_size = strlen(name) + 1;
-  if (name_size > FS_NAME_MAX)
+  if (name_size > FS_NAME_MAX || strchr(name, '/'))
     return;
 
   fs_entry_t entry;
@@ -306,11 +310,10 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
 }
 
 void fs_ls(int8 *path) {
-
   fs_node_t node;
 
-  fs_resolve(path, &node);
-
+  if (fs_resolve(path, &node))
+    return;
   fs_entry_t *buffer = pmm_alloc(1);
   uint32 buff_len = PMM_FRAME_SIZE;
 
