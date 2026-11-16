@@ -114,6 +114,8 @@ static void fs_format() {
   superblock->bitmap_bytes = bitmap_bytes;
   superblock->root.index_lba = superblock->bitmap_start + sec_needed;
   superblock->root.size = 0;
+  superblock->root.name[0] = '/';
+  superblock->root.name[1] = 0;
   superblock->data_start = superblock->root.index_lba + 1;
 
   fs.bitmap = buff + fs.disk.sector_size;
@@ -220,7 +222,7 @@ uint32 fs_index_grow(fs_index_t *index, uint32 index_lba) {
     index_lba = extent.start;
     i = 0;
   }
-  index->extents[i].count = 1;
+  index->extents[i].count = 5;
   fs_alloc_extent(&index->extents[i]);
   if (!index->extents[i].count)
     return 0;
@@ -244,14 +246,68 @@ uint32 fs_map_sector(uint32 index_lba, uint32 sec_id) {
   return lba;
 }
 
+uint32 fs_read_h(uint32 index_lba, uint32 offset, void *buffer, uint32 len) {
+
+  uint32 sector_index = offset / fs.disk.sector_size;
+  uint32 count = 0;
+
+  while (count < len) {
+    uint32 lba = fs_map_sector(index_lba, sector_index);
+    if (!lba)
+      return count;
+    ata_read_sector(lba, buffer);
+    count += fs.disk.sector_size;
+    buffer += fs.disk.sector_size;
+    sector_index++;
+  }
+  return count;
+}
+
 int32 fs_resolve(int8 *path, fs_node_t *node) {
   if (path[0] != '/')
     return -1;
 
-  memcpy(&fs.sb.root, node, sizeof(fs_entry_t));
-  node->entry_lba = 0;
-  node->entry_offset = (void *)(&fs.sb.root) - (void *)(&fs.sb);
-  return 0;
+  if (!memcmp(path, fs.sb.root.name, 2)) {
+    memcpy(&fs.sb.root, node, sizeof(fs_entry_t));
+    node->entry_lba = 0;
+    node->entry_offset = (void *)(&fs.sb.root) - (void *)(&fs.sb);
+    return 0;
+  }
+
+  int8 name[FS_NAME_MAX];
+
+  uint32 s = 1;
+  uint32 e = 1;
+
+  uint32 p;
+
+  while (e < strlen(path)) {
+    while (path[e] && path[e] != '/')
+      e++;
+
+    bezero(name, FS_NAME_MAX);
+    memcpy(path + s, name, e - s);
+
+    fs_entry_t *buffer = pmm_alloc(1);
+    uint32 buff_len = PMM_FRAME_SIZE;
+
+    uint32 entry_count = buff_len / sizeof(fs_entry_t);
+    uint32 offset = 0;
+    fs_entry_t *entry = &fs.sb.root;
+    while (offset < entry->size) {
+      fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
+      for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
+        if (!memcmp(buffer[i].name, name, 2))
+          kprintf("found it\n");
+        offset += sizeof(fs_entry_t);
+      }
+    }
+    pmm_free(buffer, 1);
+
+    e++;
+    s = e;
+  }
+  return -1;
 }
 
 void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
@@ -269,28 +325,13 @@ void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
                    len);
 }
 
-uint32 fs_read(int8 *path, uint32 offset, void *buffer, uint32 buffer_len) {
-  uint32 sector_index = offset / fs.disk.sector_size;
-  uint32 count = 0;
-
+uint32 fs_read(int8 *path, uint32 offset, void *buffer, uint32 len) {
   fs_node_t node;
-  fs_resolve(path, &node);
-
-  if (offset > node.entry.size && !(buffer_len % fs.disk.sector_size))
-    return count;
-  bezero(buffer, buffer_len);
-
-  while (count < buffer_len) {
-    uint32 lba = fs_map_sector(node.entry.index_lba, sector_index);
-    if (!lba)
-      return count;
-    ata_read_sector(lba, buffer);
-    count += fs.disk.sector_size;
-    buffer += fs.disk.sector_size;
-    sector_index++;
-  }
-
-  return count;
+  if (fs_resolve(path, &node))
+    return 0;
+  if (offset > node.entry.size && !(len % fs.disk.sector_size))
+    return 0;
+  return fs_read_h(node.entry.index_lba, offset, buffer, len);
 }
 
 void fs_new_entry(int8 *path, int8 *name, uint8 type) {
@@ -320,7 +361,7 @@ void fs_ls(int8 *path) {
   uint32 entry_count = buff_len / sizeof(fs_entry_t);
   uint32 offset = 0;
   while (offset < node.entry.size) {
-    fs_read("/", offset, buffer, PMM_FRAME_SIZE);
+    fs_read_h(node.entry.index_lba, offset, buffer, PMM_FRAME_SIZE);
     for (uint32 i = 0; i < entry_count && offset < node.entry.size; i++) {
       kprintf("%s\n", buffer[i].name);
       offset += sizeof(fs_entry_t);
