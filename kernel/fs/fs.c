@@ -158,8 +158,8 @@ void fs_init_disk() {
   }
 }
 
-uint32 fs_update_sector(uint32 entry_lba, uint32 entry_offset, uint32 sector,
-                        uint16 offset, void *data, uint16 len) {
+uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
+                        void *data, uint16 len) {
 
   void *buff = pmm_alloc(1);
   if (!buff)
@@ -169,11 +169,13 @@ uint32 fs_update_sector(uint32 entry_lba, uint32 entry_offset, uint32 sector,
   memcpy(data, buff + offset, len);
   ata_write_sector(sector, buff);
 
-  ata_read_sector(entry_lba, buff);
-  fs_entry_t *entry = buff + entry_offset;
+  ata_read_sector(node->entry_lba, buff);
+  fs_entry_t *entry = buff + node->entry_offset;
   entry->size += len;
-  ata_write_sector(entry_lba, buff);
-  if (!entry_lba)
+  ata_write_sector(node->entry_lba, buff);
+  memcpy(entry, &node->entry, sizeof(fs_entry_t));
+
+  if (!node->entry_lba)
     memcpy(entry, &fs.sb.root, sizeof(fs_entry_t));
 
   pmm_free(buff, 1);
@@ -297,8 +299,19 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
     while (offset < entry->size) {
       fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
       for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
-        if (!memcmp(buffer[i].name, name, 2))
+        if (!memcmp(buffer[i].name, name, 2)) {
           kprintf("found it\n");
+          if (e == strlen(path)) {
+            memcpy(&buffer[i], &node->entry, sizeof(fs_entry_t));
+            node->entry_lba = entry->index_lba;
+            node->entry_offset = offset;
+            kprintf("entry lba: %u\n", node->entry_lba);
+            kprintf("entry offset: %u\n", node->entry_offset);
+            kprintf("entry index_lba: %u\n", node->entry.index_lba);
+            kprintf("entry size: %u\n", node->entry.size);
+            return 0;
+          }
+        }
         offset += sizeof(fs_entry_t);
       }
     }
@@ -318,11 +331,29 @@ void fs_write(int8 *path, uint32 offset, void *data, uint32 len) {
   if (fs_resolve(path, &node))
     return;
 
+  if (!node.entry.index_lba) {
+    fs_extent_t extent = {.count = 1};
+    fs_alloc_extent(&extent);
+    if (!extent.start)
+      return;
+    node.entry.index_lba = extent.start;
+    kprintf("index:        %u\n", node.entry.index_lba);
+    kprintf("entry lba:    %u\n", node.entry_lba);
+    kprintf("entry offset: %u\n", node.entry_offset);
+
+    void *buff = pmm_alloc(1);
+    ata_read_sector(node.entry.index_lba, buff);
+    bezero(buff, fs.disk.sector_size);
+    ata_write_sector(node.entry.index_lba, buff);
+
+    fs_bitmap_flush();
+    pmm_free(buff, 1);
+  }
+
   uint32 lba = fs_map_sector(node.entry.index_lba, sector_index);
   if (!lba)
     return;
-  fs_update_sector(node.entry_lba, node.entry_offset, lba, sector_offset, data,
-                   len);
+  fs_update_sector(&node, lba, sector_offset, data, len);
 }
 
 uint32 fs_read(int8 *path, uint32 offset, void *buffer, uint32 len) {
@@ -363,7 +394,8 @@ void fs_ls(int8 *path) {
   while (offset < node.entry.size) {
     fs_read_h(node.entry.index_lba, offset, buffer, PMM_FRAME_SIZE);
     for (uint32 i = 0; i < entry_count && offset < node.entry.size; i++) {
-      kprintf("%s\n", buffer[i].name);
+      kprintf("name: %s\n", buffer[i].name);
+      kprintf("index: %u\n", buffer[i].index_lba);
       offset += sizeof(fs_entry_t);
     }
   }
