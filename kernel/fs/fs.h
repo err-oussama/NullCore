@@ -54,7 +54,7 @@ typedef struct __attribute__((packed)) {
   uint32 bitmap_sectors;
   uint32 bitmap_bytes;
   uint32 data_start;
-  fs_entry_t root;
+  fs_node_t root;
 } fs_superblock_t;
 
 typedef struct {
