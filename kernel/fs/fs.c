@@ -117,8 +117,7 @@ static void fs_format() {
   superblock->root.entry.name[0] = '/';
   superblock->root.entry.name[1] = 0;
   superblock->root.entry_lba = 0;
-  superblock->root.entry_offset = (void *)&fs.sb.root - (void *)&fs;
-  kprintf("%u\n", superblock->root.entry_offset);
+  superblock->root.entry_offset = (void *)&fs.sb.root - (void *)&fs.sb;
   superblock->data_start = superblock->root.entry.index_lba + 1;
 
   fs.bitmap = buff + fs.disk.sector_size;
@@ -168,11 +167,10 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
   if (!buff)
     return 1;
 
-  kprintf("sector_lba:    %u\n", sector);
-  kprintf("sector_offset: %u\n", sector);
-
-  kprintf("entry_sector:    %u\n", node->entry_lba);
-  kprintf("entry_offset: %u\n", node->entry_offset);
+  kprintf("sector_lba   : %u    \n", sector);
+  kprintf("sector_offset: %u    \n", offset);
+  kprintf("entry_sector : %u    \n", node->entry_lba);
+  kprintf("entry_offset : %u    \n", node->entry_offset);
 
   ata_read_sector(sector, buff);
   memcpy(data, buff + offset, len);
@@ -180,11 +178,16 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
 
   bezero(buff, PMM_FRAME_SIZE);
   ata_read_sector(node->entry_lba, buff);
-  fs_entry_t *entry = buff + node->entry_offset;
-  entry->size += len;
-  ata_write_sector(node->entry_lba, buff);
-  memcpy(entry, &node->entry, sizeof(fs_entry_t));
 
+  fs_node_t *disk_node = buff + node->entry_offset;
+  disk_node->entry.size += len;
+
+  ata_write_sector(node->entry_lba, buff);
+
+  if (!node->entry_lba)
+    fs.sb.root.entry.size += len;
+
+  memcpy(disk_node, &node, sizeof(fs_node_t));
   pmm_free(buff, 1);
   return 0;
 }
@@ -278,6 +281,7 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
 
   if (!memcmp(path, fs.sb.root.entry.name, 2)) {
     memcpy(&fs.sb.root, node, sizeof(fs_node_t));
+    kprintf("node: %u\n", fs.sb.root.entry.size);
     return 0;
   }
 
@@ -305,7 +309,6 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
       fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
       for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
         if (!memcmp(buffer[i].name, name, 2)) {
-          kprintf("found it\n");
           if (e == strlen(path)) {
             memcpy(&buffer[i], &node->entry, sizeof(fs_entry_t));
             node->entry_lba = entry->index_lba;
