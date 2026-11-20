@@ -167,11 +167,6 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
   if (!buff)
     return 1;
 
-  kprintf("sector_lba   : %u    \n", sector);
-  kprintf("sector_offset: %u    \n", offset);
-  kprintf("entry_sector : %u    \n", node->entry_lba);
-  kprintf("entry_offset : %u    \n", node->entry_offset);
-
   ata_read_sector(sector, buff);
   memcpy(data, buff + offset, len);
   ata_write_sector(sector, buff);
@@ -185,7 +180,7 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
   ata_write_sector(node->entry_lba, buff);
 
   if (!node->entry_lba)
-    fs.sb.root.entry.size += len;
+    memcpy(buff, &fs.sb, sizeof(fs.sb));
 
   memcpy(disk_node, &node, sizeof(fs_node_t));
   pmm_free(buff, 1);
@@ -279,11 +274,8 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
   if (path[0] != '/')
     return -1;
 
-  if (!memcmp(path, fs.sb.root.entry.name, 2)) {
-    memcpy(&fs.sb.root, node, sizeof(fs_node_t));
-    kprintf("node: %u\n", fs.sb.root.entry.size);
-    return 0;
-  }
+  if (!memcmp(path, fs.sb.root.entry.name, 2))
+    return memcpy(&fs.sb.root, node, sizeof(fs_node_t)), 0;
 
   int8 name[FS_NAME_MAX];
 
