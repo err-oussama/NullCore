@@ -42,5 +42,5 @@ void kmain(multiboot_info *boot_info) {
 
   /* fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR); */
   /* fs_new_entry("/home", "null_core", FS_ENTRY_TYPE_DIR); */
-  /* fs_ls("/"); */
+  fs_ls("/home");
 }
