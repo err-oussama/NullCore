@@ -282,8 +282,6 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
   uint32 s = 1;
   uint32 e = 1;
 
-  uint32 p;
-
   while (e < strlen(path)) {
     while (path[e] && path[e] != '/')
       e++;
@@ -291,12 +289,13 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
     bezero(name, FS_NAME_MAX);
     memcpy(path + s, name, e - s);
 
-    fs_entry_t *buffer = pmm_alloc(1);
+    fs_entry_t *entry = &fs.sb.root.entry;
     uint32 buff_len = PMM_FRAME_SIZE;
 
     uint32 entry_count = buff_len / sizeof(fs_entry_t);
     uint32 offset = 0;
-    fs_entry_t *entry = &fs.sb.root.entry;
+
+    fs_entry_t *buffer = pmm_alloc(1);
     while (offset < entry->size) {
       fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
       for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
@@ -390,7 +389,7 @@ void fs_ls(int8 *path) {
   while (offset < node.entry.size) {
     fs_read_h(node.entry.index_lba, offset, buffer, PMM_FRAME_SIZE);
     for (uint32 i = 0; i < entry_count && offset < node.entry.size; i++) {
-      kprintf("name: '%s', lba: \n", buffer[i].name, buffer[i].index_lba);
+      kprintf("name: '%s', lba: %u\n", buffer[i].name, buffer[i].index_lba);
       offset += sizeof(fs_entry_t);
     }
   }
