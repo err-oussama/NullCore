@@ -16,14 +16,12 @@ void fill_disk() {
   int8 name[50];
   bezero(name, 50);
   for (uint32 a = 0; a < 20; a++) {
-    kprintf("gg %i\n", a);
     for (uint32 b = 0; b < 28; b++) {
       uint32 half = sizeof(name) / 2;
       memset(name, b + 'A', half);
       memset(name + half, b + 'a', half);
       fs_new_entry("/", name, FS_ENTRY_TYPE_FILE);
     }
-    kprintf("gg %i\n", a);
   }
 }
 
@@ -40,9 +38,9 @@ void kmain(multiboot_info *boot_info) {
   banner();
   fs_init_disk();
 
-  fill_disk();
+  // fill_disk();
   /**/
-  /* fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR); */
-  /* fs_new_entry("/home", "null-core", FS_ENTRY_TYPE_DIR); */
-  /* fs_ls("/"); */
+  // fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR); 
+  // fs_new_entry("/home", "null-core", FS_ENTRY_TYPE_DIR);
+  fs_ls("/home"); 
 }

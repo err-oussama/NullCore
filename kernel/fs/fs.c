@@ -255,6 +255,8 @@ uint32 fs_map_sector(uint32 index_lba, uint32 sec_id) {
 
 uint32 fs_read_h(uint32 index_lba, uint32 offset, void *buffer, uint32 len) {
 
+  bezero(buffer, len);
+
   uint32 sector_index = offset / fs.disk.sector_size;
   uint32 count = 0;
 
@@ -296,7 +298,6 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
 
     fs_entry_t *buffer = pmm_alloc(1);
     while (offset < entry->size) {
-      kprintf("hhhhhhh\n");
       fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
       for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
         if (!memcmp(buffer[i].name, name, 2)) {
@@ -372,7 +373,6 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
   fs_init_entry(&entry, name, type);
   if (!entry.index_lba)
     return;
-  kprintf("%s\n", name);
   fs_write(&node, node.entry.size, &entry, sizeof(fs_entry_t));
 }
 
