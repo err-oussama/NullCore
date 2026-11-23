@@ -182,7 +182,7 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
   if (!node->entry_lba)
     memcpy(buff, &fs.sb, sizeof(fs.sb));
 
-  memcpy(disk_node, &node, sizeof(fs_node_t));
+  memcpy(disk_node, node, sizeof(fs_node_t));
   pmm_free(buff, 1);
   return 0;
 }
