@@ -4,11 +4,17 @@
 CC      := gcc
 ASM     := nasm
 LD      := ld
+DEBUG   ?= 0 
 
 # Flags
 CFLAGS 	:= -m32 -ffreestanding -fno-stack-protector -nostdlib -nostdinc -c
 ASFLAGS := -f elf32
 LDFLAGS := -m elf_i386 -T linker.ld
+
+ifeq ($(DEBUG),1)
+	CFLAGS += -DDEBUG
+endif
+
 
 # Files
 ASM_SRC := $(shell find . -name "*.asm" ! -name "user_program_asm.asm")
@@ -16,6 +22,7 @@ ASM_OBJ := $(ASM_SRC:.asm=.o)
 
 C_SRC   := $(shell find . -name "*.c" ! -name "user_program.c")
 C_OBJ   := $(C_SRC:.c=.o)
+
 
 
 # Header 
@@ -56,15 +63,16 @@ user_program: user/user_program_asm.o user/user_program.c
 
 # Default target
 all: $(DISK_IMAGE_FILE) user_program $(TARGET)
+	echo $(CFLAGS)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
-	@$(LD) $(LDFLAGS) -o $@ $^
+	@$(LD) $(LDFLAGS)  -o $@ $^
 	@rm -f $(ASM_OBJ) $(C_OBJ)
 
 # Compile C sources
 kernel/%.o: kernel/%.c
-	@$(CC) $(CFLAGS) $(INCL)  $< -o $@
+	@$(CC) $(CFLAGS) $(INCL) $< -o $@
 
 kernel/%.o: kernel/%.asm 
 	@$(ASM) $(ASFLAGS) $< -o $@
