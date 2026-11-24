@@ -4,6 +4,8 @@
 #include <types.h>
 #include <vga_print.h>
 
+void log(char *msg, ...);
+
 void kclear_screen();
 void kprintf(char *format, ...);
 void kprint_str(char *str);
