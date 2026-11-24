@@ -63,7 +63,6 @@ user_program: user/user_program_asm.o user/user_program.c
 
 # Default target
 all: $(DISK_IMAGE_FILE) user_program $(TARGET)
-	echo $(CFLAGS)
 
 # Link everything
 $(TARGET): $(ASM_OBJ) $(C_OBJ)
