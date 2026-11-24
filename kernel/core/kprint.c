@@ -43,6 +43,11 @@ void print(char *format, char *ptr) {
       } else if (*format == 's') {
         kprint_str(*(char **)ptr);
         ptr += sizeof(char *);
+      } else if (*format == 'q') {
+        kprint_cha('\'');
+        kprint_str(*(char **)ptr);
+        kprint_cha('\'');
+        ptr += sizeof(char *);
       } else if (*format == 'x' || *format == 'X') {
         kprint_hex(*(uint32 *)(ptr));
         ptr += sizeof(uint32);
@@ -71,5 +76,6 @@ void log(char *msg, ...) {
   ptr += sizeof(char *);
 #ifdef DEBUG
   print(msg, ptr);
+  kprint_cha('\n');
 #endif
 }
