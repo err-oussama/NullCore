@@ -72,9 +72,9 @@ void kprintf(char *format, ...) {
 }
 
 void log(char *msg, ...) {
+#ifdef DEBUG
   char *ptr = (char *)&msg;
   ptr += sizeof(char *);
-#ifdef DEBUG
   print(msg, ptr);
   kprint_cha('\n');
 #endif

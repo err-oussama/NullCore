@@ -158,6 +158,7 @@ void fs_init_disk() {
       return;
     }
   }
+  fs_bitmap_load();
 }
 
 uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
@@ -273,11 +274,16 @@ uint32 fs_read_h(uint32 index_lba, uint32 offset, void *buffer, uint32 len) {
 }
 
 int32 fs_resolve(int8 *path, fs_node_t *node) {
-  if (path[0] != '/')
+  if (path[0] != '/') {
+    kprintf("path should start with '/'\n");
     return -1;
+  }
 
-  if (!memcmp(path, fs.sb.root.entry.name, 2))
-    return memcpy(&fs.sb.root, node, sizeof(fs_node_t)), 0;
+  if (!memcmp(path, fs.sb.root.entry.name, 2)) {
+    memcpy(&fs.sb.root, node, sizeof(fs_node_t));
+    kprintf("resolve: root node\n");
+    return 0;
+  }
 
   int8 name[FS_NAME_MAX];
 
@@ -355,6 +361,10 @@ void fs_init_entry(fs_entry_t *entry, char *name, uint8 type) {
   entry->index_lba = extent.start;
 
   void *buff = pmm_alloc(1);
+  if (!buff) {
+    kprintf("pmm_alloc: failed ");
+    return;
+  }
   bezero(buff, PMM_FRAME_SIZE);
   ata_write_sector(entry->index_lba, buff);
   pmm_free(buff, 1);
@@ -366,6 +376,7 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
     return;
   fs_node_t node;
 
+  log("new_entry: path: %q, name: %q, type: %u", path, name, type);
   if (fs_resolve(path, &node))
     return;
 
@@ -379,8 +390,16 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
 void fs_ls(int8 *path) {
   fs_node_t node;
 
-  if (fs_resolve(path, &node))
+  if (fs_resolve(path, &node)) {
+    kprintf("no path: %q\n", path);
     return;
+  }
+
+  kprintf("entry_lba: %u\nentry_offset: %u\n", node.entry_lba,
+          node.entry_offset);
+  kprintf("entry_name: %s\n", node.entry.name);
+  kprintf("entry_size: %u\n", node.entry.size);
+  kprintf("entry_index: %u\n", node.entry.index_lba);
   fs_entry_t *buffer = pmm_alloc(1);
   uint32 buff_len = PMM_FRAME_SIZE;
 
