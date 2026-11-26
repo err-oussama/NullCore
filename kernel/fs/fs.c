@@ -174,7 +174,6 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
 
   bezero(buff, PMM_FRAME_SIZE);
   ata_read_sector(node->entry_lba, buff);
-
   fs_node_t *disk_node = buff + node->entry_offset;
   disk_node->entry.size += len;
 
@@ -185,6 +184,8 @@ uint32 fs_update_sector(fs_node_t *node, uint32 sector, uint16 offset,
 
   memcpy(disk_node, node, sizeof(fs_node_t));
   pmm_free(buff, 1);
+
+  kprintf("address: %x\n", (sector * fs.disk.sector_size) + offset);
   return 0;
 }
 
@@ -290,38 +291,54 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
   uint32 s = 1;
   uint32 e = 1;
 
+  fs_index_t *idx = pmm_alloc(1);
+  if (!idx) {
+    kprintf("pmm_alloc failed\n");
+    return -1;
+  }
+  fs_entry_t *entry = &fs.sb.root.entry;
+  fs_entry_t *buff = pmm_alloc(1);
+  uint32 entry_count = PMM_FRAME_SIZE / sizeof(fs_entry_t);
   while (e < strlen(path)) {
     while (path[e] && path[e] != '/')
       e++;
     bezero(name, FS_NAME_MAX);
     memcpy(path + s, name, e - s);
-
-    fs_entry_t *entry = &fs.sb.root.entry;
-    uint32 buff_len = PMM_FRAME_SIZE;
-
-    uint32 entry_count = buff_len / sizeof(fs_entry_t);
-    uint32 offset = 0;
-
-    fs_entry_t *buffer = pmm_alloc(1);
-    while (offset < entry->size) {
-      fs_read_h(entry->index_lba, offset, buffer, PMM_FRAME_SIZE);
-      for (uint32 i = 0; i < entry_count && offset < entry->size; i++) {
-        if (!memcmp(buffer[i].name, name, 2)) {
-          if (e == strlen(path)) {
-            memcpy(&buffer[i], &node->entry, sizeof(fs_entry_t));
-            node->entry_lba = entry->index_lba;
-            node->entry_offset = offset;
-            return 0;
+    bezero(idx, PMM_FRAME_SIZE);
+    do {
+      ata_read_sector(entry->index_lba, idx);
+      for (uint32 i = 0; i < FS_EXTENTS_MAX; i++) {
+        fs_extent_t *extent = &idx->extents[i];
+        if (!extent->start)
+          continue;
+        uint32 start = extent->start;
+        uint32 end = extent->start + extent->count;
+        for (uint32 sec = start; sec < end; sec++) {
+          ata_read_sector(sec, buff);
+          uint32 offset = 0;
+          for (uint32 v = 0; v < 8; v++) {
+            if (buff[i].index_lba == 0)
+              break;
+            if (!memcmp(buff[i].name, name, e - s)) {
+              memcpy(&buff[i], &node->entry, sizeof(fs_entry_t));
+              kprintf("%s\n", node->entry.name, v);
+              node->entry_lba = sec;
+              node->entry_offset = offset;
+              pmm_free(idx, 1);
+              pmm_free(buff, 1);
+              return 0;
+            }
+            offset += sizeof(fs_entry_t);
           }
         }
-        offset += sizeof(fs_entry_t);
       }
-    }
-    pmm_free(buffer, 1);
+    } while (idx->next);
 
     e++;
     s = e;
   }
+  pmm_free(idx, 1);
+  pmm_free(buff, 1);
   return -1;
 }
 
@@ -376,11 +393,15 @@ void fs_new_entry(int8 *path, int8 *name, uint8 type) {
     return;
   fs_node_t node;
 
-  log("new_entry: path: %q, name: %q, type: %u", path, name, type);
   if (fs_resolve(path, &node))
     return;
 
+  kprintf("node name: %s\n", node.entry.name);
+  kprintf("node.entr_lba: %u\n", node.entry_lba);
+  kprintf("node.entry_offset: %u\n", node.entry_offset);
+  kprintf("address: %x\n", node.entry_lba * fs.disk.sector_size);
   fs_entry_t entry;
+
   fs_init_entry(&entry, name, type);
   if (!entry.index_lba)
     return;
@@ -395,11 +416,6 @@ void fs_ls(int8 *path) {
     return;
   }
 
-  kprintf("entry_lba: %u\nentry_offset: %u\n", node.entry_lba,
-          node.entry_offset);
-  kprintf("entry_name: %s\n", node.entry.name);
-  kprintf("entry_size: %u\n", node.entry.size);
-  kprintf("entry_index: %u\n", node.entry.index_lba);
   fs_entry_t *buffer = pmm_alloc(1);
   uint32 buff_len = PMM_FRAME_SIZE;
 
