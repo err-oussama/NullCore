@@ -41,5 +41,7 @@ void kmain(multiboot_info *boot_info) {
   /* fill_disk(); */
   /* fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR); */
   /* fs_new_entry("/home", "null-core", FS_ENTRY_TYPE_DIR); */
-  fs_ls("/home");
+  /* fs_new_entry("/home/null-core", "kernel", FS_ENTRY_TYPE_DIR); */
+  /* fs_new_entry("/home/null-core", "file-system", FS_ENTRY_TYPE_DIR); */
+  fs_ls("/home/null-core");
 }

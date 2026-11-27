@@ -4,7 +4,11 @@
 #include <types.h>
 #include <vga_print.h>
 
-void log(char *msg, ...);
+#ifdef DEBUG
+#define LOG(...) kprintf(__VA_ARGS__)
+#else
+#define LOG(...) ((void)0)
+#endif
 
 void kclear_screen();
 void kprintf(char *format, ...);

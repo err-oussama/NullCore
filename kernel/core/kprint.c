@@ -27,7 +27,10 @@ void kmemory_dump_hex(void *ptr, uint32 size) {
   vga_memory_dump_hex(ptr, size);
 }
 
-void print(char *format, char *ptr) {
+void kprintf(char *format, ...) {
+  char *ptr = (char *)&format;
+  ptr += sizeof(char *); // skip the fist arg
+
   while (*format) {
     if (*format == '%') {
       format++;
@@ -63,19 +66,4 @@ void print(char *format, char *ptr) {
     }
     format++;
   }
-}
-
-void kprintf(char *format, ...) {
-  char *ptr = (char *)&format;
-  ptr += sizeof(char *);
-  print(format, ptr);
-}
-
-void log(char *msg, ...) {
-#ifdef DEBUG
-  char *ptr = (char *)&msg;
-  ptr += sizeof(char *);
-  print(msg, ptr);
-  kprint_cha('\n');
-#endif
 }
