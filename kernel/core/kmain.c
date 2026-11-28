@@ -75,9 +75,14 @@ void kmain(multiboot_info *boot_info) {
 // fs_new_entry("/usr/bin", "clang", FS_ENTRY_TYPE_FILE);
 // fs_new_entry("/usr/bin", "python", FS_ENTRY_TYPE_FILE);
 
-
   fs_ls("/usr/bin");
   kprintf("\n");
   fs_ls("/usr");
+
+  kprintf("\n");
+  fs_ls("/home");
+
+  kprintf("\n");
+  fs_ls("/home/err-oussama");
 
 }
