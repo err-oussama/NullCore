@@ -276,7 +276,7 @@ uint32 fs_read_h(uint32 index_lba, uint32 offset, void *buffer, uint32 len) {
 
 int32 fs_resolve(int8 *path, fs_node_t *node) {
   if (path[0] != '/') {
-    kprintf("path should start with '/'\n");
+    LOG("path should start with '/'\n");
     return -1;
   }
 
@@ -307,7 +307,6 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
   fs_entry_t entry;
   memcpy(&fs.sb.root.entry, &entry, sizeof(fs_entry_t));
 
-  uint32 entry_count = PMM_FRAME_SIZE / sizeof(fs_entry_t);
   while (ei < strlen(path)) {
     while (path[ei] && path[ei] != '/')
       ei++;
@@ -319,7 +318,7 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
       for (uint32 i = 0; i < FS_EXTENTS_MAX; i++) {
         fs_extent_t *extent = &idx->extents[i];
         if (!extent->start)
-          continue;
+          break;
         uint32 start = extent->start;
         uint32 end = extent->start + extent->count;
         for (uint32 sec = start; sec < end; sec++) {
@@ -327,14 +326,13 @@ int32 fs_resolve(int8 *path, fs_node_t *node) {
           uint32 offset = 0;
           for (uint32 v = 0; v < 8; v++) {
             if (buff[i].index_lba == 0)
-              break;
-            if (!memcmp(buff[i].name, name, ei - si)) {
-              memcpy(&buff[i], &entry, sizeof(fs_entry_t));
-              LOG("e: %i %s\n", ei, entry.name);
+              continue;
+            if (!memcmp(buff[v].name, name, ei - si)) {
+              memcpy(&buff[v], &entry, sizeof(fs_entry_t));
               if (ei < strlen(path))
                 continue;
 
-              memcpy(&buff[i], &node->entry, sizeof(fs_entry_t));
+              memcpy(&buff[v], &node->entry, sizeof(fs_entry_t));
               node->entry_lba = sec;
               node->entry_offset = offset;
               pmm_free(idx, 1);
@@ -438,7 +436,7 @@ void fs_ls(int8 *path) {
   while (offset < node.entry.size) {
     fs_read_h(node.entry.index_lba, offset, buffer, PMM_FRAME_SIZE);
     for (uint32 i = 0; i < entry_count && offset < node.entry.size; i++) {
-      kprintf("name: '%s', lba: %u\n", buffer[i].name, buffer[i].index_lba);
+      kprintf("%q ", buffer[i].name);
       offset += sizeof(fs_entry_t);
     }
   }

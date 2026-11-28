@@ -38,10 +38,46 @@ void kmain(multiboot_info *boot_info) {
   banner();
   fs_init_disk();
 
-  /* fill_disk(); */
-  /* fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR); */
-  /* fs_new_entry("/home", "null-core", FS_ENTRY_TYPE_DIR); */
-  /* fs_new_entry("/home/null-core", "kernel", FS_ENTRY_TYPE_DIR); */
-  /* fs_new_entry("/home/null-core", "file-system", FS_ENTRY_TYPE_DIR); */
-  fs_ls("/home/null-core");
+// fs_new_entry("/", "usr", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "var", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "sys", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "dev", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "etc", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "srv", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "mnt", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "opt", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "root", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "run", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "snap", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "proc", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "boot", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "home", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "media", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/", "lost+found", FS_ENTRY_TYPE_DIR);
+
+
+// fs_new_entry("/home", "err-oussama", FS_ENTRY_TYPE_DIR);
+
+// fs_new_entry("/home/err-oussama", "Work", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/home/err-oussama", "Desktop", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/home/err-oussama", "Pictures", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/home/err-oussama", "Documents", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/home/err-oussama", "Downloads", FS_ENTRY_TYPE_DIR);
+
+// fs_new_entry("/usr", "bin", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/usr", "lib", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/usr", "lib32", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/usr", "lib64", FS_ENTRY_TYPE_DIR);
+// fs_new_entry("/usr", "libx32", FS_ENTRY_TYPE_DIR);
+
+// fs_new_entry("/usr/bin", "gcc", FS_ENTRY_TYPE_FILE);
+// fs_new_entry("/usr/bin", "gdb", FS_ENTRY_TYPE_FILE);
+// fs_new_entry("/usr/bin", "clang", FS_ENTRY_TYPE_FILE);
+// fs_new_entry("/usr/bin", "python", FS_ENTRY_TYPE_FILE);
+
+
+  fs_ls("/usr/bin");
+  kprintf("\n");
+  fs_ls("/usr");
+
 }
